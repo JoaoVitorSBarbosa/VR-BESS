@@ -1,0 +1,1043 @@
+//
+// Saved by sw version: 2026.2
+//
+
+library "Bat_array" {
+    configuration {
+        hil_device = "VHIL+"
+        hil_configuration_id = 1
+        simulation_method = exact
+        simulation_time_step = auto
+        simulation_discret_scaling = 1.0
+        dsp_timer_periods = 100e-6, 50e-3
+        ss_calc_method = "systematic elimination"
+        enb_pole_shift = True
+        enb_gds_oversampling = True
+        show_modes = False
+        device_ao_limit_enable = False
+        reset_analog_outputs_on_sim_stop = True
+        reset_analog_outputs_on_sim_stop_mode = Offset values
+        reset_digital_outputs_on_sim_stop = True
+        vhil_adio_loopback = False
+        dma_enable = False
+        cpl_stb = False
+        enb_dep_sw_detect = False
+        code_section = "internal memory"
+        data_section = "internal memory"
+        sys_sp_rate_1 = 0.0001
+        sys_sp_rate_2 = 0.05
+        sys_real_type_precision = "default"
+        user_real_type_precision = "default"
+        sys_cpu_optimization = "high"
+        user_cpu_optimization = "high"
+        user_cpu_part_option = "default"
+        matrix_based_reduction = True
+        cpl_dynamics_analysis = False
+        export_ss_to_pickle = False
+        ground_scope_core = False
+        dss_num_tol = 1e-15
+        cce_platform = "generic"
+        cce_use_relative_names = False
+        cce_type_mapping_real = "double"
+        cce_type_mapping_uint = "unsigned int"
+        cce_type_mapping_int = "int"
+        cce_platform = "generic"
+        cce_use_relative_names = False
+        cce_type_mapping_real = "double"
+        cce_type_mapping_uint = "unsigned int"
+        cce_type_mapping_int = "int"
+        cce_term_var_location = "local"
+        cce_directory = ""
+        cce_custom_type_int = ""
+        cce_custom_type_uint = ""
+        cce_custom_type_real = ""
+        tunable_params = "component defined"
+        sp_compiler_type = "C compiler"
+        sig_stim = "off"
+        export_resource_list = ""
+        export_dependency_list = ""
+        excluded_resource_list = ""
+        excluded_component_from_locking_list = ""
+        export_out_file = ""
+        export_lock_top_level = True
+        export_encrypt_library = True
+        export_encrypt_resources = True
+        solver_type = "DAE"
+        integration_method = "BDF"
+        max_sim_step = 1e-4
+        simulation_time = 1.0
+        abs_tol = 1e-3
+        rel_tol = 1e-3
+        init_sim_step = 1e-6
+        r_on_sw = 1e-3
+        v_on_diode = 0.1
+        data_sampling_rate = 0
+        feedthrough_validation_error_level = error
+    }
+
+    component Subsystem Root {
+        component Subsystem Bat_array {
+            layout = dynamic
+            component "core/C function" modelo_bateria {
+                arb_defs = "/*Begin code section*/
+
+/*End code section*/"
+                init_fnc = "/*Begin code section*/
+
+/*End code section*/"
+                input_terminals = "real I;real it;real V_feedback;real Ns_bat;real Np_bat;real modo_teste;"
+                input_terminals_dimensions = "inherit;inherit;inherit;inherit;inherit;inherit"
+                input_terminals_feedthrough = "True;True;True;True;True;True"
+                input_terminals_show_labels = "True;True;True;True;True;True"
+                output_fnc = "/*Begin code section*/
+const real_t E0_1 = 16.8;
+  const real_t Q_1_real = 2.3;
+  const real_t R_1 = 0.01;
+  const real_t K_1_real = 0.0076;
+  const real_t A_1 = 0.26422;
+  const real_t B_1_real = 26.5487;
+  const real_t V_max_1 = 19.0;
+  const real_t V_min_1 = 13.5;
+  const real_t margem_religa_1 = 0.3;
+  const real_t C = 2.3;
+  const real_t I_max_desc = C * 2.0;
+  const real_t I_max_carga = C * 0.5;
+
+  real_t Q_1, K_1, B_1, f;
+  real_t E0, Q, R, K, A, B, V_max, V_min, margem_religa;
+  real_t I_max_pack_calc;
+  real_t it_c, E, V_calc, SOC_calc, S_calc;
+
+  if (modo_teste == 1.0) {
+      Q_1 = 0.00055;
+      f = Q_1_real / Q_1;
+      K_1 = K_1_real * f;
+      B_1 = B_1_real * f;
+  } else {
+      Q_1 = Q_1_real;
+      K_1 = K_1_real;
+      B_1 = B_1_real;
+  }
+
+  E0 = E0_1 * Ns_bat;
+  Q  = Q_1  * Np_bat;
+  R  = R_1  * Ns_bat / Np_bat;
+  K  = K_1  * Ns_bat;
+  A  = A_1  * Ns_bat;
+  B  = B_1  / Np_bat;
+  V_max = V_max_1 * Ns_bat;
+  V_min = V_min_1 * Ns_bat;
+  margem_religa = margem_religa_1 * Ns_bat;
+
+  if (I < 0.0) {
+      I_max_pack_calc = I_max_carga * Np_bat;
+  } else {
+      I_max_pack_calc = I_max_desc * Np_bat;
+  }
+
+  it_c = it;
+  if (it_c < 0.0) it_c = 0.0;
+  if (it_c > 0.99 * Q) it_c = 0.99 * Q;
+
+  E = E0 - K * (Q / (Q - it_c)) * it_c + A * exp(-B * it_c);
+  V_calc = E - I * R;
+  SOC_calc = 100.0 * (1.0 - it / Q);
+  if (SOC_calc < 0.0) SOC_calc = 0.0;
+  else if (SOC_calc > 100.0) SOC_calc = 100.0;
+
+  if (V_calc < V_min || SOC_calc <= 0.0) {
+      S_calc = (V_feedback > (E + margem_religa)) ? 1.0 : 0.0;
+  } else if (V_calc > V_max) {
+      S_calc = 0.0;
+  } else if (SOC_calc >= 100.0 && I < 0.0) {
+      S_calc = 0.0;
+  } else {
+      S_calc = 1.0;
+  }
+
+  if (V_calc < V_min) V_calc = V_min;
+  else if (V_calc > V_max) V_calc = V_max;
+
+  V = V_calc;
+  SOC = SOC_calc;
+  S = S_calc;
+  I_max_pack = I_max_pack_calc;
+/*End code section*/"
+                output_terminals = "real V;real SOC;real S;real I_max_pack;"
+                output_terminals_dimensions = "inherit;inherit;inherit;inherit"
+                output_terminals_feedthrough = "True;True;True;True"
+                output_terminals_show_labels = "True;True;True;True"
+                update_fnc = "/*Begin code section*/
+
+/*End code section*/"
+            }
+            [
+                position = 7712, 8340
+                size = 256, 240
+            ]
+
+            component "core/C function" calc_it0 {
+                arb_defs = "/*Begin code section*/
+
+/*End code section*/"
+                init_fnc = "/*Begin code section*/
+
+/*End code section*/"
+                input_terminals = "real SOC_inicial;inherit Np_bat;inherit modo_teste;"
+                input_terminals_dimensions = "inherit;inherit;inherit"
+                input_terminals_feedthrough = "True;True;True"
+                input_terminals_show_labels = "True;True;True"
+                output_fnc = "/*Begin code section*/
+const real_t Q_1_real = 2.3;
+  const real_t Q_1_teste = 0.00055;
+  real_t Q_1, Q, it0_calc;
+
+  if (modo_teste == 1.0) {
+      Q_1 = Q_1_teste;
+  } else {
+      Q_1 = Q_1_real;
+  }
+
+  Q = Q_1 * Np_bat;
+  it0_calc = Q * (1.0 - SOC_inicial / 100.0);
+
+  it0 = it0_calc;
+/*End code section*/"
+                output_terminals = "real it0;"
+                output_terminals_dimensions = "inherit"
+                output_terminals_feedthrough = "True"
+                output_terminals_show_labels = "True"
+                update_fnc = "/*Begin code section*/
+
+/*End code section*/"
+            }
+            [
+                position = 7664, 8056
+                size = 144, 120
+            ]
+
+            component "core/Signal Controlled Voltage Source" Vout {
+            }
+            [
+                position = 8012, 8244
+                rotation = left
+                scale = 1, -1
+                size = 64, 32
+            ]
+
+            component "core/Current Measurement" Iout {
+                execution_rate = "0.0001"
+                sig_output = "True"
+                signal_access = "Public"
+            }
+            [
+                position = 8120, 8184
+                size = 64, 32
+            ]
+
+            component "core/Voltage Measurement" Va1 {
+                execution_rate = "0.0001"
+                sig_output = "True"
+            }
+            [
+                position = 8076, 8304
+                rotation = right
+                size = 64, 32
+            ]
+
+            component "core/MOSFET" MOSFET1 {
+                ctrl_src = "Model"
+                model_load_legacy = "1"
+            }
+            [
+                position = 8280, 8184
+                rotation = left
+                size = 48, 64
+            ]
+
+            component "core/Variable Resistor" RL1 {
+            }
+            [
+                position = 8460, 8184
+                size = 64, 48
+            ]
+
+            component "core/Abs" Abs1 {
+            }
+            [
+                position = 7804, 8596
+            ]
+
+            component "core/Sum" Sum1 {
+            }
+            [
+                position = 7956, 8604
+            ]
+
+            component "core/Gain" Gain1 {
+                gain = "-1"
+            }
+            [
+                position = 7808, 8668
+            ]
+
+            component "core/Limit" Limit1 {
+                lower_limit = "0"
+                upper_limit = "100000"
+            }
+            [
+                position = 8056, 8604
+            ]
+
+            component "core/Gain" Gain2 {
+                gain = "-1"
+            }
+            [
+                position = 8176, 8604
+            ]
+
+            component "core/Sum" Sum2 {
+            }
+            [
+                position = 8280, 8612
+            ]
+
+            component "core/Constant" Constant1 {
+                execution_rate = "0.0001"
+            }
+            [
+                position = 8168, 8668
+            ]
+
+            component "core/Integrator" Integrator1 {
+                show_init_condition = "external"
+            }
+            [
+                position = 7992, 8820
+            ]
+
+            component "core/Gain" Gain3 {
+                gain = "0.000277777778"
+            }
+            [
+                position = 7860, 8780
+            ]
+
+            port - {
+                label = "-"
+                position = bottom:auto
+                kind = pe
+            }
+            [
+                position = 8544, 8392
+                rotation = down
+            ]
+
+            port + {
+                label = "+"
+                position = top:auto
+                kind = pe
+            }
+            [
+                position = 8544, 8184
+                scale = -1, 1
+            ]
+
+            port I {
+                label = "I"
+                position = right:auto
+                kind = sp
+                direction =  in
+                sp_type {
+                    default = inherit
+                    readonly = True
+                }
+            }
+            [
+                position = 8320, 7772
+            ]
+
+            port V {
+                label = "V"
+                position = right:auto
+                kind = sp
+                direction =  in
+                sp_type {
+                    default = inherit
+                    readonly = True
+                }
+            }
+            [
+                position = 8320, 7832
+            ]
+
+            port SOC {
+                label = "SOC"
+                position = right:auto
+                kind = sp
+                direction =  in
+                sp_type {
+                    default = inherit
+                    readonly = True
+                }
+            }
+            [
+                position = 8320, 7900
+            ]
+
+            port SOC_inicial {
+                label = "SOC_inicial"
+                position = left:auto
+                kind = sp
+                direction =  out
+                sp_type {
+                    default = auto
+                    readonly = True
+                }
+            }
+            [
+                position = 7964, 7772
+            ]
+
+            port Np_bat {
+                label = "Np_bat"
+                position = left:auto
+                kind = sp
+                direction =  out
+                sp_type {
+                    default = auto
+                    readonly = True
+                }
+            }
+            [
+                position = 7964, 7832
+            ]
+
+            port Ns_bat {
+                label = "Ns_bat"
+                position = left:auto
+                kind = sp
+                direction =  out
+                sp_type {
+                    default = auto
+                    readonly = True
+                }
+            }
+            [
+                position = 7964, 7900
+            ]
+
+            port modo_teste {
+                label = "modo_teste"
+                position = left:auto
+                kind = sp
+                direction =  out
+                sp_type {
+                    default = auto
+                    readonly = True
+                }
+            }
+            [
+                position = 7964, 7964
+            ]
+
+            tag Goto1 {
+                value = "S"
+                scope = local
+                kind = sp
+                direction = in
+            }
+            [
+                position = 7900, 8372
+                size = 60, 20
+            ]
+
+            tag Goto2 {
+                value = "SOC"
+                scope = local
+                kind = sp
+                direction = in
+            }
+            [
+                position = 7904, 8308
+                size = 60, 20
+            ]
+
+            tag Goto3 {
+                value = "I_max_pack"
+                scope = local
+                kind = sp
+                direction = in
+            }
+            [
+                position = 7900, 8436
+                size = 60, 20
+            ]
+
+            tag From1 {
+                value = "Ns_bat"
+                scope = local
+                kind = sp
+                direction = out
+            }
+            [
+                position = 7452, 8360
+                size = 60, 20
+            ]
+
+            tag From2 {
+                value = "Np_bat"
+                scope = local
+                kind = sp
+                direction = out
+            }
+            [
+                position = 7452, 8400
+                size = 60, 20
+            ]
+
+            tag From3 {
+                value = "modo_teste"
+                scope = local
+                kind = sp
+                direction = out
+            }
+            [
+                position = 7452, 8440
+                size = 60, 20
+            ]
+
+            tag From4 {
+                value = "it"
+                scope = local
+                kind = sp
+                direction = out
+            }
+            [
+                position = 7452, 8280
+                size = 60, 20
+            ]
+
+            tag From6 {
+                value = "Np_bat"
+                scope = local
+                kind = sp
+                direction = out
+            }
+            [
+                position = 7508, 8056
+                size = 60, 20
+            ]
+
+            tag From7 {
+                value = "modo_teste"
+                scope = local
+                kind = sp
+                direction = out
+            }
+            [
+                position = 7508, 8096
+                size = 60, 20
+            ]
+
+            tag From8 {
+                value = "SOC_inicial"
+                scope = local
+                kind = sp
+                direction = out
+            }
+            [
+                position = 7508, 8016
+                size = 60, 20
+            ]
+
+            tag Goto4 {
+                value = "it0"
+                scope = local
+                kind = sp
+                direction = in
+            }
+            [
+                position = 7872, 8016
+                size = 60, 20
+            ]
+
+            tag From9 {
+                value = "Res_calculada"
+                scope = local
+                kind = sp
+                direction = out
+            }
+            [
+                position = 8392, 8096
+                size = 60, 20
+            ]
+
+            tag From10 {
+                value = "S"
+                scope = local
+                kind = sp
+                direction = out
+            }
+            [
+                position = 8340, 8248
+                rotation = down
+                size = 60, 20
+            ]
+
+            tag Goto5 {
+                value = "Res_calculada"
+                scope = local
+                kind = sp
+                direction = in
+            }
+            [
+                position = 8388, 8612
+                size = 60, 20
+            ]
+
+            tag From12 {
+                value = "I_max_pack"
+                scope = local
+                kind = sp
+                direction = out
+            }
+            [
+                position = 7680, 8668
+                size = 60, 20
+            ]
+
+            tag From17 {
+                value = "SOC"
+                scope = local
+                kind = sp
+                direction = out
+            }
+            [
+                position = 8220, 7900
+                size = 60, 20
+            ]
+
+            tag From20 {
+                value = "V_out_mes"
+                scope = local
+                kind = sp
+                direction = out
+            }
+            [
+                position = 7452, 8320
+                size = 60, 20
+            ]
+
+            tag Goto6 {
+                value = "V_out_mes"
+                scope = local
+                kind = sp
+                direction = in
+            }
+            [
+                position = 8172, 8304
+                size = 60, 20
+            ]
+
+            tag Goto7 {
+                value = "I_out_mes"
+                scope = local
+                kind = sp
+                direction = in
+            }
+            [
+                position = 8204, 8096
+                size = 60, 20
+            ]
+
+            tag Goto8 {
+                value = "SOC_inicial"
+                scope = local
+                kind = sp
+                direction = in
+            }
+            [
+                position = 8068, 7772
+                size = 60, 20
+            ]
+
+            tag Goto9 {
+                value = "Np_bat"
+                scope = local
+                kind = sp
+                direction = in
+            }
+            [
+                position = 8068, 7832
+                size = 60, 20
+            ]
+
+            tag Goto10 {
+                value = "Ns_bat"
+                scope = local
+                kind = sp
+                direction = in
+            }
+            [
+                position = 8068, 7900
+                size = 60, 20
+            ]
+
+            tag Goto11 {
+                value = "modo_teste"
+                scope = local
+                kind = sp
+                direction = in
+            }
+            [
+                position = 8068, 7964
+                size = 60, 20
+            ]
+
+            tag From21 {
+                value = "I_out_mes"
+                scope = local
+                kind = sp
+                direction = out
+            }
+            [
+                position = 8220, 7772
+                size = 60, 20
+            ]
+
+            tag From22 {
+                value = "V_out_mes"
+                scope = local
+                kind = sp
+                direction = out
+            }
+            [
+                position = 8220, 7832
+                size = 60, 20
+            ]
+
+            tag From23 {
+                value = "I_out_mes"
+                scope = local
+                kind = sp
+                direction = out
+            }
+            [
+                position = 7448, 8240
+                size = 60, 20
+            ]
+
+            tag Goto12 {
+                value = "it"
+                scope = local
+                kind = sp
+                direction = in
+            }
+            [
+                position = 8128, 8824
+                size = 60, 20
+            ]
+
+            tag From24 {
+                value = "it0"
+                scope = local
+                kind = sp
+                direction = out
+            }
+            [
+                position = 7864, 8856
+                size = 60, 20
+            ]
+
+            tag From25 {
+                value = "I_out_mes"
+                scope = local
+                kind = sp
+                direction = out
+            }
+            [
+                position = 7768, 8780
+                size = 60, 20
+            ]
+
+            tag From26 {
+                value = "I_out_mes"
+                scope = local
+                kind = sp
+                direction = out
+            }
+            [
+                position = 7680, 8596
+                size = 60, 20
+            ]
+
+            junction Junction1 pe
+            [
+                position = 8076, 8184
+            ]
+
+            junction Junction2 pe
+            [
+                position = 8076, 8392
+            ]
+
+            connect modelo_bateria.V Vout.in as Connection2
+            connect Iout.p_node Junction1 as Connection5
+            connect Junction1 Vout.p_node as Connection6
+            [
+                breakpoints = 8012, 8184; 8012, 8200
+            ]
+            connect Va1.p_node Junction1 as Connection7
+            [
+                breakpoints = 8076, 8264; 8076, 8208
+            ]
+            connect Iout.n_node MOSFET1.D as Connection10
+            connect MOSFET1.S RL1.p_node as Connection11
+            connect Goto1 modelo_bateria.S as Connection12
+            connect Goto3 modelo_bateria.I_max_pack as Connection13
+            connect Goto2 modelo_bateria.SOC as Connection14
+            connect From1 modelo_bateria.Ns_bat as Connection15
+            connect From2 modelo_bateria.Np_bat as Connection16
+            connect From3 modelo_bateria.modo_teste as Connection17
+            connect From4 modelo_bateria.it as Connection18
+            connect calc_it0.SOC_inicial From8 as Connection19
+            connect calc_it0.Np_bat From6 as Connection20
+            connect From7 calc_it0.modo_teste as Connection21
+            connect Goto4 calc_it0.it0 as Connection22
+            connect RL1.n_node + as Connection23
+            connect Vout.n_node Junction2 as Connection25
+            connect Junction2 - as Connection26
+            connect Va1.n_node Junction2 as Connection27
+            connect From9 RL1.In as Connection28
+            connect From10 MOSFET1.ctrl_in as Connection29
+            connect Abs1.out Sum1.in as Connection30
+            connect Gain1.out Sum1.in1 as Connection31
+            connect Sum1.out Limit1.in as Connection32
+            connect Sum2.in Gain2.out as Connection34
+            connect Limit1.out Gain2.in as Connection35
+            connect Sum2.in1 Constant1.out as Connection36
+            connect From12 Gain1.in as Connection37
+            connect Sum2.out Goto5 as Connection39
+            connect From20 modelo_bateria.V_feedback as Connection40
+            connect Va1.out Goto6 as Connection41
+            connect Goto7 Iout.out as Connection42
+            connect I From21 as Connection43
+            connect From22 V as Connection44
+            connect From17 SOC as Connection45
+            connect SOC_inicial Goto8 as Connection46
+            connect Goto9 Np_bat as Connection47
+            connect Ns_bat Goto10 as Connection48
+            connect Goto11 modo_teste as Connection49
+            [
+                breakpoints = 8028, 7964
+            ]
+            connect From23 modelo_bateria.I as Connection50
+            connect From25 Gain3.in as Connection51
+            connect From24 Integrator1.init_condition_port as Connection52
+            connect Goto12 Integrator1.out as Connection53
+            connect Integrator1.in Gain3.out as Connection54
+            connect From26 Abs1.in as Connection55
+        }
+        [
+            position = 4920, 4780
+            size = 216, 152
+        ]
+    }
+
+    default {
+        "core/Abs" {
+            execution_rate = "inherit"
+        }
+
+        "core/C function" {
+            input_terminals = "real in;"
+            input_terminals_show_labels = "False;"
+            input_terminals_feedthrough = "True;"
+            input_terminals_dimensions = "inherit;"
+            output_terminals = "real out;"
+            output_terminals_show_labels = "False;"
+            output_terminals_feedthrough = "True;"
+            output_terminals_dimensions = "inherit;"
+            output_fnc = ""
+            update_fnc = ""
+            init_fnc = ""
+            global_variables = ""
+            parameters = ""
+            library_load_type = "Compile-time load"
+            dll_file_path = ""
+            dll_file_path_full = ""
+            arm_a9_file_path = ""
+            arm_a9_file_path_full = ""
+            arm_a53_file_path = ""
+            arm_a53_file_path_full = ""
+            h_file_path = ""
+            h_file_path_full = ""
+            add_src_path = ""
+            add_src_path_full = ""
+            convert_to_relative_dll = "True"
+            convert_to_relative_a = "True"
+            convert_to_relative_src = "True"
+            arb_defs = ""
+            add_macros = ""
+            skip_pre_cmpl_check = "False"
+            generate_for_hil = "True"
+            execution_rate = "inherit"
+            _supported_platforms = "[\'generic\']"
+            refresh = "refresh"
+        }
+
+        "core/Constant" {
+            value = "1"
+            signal_type = "real"
+            execution_rate = "100e-6"
+            _tunable = "False"
+        }
+
+        "core/Gain" {
+            gain = "1"
+            multiplication = "Element-wise(K.*u)"
+            force_tml = "True"
+            _tunable = "False"
+            execution_rate = "inherit"
+        }
+
+        "core/Integrator" {
+            show_reset = "none"
+            reset_type = "asynchronous"
+            show_init_condition = "internal"
+            init_value = "0"
+            limit_output = "False"
+            limit_upper = "inf"
+            limit_lower = "-inf"
+            show_state = "False"
+            state_port_type = "inherit"
+            tml_file = "gen_accumulator_integrator"
+            mode = "integrator"
+            execution_rate = "inherit"
+        }
+
+        "core/Limit" {
+            upper_limit = "[\'inf\']"
+            lower_limit = "[\'-inf\']"
+            execution_rate = "inherit"
+        }
+
+        "core/Sum" {
+            signs = "2"
+            execution_rate = "inherit"
+        }
+
+        "core/Current Measurement" {
+            signal_access = "inherit"
+            bw_limit = "False"
+            frequency = "10e3"
+            comparator_enable = "False"
+            operator = "greater"
+            threshold = "0"
+            cmp_abs_value = "False"
+            feed_forward = "false"
+            sig_output = "False"
+            sig_output_filt_and_full_bw = "False"
+            execution_rate = "100e-6"
+            addr = "0"
+            nd_msr_estimation = "false"
+            dev_cpl_msr = "false"
+            host_device = "0"
+            output_to_device = "0"
+            dev_cpl_index = "0"
+            dev_cpl_var_nb = "0"
+            visible = "True"
+            override_signal_name = "False"
+            signal_name = ""
+        }
+
+        "core/MOSFET" {
+            signal_access = "inherit"
+            switches_option = "False"
+            resistance = "1.0"
+            ctrl_src = "Digital inputs"
+            dtsm_switch_name = ""
+            dtsm_switch_ctrl = ""
+            op_mode = "Fixed carrier frequency"
+            carrier_freq = "10000.0"
+            carr_ph_offset = "0.0"
+            d_time = "5e-6"
+            ref_sig_min_max = "[-1.0, 1.0]"
+            load_mode = "on min"
+            switches_names_at_mask = "[\'S1\']"
+            switches_names_at_mask_previous = "[\'S1\']"
+            S1 = "1"
+            S1_logic = "active high"
+            execution_rate = "inherit"
+            snb_type = "none"
+            R = "100e3"
+            C = "1e-6"
+            spc_nb = "0"
+            addr = "0"
+            show_monitoring = "False"
+            pwm_enabling = "False"
+            pwm_enable_di = "13"
+            pwm_enable_inv = "active high"
+            model_load_legacy = "0"
+            losses_estimation = "False"
+            load_xml_en = "User tables"
+            Import_igbt_xml = "not selected"
+            Import_diode_xml = "not selected"
+            xml_data = "{}"
+            transistor_data = "{\'package_class\': \'IGBT\', \'variables\': {}, \'constants\': {}, \'custom_tables\': {}, \'turn_on_losses\': {\'type\': \'Table only\', \'formula\': None, \'current_axis\': [0.0, 400.0, 800.0, 1200.0], \'voltage_axis\': [0.0, 1800.0], \'temperature_axis\': [25.0, 125.0], \'energy\': [[[0.0, 0.0, 0.0, 0.0], [0.0, 0.4068, 1.001, 1.822]], [[0.0, 0.0, 0.0, 0.0], [0.0, 0.6317, 1.38, 1.784]]], \'parsed_formula\': \'E_turn_on_losses\'}, \'turn_off_losses\': {\'type\': \'Table only\', \'formula\': None, \'current_axis\': [0.0, 400.0, 800.0, 1200.0], \'voltage_axis\': [0.0, 1800.0], \'temperature_axis\': [25.0, 125.0], \'energy\': [[[0.0, 0.0, 0.0, 0.0], [0.0, 0.6, 0.88, 1.177]], [[0.0, 0.0, 0.0, 0.0], [0.0, 0.9094, 1.25, 1.784]]], \'parsed_formula\': \'E_turn_off_losses\'}, \'conduction_losses\': {\'type\': \'Table only\', \'formula\': None, \'current_axis\': [0.0, 100.0, 200.0, 400.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 1200.0, 1400.0, 1600.0], \'temperature_axis\': [25.0, 125.0], \'voltage_drop\': [[0.0, 1.5, 1.8, 2.3, 2.69, 2.9, 3.1, 3.25, 3.41, 3.73, 4.0, 4.31], [0.0, 1.63, 2.09, 2.77, 3.37, 3.63, 3.8, 4.11, 4.37, 4.81, 5.29, 5.7]], \'parsed_formula\': \'v_conduction_losses\'}, \'c_function_code\': {\'output_fnc\': \'E_turn_on_losses = lookup3d(turn_on_losses_table, i, v, T, current_axis_turn_on_losses, voltage_axis_turn_on_losses, temperature_axis_turn_on_losses, 4, 2, 2);\nE_turn_off_losses = lookup3d(turn_off_losses_table, i, v, T,current_axis_turn_off_losses, voltage_axis_turn_off_losses, temperature_axis_turn_off_losses, 4, 2, 2);\nv_conduction_losses = lookup2d(conduction_losses_table, i, T,current_axis_conduction_losses, temperature_axis_conduction_losses, 12, 2);\ne_t_on = E_turn_on_losses;\ne_t_off = E_turn_off_losses;\nv_ce = v_conduction_losses;\n\', \'arb_defs\': \'real current_axis_turn_off_losses[4] = { 0.0, 400.0, 800.0, 1200.0 };\nreal voltage_axis_turn_off_losses[2] = { 0.0, 1800.0 };\nreal temperature_axis_turn_off_losses[2] = { 25.0, 125.0 };\nreal E_turn_off_losses;\nreal turn_off_losses_table[16] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.6, 0.88, 1.177, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9094, 1.25, 1.784 };\nreal current_axis_conduction_losses[12] = { 0.0, 100.0, 200.0, 400.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 1200.0, 1400.0, 1600.0 };\nreal temperature_axis_conduction_losses[2] = { 25.0, 125.0 };\nreal v_conduction_losses;\nreal conduction_losses_table[24] = { 0.0, 1.5, 1.8, 2.3, 2.69, 2.9, 3.1, 3.25, 3.41, 3.73, 4.0, 4.31, 0.0, 1.63, 2.09, 2.77, 3.37, 3.63, 3.8, 4.11, 4.37, 4.81, 5.29, 5.7 };\nreal current_axis_turn_on_losses[4] = { 0.0, 400.0, 800.0, 1200.0 };\nreal voltage_axis_turn_on_losses[2] = { 0.0, 1800.0 };\nreal temperature_axis_turn_on_losses[2] = { 25.0, 125.0 };\nreal E_turn_on_losses;\nreal turn_on_losses_table[16] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.4068, 1.001, 1.822, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6317, 1.38, 1.784 };\n\'}}"
+            diode_data = "{\'package_class\': \'Diode\', \'variables\': {}, \'constants\': {}, \'custom_tables\': {}, \'turn_on_losses\': {\'type\': \'Table only\', \'formula\': None, \'current_axis\': [0.0, 400.0, 800.0, 1200.0], \'voltage_axis\': [0.0, 1800.0], \'temperature_axis\': [25.0, 125.0], \'energy\': [[[0.0, 0.0, 0.0, 0.0], [0.0, 0.4068, 1.001, 1.822]], [[0.0, 0.0, 0.0, 0.0], [0.0, 0.6317, 1.38, 1.784]]], \'parsed_formula\': \'E_turn_on_losses\'}, \'turn_off_losses\': {\'type\': \'Table only\', \'formula\': None, \'current_axis\': [0.0, 400.0, 800.0, 1200.0], \'voltage_axis\': [0.0, 1800.0], \'temperature_axis\': [25.0, 125.0], \'energy\': [[[0.0, 0.0, 0.0, 0.0], [0.0, 0.6, 0.88, 1.177]], [[0.0, 0.0, 0.0, 0.0], [0.0, 0.9094, 1.25, 1.784]]], \'parsed_formula\': \'E_turn_off_losses\'}, \'conduction_losses\': {\'type\': \'Table only\', \'formula\': None, \'current_axis\': [0.0, 100.0, 200.0, 400.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 1200.0, 1400.0, 1600.0], \'temperature_axis\': [25.0, 125.0], \'voltage_drop\': [[0.0, 1.5, 1.8, 2.3, 2.69, 2.9, 3.1, 3.25, 3.41, 3.73, 4.0, 4.31], [0.0, 1.63, 2.09, 2.77, 3.37, 3.63, 3.8, 4.11, 4.37, 4.81, 5.29, 5.7]], \'parsed_formula\': \'v_conduction_losses\'}, \'c_function_code\': {\'output_fnc\': \'E_turn_on_losses = lookup3d(turn_on_losses_table, i, v, T, current_axis_turn_on_losses, voltage_axis_turn_on_losses, temperature_axis_turn_on_losses, 4, 2, 2);\nE_turn_off_losses = lookup3d(turn_off_losses_table, i, v, T,current_axis_turn_off_losses, voltage_axis_turn_off_losses, temperature_axis_turn_off_losses, 4, 2, 2);\nv_conduction_losses = lookup2d(conduction_losses_table, i, T,current_axis_conduction_losses, temperature_axis_conduction_losses, 12, 2);\ne_t_on = E_turn_on_losses;\ne_t_off = E_turn_off_losses;\nv_ce = v_conduction_losses;\n\', \'arb_defs\': \'real current_axis_turn_off_losses[4] = { 0.0, 400.0, 800.0, 1200.0 };\nreal voltage_axis_turn_off_losses[2] = { 0.0, 1800.0 };\nreal temperature_axis_turn_off_losses[2] = { 25.0, 125.0 };\nreal E_turn_off_losses;\nreal turn_off_losses_table[16] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.6, 0.88, 1.177, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9094, 1.25, 1.784 };\nreal current_axis_conduction_losses[12] = { 0.0, 100.0, 200.0, 400.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 1200.0, 1400.0, 1600.0 };\nreal temperature_axis_conduction_losses[2] = { 25.0, 125.0 };\nreal v_conduction_losses;\nreal conduction_losses_table[24] = { 0.0, 1.5, 1.8, 2.3, 2.69, 2.9, 3.1, 3.25, 3.41, 3.73, 4.0, 4.31, 0.0, 1.63, 2.09, 2.77, 3.37, 3.63, 3.8, 4.11, 4.37, 4.81, 5.29, 5.7 };\nreal current_axis_turn_on_losses[4] = { 0.0, 400.0, 800.0, 1200.0 };\nreal voltage_axis_turn_on_losses[2] = { 0.0, 1800.0 };\nreal temperature_axis_turn_on_losses[2] = { 25.0, 125.0 };\nreal E_turn_on_losses;\nreal turn_on_losses_table[16] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.4068, 1.001, 1.822, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6317, 1.38, 1.784 };\n\'}}"
+            user_vars_transistor = "User variables transistor"
+            user_vars_diode = "User variables diode"
+            i_sw = "[0.0, 6.0, 12.0, 18.0, 24.0]"
+            v_sw = "[0.0, 600.0]"
+            temp_sw = "[25.0, 50.0, 75.0, 100.0, 125.0]"
+            vce_table_out = "[1.3, 1.3, 1.3, 1.3, 1.3]"
+            vd_table_out = "[1.2, 1.2, 1.2, 1.2, 1.2]"
+            et_on_table_out = "[[0.0, 0.0275e-3, 0.15e-3, 0.275e-3, 0.3e-3], [0.35*3.8e-3, 0.4*3.8e-3, 0.8*3.8e-3, 0.68*3.8e-3, 0.9*3.8e-3], [0.65*3.8e-3, 0.9*3.8e-3, 1.2*3.8e-3, 1.5*3.8e-3, 1.7*3.8e-3], [0.9*3.8e-3, 1.3*3.8e-3, 1.7*3.8e-3, 1.9*3.8e-3, 2.25*3.8e-3], [1.1*3.8e-3, 1.7*3.8e-3, 2.1*3.8e-3, 2.3*3.8e-3, 2.5*3.8e-3]]"
+            et_off_table_out = "[[0.0, 0.0275e-3, 0.15e-3, 0.275e-3, 0.3e-3], [0.35*2.1e-3, 0.4*2.1e-3, 0.8*2.1e-3, 0.68*2.1e-3, 0.9*2.1e-3], [0.65*2.1e-3, 0.9*2.1e-3, 1.2*2.1e-3, 1.5*2.1e-3, 1.7*2.1e-3], [0.9*2.1e-3, 1.3*2.1e-3, 1.7*2.1e-3, 1.9*2.1e-3, 2.25*2.1e-3], [1.1*2.1e-3, 1.7*2.1e-3, 2.1*2.1e-3, 2.3*2.1e-3, 2.5*2.1e-3]]"
+            ed_off_table_out = "[[0.0, 0.0275e-3, 0.15e-3, 0.275e-3, 0.3e-3], [0.35*2.2e-3, 0.4*2.2e-3, 0.8*2.2e-3, 0.68*2.2e-3, 0.9*2.2e-3], [0.65*2.2e-3, 0.9*2.2e-3, 1.2*2.2e-3, 1.5*2.2e-3, 1.7*2.2e-3], [0.9*2.2e-3, 1.3*2.2e-3, 1.7*2.2e-3, 1.9*2.2e-3, 2.25*2.2e-3], [1.1*2.2e-3, 1.7*2.2e-3, 2.1*2.2e-3, 2.3*2.2e-3, 2.5*2.2e-3]]"
+            load_switching_data_from_xml = "Import losses data from xml files"
+            temp_estimation = "False"
+            thermal_networks_type = "Foster"
+            switch_Rth = "[0.159, 0.133, 0.120, 0.038]"
+            switch_Tth = "[1.1e-1, 1.56e-2, 1.35e-3, 1.51e-4]"
+            switch_Cth = "[0.0029, 0.0097, 0.1068, 0.8500]"
+            loss_exec_rate = "100e-6"
+        }
+
+        "core/Signal Controlled Voltage Source" {
+            execution_rate = "inherit"
+        }
+
+        "core/Variable Resistor" {
+            inductance = "1e-3"
+            initial_current = "0.0"
+            hide_int_meas = "False"
+        }
+
+        "core/Voltage Measurement" {
+            signal_access = "inherit"
+            bw_limit = "False"
+            frequency = "10e3"
+            comparator_enable = "False"
+            operator = "greater"
+            threshold = "0"
+            cmp_abs_value = "False"
+            feed_forward = "false"
+            sig_output = "False"
+            sig_output_filt_and_full_bw = "False"
+            execution_rate = "100e-6"
+            addr = "0"
+            nd_msr_estimation = "false"
+            dev_cpl_msr = "false"
+            host_device = "0"
+            output_to_device = "0"
+            dev_cpl_index = "0"
+            dev_cpl_var_nb = "0"
+            visible = "True"
+            override_signal_name = "False"
+            signal_name = ""
+        }
+    }
+}

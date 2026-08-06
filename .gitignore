@@ -1,0 +1,6 @@
+# Typhoon HIL build output (regenerated on every compile, machine-specific)
+typhoonsim/*Target files/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db

@@ -43,6 +43,36 @@ Porte do mesmo conversor para o Typhoon HIL Schematic Editor (TySim), para rodar
 bibliotecas. A pasta `VR-BESS Target files/` (gerada ao compilar) não é versionada — é
 recriada localmente a cada compilação.
 
+#### Instalação do Typhoon HIL (Linux)
+
+1. Baixar o instalador oficial do Typhoon HIL Control Center (`.sh`, self-extracting) no site da
+   Typhoon HIL e instalar com `sudo`:
+   ```
+   sudo bash typhoon_hil_control_center_<versao>.sh -- --accept_license_agreement
+   ```
+   Instala em `/opt/typhoon/typhoonsim_<versao>/` e cria o atalho no menu. Também aceita
+   `-t <diretorio>` para instalar em outro lugar.
+2. Ativar a licença:
+   ```
+   typhoon_hil_activation --activate --activation-key <caminho_para_o_arquivo>.lic
+   ```
+
+**Problemas que tive na instalação (Linux, sessão Wayland/GNOME):**
+
+- **Cache com dono errado:** por rodar a primeira vez como root/sudo, `~/.cache/typhoon` ficou
+  pertencendo ao root, e o programa não conseguia mais escrever nele rodando como usuário normal.
+  Corrigido com:
+  ```
+  sudo chown -R $USER:$USER ~/.cache/typhoon
+  ```
+- **Tela em branco / não renderiza no Wayland:** abrir pelo atalho do menu (ou rodar
+  `typhoon_hil.sh` direto) não funcionava corretamente em sessão Wayland. Corrigido forçando o
+  backend X11 (xcb) do Qt:
+  ```
+  QT_QPA_PLATFORM=xcb typhoon_hil.sh
+  ```
+  (`typhoon_hil.sh` fica em `/opt/typhoon/typhoonsim_<versao>/bin/`.)
+
 ### `kicad/`
 
 Reservado para o projeto de hardware (placa do conversor). Ainda vazio.

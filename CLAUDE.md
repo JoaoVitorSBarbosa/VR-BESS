@@ -63,6 +63,34 @@ nova (ex.: se um dia portar mais alguma coisa do MATLAB para cá):
 - **Sinal no I/O digital sem mapear canal manualmente:** colocar um bloco **Probe** nomeado igual
   ao sinal-alvo funciona como sink implícito no I/O digital — mais simples que mexer em
   `channels`/`di_ctrl_addrs` de componentes como o PWM Modulator.
+- **Sinal de dentro de uma library (`.tlib`) não aparece no Scope/Probe do simulador offline
+  (TySim software, sem HIL real) — mensagem `"<sinal> is not supported by TyphoonSim yet. Signal
+  will be zeroed."`.** Isso vale mesmo quando o sinal já sai por uma porta da subsystem exportada
+  como pino da library (ex.: `Bat_array1.V`, `Bat_array1.SOC`) e mesmo quando internamente ele já
+  passa por um bloco nativo com `sig_output = "True"` (ex.: `Va1`/`Iout` dentro de `Bat_array.tlib`
+  já tinham isso e ainda assim zeraram) — `signal_access = "Public"` no `core/Probe` do lado de
+  fora também não resolve. O limite parece ser cruzar a fronteira da library em si, não o tipo de
+  bloco que produz o sinal.
+  - **O que resolveu para tensão/corrente da bateria** (`V_bat_mes`, `I_bat`): colocar um bloco
+    nativo `core/Voltage Measurement`/`core/Current Measurement` **direto no schematic principal**,
+    medindo o nó real fora da library, e ligar o Probe nele — sem passar pela porta da subsystem.
+  - **Por que isso não existe para SOC:** SOC não é uma grandeza do circuito, é estado interno
+    (contagem de Coulomb via `Integrator1` + fórmula em `modelo_bateria`, um `core/C function`)
+    dentro de `Bat_array.tlib`. Não tem bloco de medição nativo equivalente para colocar fora da
+    library.
+  - Confirmado rastreando a fiação: mesmo o probe do PWM (`Digital Probe1`, rotulado
+    `"PWM Modulator1.TOP_1"` via `override_signal_name`) não lê o componente PWM Modulator por
+    dentro — ele está fiado em `Digital Input1.out` (leitura real de um canal DIO físico) que
+    também aciona `S1.ctrl_in`. Ou seja, todo sinal visível no Scope/Probe do TySim offline vem de
+    um produtor nativo no nível do schematic principal (medição física ou readback de I/O), nunca
+    de dentro de uma library.
+  - Correção pendente / caminho a seguir: replicar o cálculo de SOC (integrador de Coulomb +
+    fórmula de `modelo_bateria`) direto no schematic principal, alimentado pelos sinais de
+    `I_bat`/`V_bat_mes` que já funcionam — mesmo padrão do fix de tensão/corrente. Duplica lógica
+    (risco de divergir se a fórmula dentro de `Bat_array.tlib` mudar), mas é o único jeito
+    encontrado até agora de ver o SOC no simulador offline. Alternativa não testada: rodar no HIL
+    real (não o TySim software) — a mensagem de erro diz "not supported by TyphoonSim **yet**",
+    sugerindo que é uma limitação específica do simulador local, não do hardware.
 
 ## Bug conhecido, não corrigido (`modelo_bateria`)
 

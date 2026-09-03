@@ -226,7 +226,7 @@ const real_t Q_1_real = 2.3;
             ]
 
             component "core/Current Measurement" Iout {
-                execution_rate = "0.0001"
+                execution_rate = "2e-07"
                 sig_output = "True"
                 signal_access = "Public"
             }
@@ -236,7 +236,7 @@ const real_t Q_1_real = 2.3;
             ]
 
             component "core/Voltage Measurement" Va1 {
-                execution_rate = "0.0001"
+                execution_rate = "2e-07"
                 sig_output = "True"
             }
             [
@@ -265,62 +265,90 @@ const real_t Q_1_real = 2.3;
             component "core/Abs" Abs1 {
             }
             [
-                position = 7804, 8596
+                position = 7812, 8696
             ]
 
             component "core/Sum" Sum1 {
             }
             [
-                position = 7956, 8604
+                position = 7964, 8704
             ]
 
             component "core/Gain" Gain1 {
                 gain = "-1"
             }
             [
-                position = 7808, 8668
+                position = 7816, 8768
             ]
 
-            component "core/Limit" Limit1 {
-                lower_limit = "0"
-                upper_limit = "100000"
+            component "core/Gain" GainKi {
+                gain = "1000"
             }
             [
-                position = 8056, 8604
+                position = 8084, 8704
             ]
 
-            component "core/Gain" Gain2 {
-                gain = "-1"
+            component "core/Integrator" IntegratorR {
+                limit_lower = "0"
+                limit_output = "True"
+                limit_upper = "100000"
             }
             [
-                position = 8176, 8604
+                position = 8160, 8704
             ]
 
             component "core/Sum" Sum2 {
             }
             [
-                position = 8280, 8612
+                position = 8288, 8712
             ]
 
             component "core/Constant" Constant1 {
-                execution_rate = "0.0001"
+                execution_rate = "2e-7"
+                value = "0.0001"
             }
             [
-                position = 8168, 8668
+                position = 8208, 8796
             ]
 
             component "core/Integrator" Integrator1 {
                 show_init_condition = "external"
             }
             [
-                position = 7992, 8820
+                position = 8108, 8996
             ]
 
             component "core/Gain" Gain3 {
                 gain = "0.000277777778"
             }
             [
-                position = 7860, 8780
+                position = 7976, 8956
+            ]
+
+            component "core/Sum" SumFilt {
+            }
+            [
+                position = 8000, 8588
+            ]
+
+            component "core/Gain" GainFiltFB {
+                gain = "-1"
+            }
+            [
+                position = 7920, 8620
+            ]
+
+            component "core/Gain" GainFiltTau {
+                gain = "20000"
+            }
+            [
+                position = 8128, 8588
+            ]
+
+            component "core/Integrator" IFilt {
+            }
+            [
+                position = 8224, 8588
             ]
 
             port - {
@@ -592,7 +620,7 @@ const real_t Q_1_real = 2.3;
                 direction = in
             }
             [
-                position = 8388, 8612
+                position = 8396, 8712
                 size = 60, 20
             ]
 
@@ -603,7 +631,7 @@ const real_t Q_1_real = 2.3;
                 direction = out
             }
             [
-                position = 7680, 8668
+                position = 7688, 8768
                 size = 60, 20
             ]
 
@@ -735,7 +763,7 @@ const real_t Q_1_real = 2.3;
                 direction = in
             }
             [
-                position = 8128, 8824
+                position = 8244, 9000
                 size = 60, 20
             ]
 
@@ -746,7 +774,7 @@ const real_t Q_1_real = 2.3;
                 direction = out
             }
             [
-                position = 7864, 8856
+                position = 7980, 9032
                 size = 60, 20
             ]
 
@@ -757,7 +785,7 @@ const real_t Q_1_real = 2.3;
                 direction = out
             }
             [
-                position = 7768, 8780
+                position = 7884, 8956
                 size = 60, 20
             ]
 
@@ -768,7 +796,7 @@ const real_t Q_1_real = 2.3;
                 direction = out
             }
             [
-                position = 7680, 8596
+                position = 7688, 8696
                 size = 60, 20
             ]
 
@@ -780,6 +808,11 @@ const real_t Q_1_real = 2.3;
             junction Junction2 pe
             [
                 position = 8076, 8392
+            ]
+
+            junction Junction3 sp
+            [
+                position = 7864, 8672
             ]
 
             connect modelo_bateria.V Vout.in as Connection2
@@ -811,11 +844,16 @@ const real_t Q_1_real = 2.3;
             connect Va1.n_node Junction2 as Connection27
             connect From9 RL1.In as Connection28
             connect From10 MOSFET1.ctrl_in as Connection29
-            connect Abs1.out Sum1.in as Connection30
+            connect Abs1.out SumFilt.in as Connection56
+            [
+                breakpoints = 7848, 8696; 7848, 8580
+            ]
+            connect SumFilt.out GainFiltTau.in as Connection59
+            connect GainFiltTau.out IFilt.in as Connection60
             connect Gain1.out Sum1.in1 as Connection31
-            connect Sum1.out Limit1.in as Connection32
-            connect Sum2.in Gain2.out as Connection34
-            connect Limit1.out Gain2.in as Connection35
+            connect Sum1.out GainKi.in as Connection32
+            connect GainKi.out IntegratorR.in as Connection34
+            connect IntegratorR.out Sum2.in as Connection35
             connect Sum2.in1 Constant1.out as Connection36
             connect From12 Gain1.in as Connection37
             connect Sum2.out Goto5 as Connection39
@@ -838,6 +876,13 @@ const real_t Q_1_real = 2.3;
             connect Goto12 Integrator1.out as Connection53
             connect Integrator1.in Gain3.out as Connection54
             connect From26 Abs1.in as Connection55
+            connect GainFiltFB.out SumFilt.in1 as Connection65
+            connect Sum1.in Junction3 as Connection70
+            connect Junction3 GainFiltFB.in as Connection71
+            [
+                breakpoints = 7864, 8640
+            ]
+            connect IFilt.out Junction3 as Connection72
         }
         [
             position = 4920, 4780
@@ -914,12 +959,6 @@ const real_t Q_1_real = 2.3;
             state_port_type = "inherit"
             tml_file = "gen_accumulator_integrator"
             mode = "integrator"
-            execution_rate = "inherit"
-        }
-
-        "core/Limit" {
-            upper_limit = "[\'inf\']"
-            lower_limit = "[\'-inf\']"
             execution_rate = "inherit"
         }
 

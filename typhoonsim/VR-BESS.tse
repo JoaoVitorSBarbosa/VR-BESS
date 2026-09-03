@@ -9,7 +9,7 @@ model "VR-BESS" {
         hil_device = "VHIL+"
         hil_configuration_id = 1
         simulation_method = exact
-        simulation_time_step = auto
+        simulation_time_step = 2e-7
         simulation_discret_scaling = 1.0
         dsp_timer_periods = 100e-6, 50e-3
         ss_calc_method = "systematic elimination"
@@ -20,7 +20,7 @@ model "VR-BESS" {
         reset_analog_outputs_on_sim_stop = True
         reset_analog_outputs_on_sim_stop_mode = Offset values
         reset_digital_outputs_on_sim_stop = True
-        vhil_adio_loopback = False
+        vhil_adio_loopback = True
         dma_enable = False
         cpl_stb = False
         enb_dep_sw_detect = False
@@ -66,11 +66,11 @@ model "VR-BESS" {
         export_encrypt_resources = True
         solver_type = "DAE"
         integration_method = "BDF"
-        max_sim_step = 1e-7
+        max_sim_step = 2e-7
         simulation_time = 0.1
         abs_tol = 1e-3
         rel_tol = 1e-3
-        init_sim_step = 1e-4
+        init_sim_step = 2e-7
         r_on_sw = 1e-3
         v_on_diode = 0.1
         data_sampling_rate = 0
@@ -105,7 +105,7 @@ model "VR-BESS" {
             capacitance = "1.41e-6"
         }
         [
-            position = 8432, 8216
+            position = 8452, 8220
             rotation = right
         ]
 
@@ -116,7 +116,7 @@ model "VR-BESS" {
             position = 7880, 8216
         ]
 
-        component "core/Diode" Diode1 {
+        component "core/Diode" D3 {
             model_load_legacy = "1"
         }
         [
@@ -124,7 +124,7 @@ model "VR-BESS" {
             size = 64, 32
         ]
 
-        component "core/Diode" Diode2 {
+        component "core/Diode" D1 {
             model_load_legacy = "1"
         }
         [
@@ -133,7 +133,7 @@ model "VR-BESS" {
             size = 64, 32
         ]
 
-        component "core/Diode" Diode3 {
+        component "core/Diode" D2 {
             model_load_legacy = "1"
         }
         [
@@ -174,195 +174,190 @@ model "VR-BESS" {
             position = 7768, 8452
         ]
 
-        component "core/Constant" Constant1 {
-            execution_rate = "0.0001"
+        component "core/Constant" SOC_inicial_bat {
+            execution_rate = "2e-7"
             value = "50"
         }
         [
-            position = 8072, 8144
+            position = 7032, 8640
         ]
 
-        component "core/Constant" Constant2 {
-            execution_rate = "0.0001"
+        component "core/Constant" Num_cel_par_bat {
+            execution_rate = "2e-7"
         }
         [
-            position = 8072, 8208
+            position = 7032, 8704
         ]
 
-        component "core/Constant" Constant3 {
-            execution_rate = "0.0001"
+        component "core/Constant" Num_cel_serie_bat {
+            execution_rate = "2e-7"
             value = "15"
         }
         [
-            position = 8072, 8272
+            position = 7032, 8768
         ]
 
-        component "core/Constant" Constant4 {
-            execution_rate = "0.0001"
+        component "core/Constant" modo_teste {
+            execution_rate = "2e-7"
+            value = "0"
         }
         [
-            position = 8072, 8344
-        ]
-
-        component "core/PWM Modulator" "PWM Modulator1" {
-            carrier_freq = "100000"
-            num_of_ch = "2"
-            ref_sig_min_max = "[0, 1.0]"
-            signal_access = "Public"
-        }
-        [
-            position = 7540, 7932
-        ]
-
-        component "core/Constant" Constant5 {
-            execution_rate = "0.0001"
-        }
-        [
-            position = 7412, 7880
-        ]
-
-        component "core/Constant" Constant6 {
-            execution_rate = "0.0001"
-            value = "0.7677"
-        }
-        [
-            position = 7412, 7932
-        ]
-
-        component "core/Constant" Constant7 {
-            execution_rate = "0.0001"
-            value = "0.1377"
-        }
-        [
-            position = 7412, 7988
-        ]
-
-        component "core/Digital Input" "Digital Input1" {
-            execution_rate = "0.0001"
-        }
-        [
-            position = 7452, 8152
-        ]
-
-        component "core/Digital Input" "Digital Input2" {
-            execution_rate = "0.0001"
-        }
-        [
-            position = 7452, 8272
+            position = 7032, 8824
         ]
 
         component "Bat_array/Bat_array" Bat_array1 {
         }
         [
-            position = 8232, 8236
-            size = 176, 152
+            position = 8244, 8252
+            size = 176, 184
         ]
 
         component "core/Scope" Scope1 {
-            selected_signals = "[\'Vbat\', \'Vpv\', \'V_out\', \'SOC\']"
-            signals_data = "{\"plot_settings\": {\"layout\": \"Vertical\", \"background_color\": \"white\", \"legend_visible\": true, \"signals_tooltips_enabled\": true}, \"signals\": {\"Vbat\": {\"viewports\": [1], \"type\": \"analog\", \"color\": {\"1\": \"#FF0000\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"Vpv\": {\"viewports\": [2], \"type\": \"analog\", \"color\": {\"2\": \"#FF0000\"}, \"display\": {\"2\": \"solid\"}, \"is_manual\": {\"2\": false}}, \"V_out\": {\"viewports\": [3], \"type\": \"analog\", \"color\": {\"3\": \"#FF0000\"}, \"display\": {\"3\": \"solid\"}, \"is_manual\": {\"3\": false}}, \"SOC\": {\"viewports\": [4], \"type\": \"analog\", \"color\": {\"4\": \"#FF0000\"}, \"display\": {\"4\": \"solid\"}, \"is_manual\": {\"4\": false}}}, \"viewports\": {\"1\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"2\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"3\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"4\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"5\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"6\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}}}"
-            user_range_data = "{\"1\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0, 1], \"user_y_range\": [0, 1]}, \"2\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0, 1], \"user_y_range\": [0, 1]}, \"3\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0, 1], \"user_y_range\": [0, 1]}, \"4\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0, 1], \"user_y_range\": [0, 1]}, \"5\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0, 1], \"user_y_range\": [0, 1]}, \"6\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0, 1], \"user_y_range\": [0, 1]}}"
+            selected_signals = "[\'PWM_Mod_S1.TOP_1\', \'PWM_Mod_S2.TOP_1\', \'I_bat\', \'SOC_mes\']"
+            signals_data = "{\"plot_settings\": {\"layout\": \"Vertical\", \"background_color\": \"white\", \"legend_visible\": true, \"signals_tooltips_enabled\": true}, \"signals\": {\"PWM_Mod_S1.TOP_1\": {\"viewports\": [1], \"type\": \"digital\", \"color\": {\"1\": \"#FF0000\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"PWM_Mod_S2.TOP_1\": {\"viewports\": [2], \"type\": \"digital\", \"color\": {\"2\": \"#FF0000\"}, \"display\": {\"2\": \"solid\"}, \"is_manual\": {\"2\": false}}, \"I_bat\": {\"viewports\": [3], \"type\": \"analog\", \"color\": {\"3\": \"#FF0000\"}, \"display\": {\"3\": \"solid\"}, \"is_manual\": {\"3\": false}}, \"SOC_mes\": {\"viewports\": [4], \"type\": \"analog\", \"color\": {\"4\": \"#FF0000\"}, \"display\": {\"4\": \"solid\"}, \"is_manual\": {\"4\": false}}}, \"viewports\": {\"1\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"2\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"3\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"4\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}}}"
+            user_range_data = "{\"1\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.0, 1.0]}, \"2\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.0, 1.0]}, \"3\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.0, 1.0]}, \"4\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.0, 1.0]}, \"5\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Manual\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-10.0, 30.0]}, \"6\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.0, 1.0]}}"
         }
         [
             position = 7856, 7960
         ]
 
-        component "core/Digital Probe" "Digital Probe1" {
-            override_signal_name = "True"
-            signal_name = "PWM Modulator1.TOP_1"
-        }
-        [
-            position = 7512, 8216
-        ]
-
-        component "core/Digital Probe" "Digital Probe2" {
-            override_signal_name = "True"
-            signal_name = "PWM Modulator1.TOP_2"
-        }
-        [
-            position = 7520, 8348
-        ]
-
         component "pv_array/pv_array" pv_array1 {
         }
         [
-            position = 7188, 8224
-            size = 120, 128
+            position = 7192, 8240
+            size = 112, 184
         ]
 
-        component "core/Constant" Constant8 {
+        component "core/Constant" Num_cel_serie_pv {
             execution_rate = "0.0001"
             value = "17"
         }
         [
-            position = 7008, 8152
+            position = 6684, 8636
         ]
 
-        component "core/Constant" Constant9 {
+        component "core/Constant" Num_cel_par_pv {
             execution_rate = "0.0001"
             value = "2"
         }
         [
-            position = 7008, 8208
+            position = 6684, 8692
         ]
 
-        component "core/Constant" Constant10 {
+        component "core/Constant" G_pv {
             execution_rate = "0.0001"
             value = "1000"
         }
         [
-            position = 7008, 8272
+            position = 6684, 8756
         ]
 
-        component "core/Constant" Constant11 {
+        component "core/Constant" Temp_pv {
             execution_rate = "0.0001"
             value = "25"
         }
         [
-            position = 7008, 8336
+            position = 6684, 8820
         ]
 
-        component "core/Probe" Probe1 {
-            override_signal_name = "True"
-            signal_name = "SOC"
+        component "core/C function" SOC_it0_calc {
+            arb_defs = "/*Begin code section*/
+
+/*End code section*/"
+            init_fnc = "/*Begin code section*/
+
+/*End code section*/"
+            input_terminals = "real SOC_inicial;real Np_bat;real modo_teste;"
+            input_terminals_dimensions = "inherit;inherit;inherit"
+            input_terminals_feedthrough = "True;True;True"
+            input_terminals_show_labels = "True;True;True"
+            output_fnc = "/*Begin code section*/
+const real_t Q_1_real = 2.3;
+const real_t Q_1_teste = 0.00055;
+real_t Q_1, Q, it0_calc;
+
+if (modo_teste == 1.0) {
+    Q_1 = Q_1_teste;
+} else {
+    Q_1 = Q_1_real;
+}
+
+Q = Q_1 * Np_bat;
+it0_calc = Q * (1.0 - SOC_inicial / 100.0);
+
+it0 = it0_calc;
+/*End code section*/"
+            output_terminals = "real it0;"
+            output_terminals_dimensions = "inherit"
+            output_terminals_feedthrough = "True"
+            output_terminals_show_labels = "True"
+            update_fnc = "/*Begin code section*/
+
+/*End code section*/"
         }
         [
-            position = 8372, 8292
+            position = 7680, 8796
+            size = 144, 120
         ]
 
-        component "core/Probe" Probe2 {
-            override_signal_name = "True"
-            signal_name = "I_bat"
+        component "core/Gain" SOC_I_to_Ah {
+            gain = "0.000277777778"
         }
         [
-            position = 8372, 8180
+            position = 7632, 8636
         ]
 
-        component "core/Probe" Probe3 {
-            override_signal_name = "True"
-            signal_name = "Vbat"
+        component "core/Integrator" SOC_it_integrator {
+            show_init_condition = "external"
         }
         [
-            position = 8372, 8236
+            position = 7968, 8788
         ]
 
-        component "core/Probe" Probe4 {
-            override_signal_name = "True"
-            signal_name = "Vpv"
+        component "core/C function" SOC_calc_top {
+            arb_defs = "/*Begin code section*/
+
+/*End code section*/"
+            init_fnc = "/*Begin code section*/
+
+/*End code section*/"
+            input_terminals = "real it;real Np_bat;real modo_teste;"
+            input_terminals_dimensions = "inherit;inherit;inherit"
+            input_terminals_feedthrough = "True;True;True"
+            input_terminals_show_labels = "True;True;True"
+            output_fnc = "/*Begin code section*/
+const real_t Q_1_real = 2.3;
+  const real_t Q_1_teste = 0.00055;
+  real_t Q_1, Q, SOC_calc;
+
+  if (modo_teste == 1.0) {
+      Q_1 = Q_1_teste;
+  } else {
+      Q_1 = Q_1_real;
+  }
+
+  Q = Q_1 * Np_bat;
+  SOC_calc = 100.0 * (1.0 - it / Q);
+  if (SOC_calc < 0.0) SOC_calc = 0.0;
+  else if (SOC_calc > 100.0) SOC_calc = 100.0;
+
+  SOC = SOC_calc;
+/*End code section*/"
+            output_terminals = "real SOC;"
+            output_terminals_dimensions = "inherit"
+            output_terminals_feedthrough = "True"
+            output_terminals_show_labels = "True"
+            update_fnc = "/*Begin code section*/
+
+/*End code section*/"
         }
         [
-            position = 7312, 8180
+            position = 8424, 8688
+            size = 144, 120
         ]
 
-        component "core/Probe" Probe5 {
-            override_signal_name = "True"
-            signal_name = "Ipv"
-        }
-        [
-            position = 7308, 8268
-        ]
-
-        component "core/Voltage Measurement" Va1 {
+        component "core/Voltage Measurement" V_out {
+            execution_rate = "2e-07"
             override_signal_name = "True"
             signal_name = "V_out"
         }
@@ -370,6 +365,412 @@ model "VR-BESS" {
             position = 8600, 8220
             rotation = right
             size = 64, 32
+        ]
+
+        component "core/Current Measurement" I_pv {
+            execution_rate = "2e-07"
+            override_signal_name = "True"
+            signal_name = "I_pv"
+        }
+        [
+            position = 7280, 8092
+            size = 64, 32
+        ]
+
+        component "core/Voltage Measurement" V-pv {
+            execution_rate = "2e-07"
+            override_signal_name = "True"
+            signal_name = "V_pv"
+        }
+        [
+            position = 7336, 8264
+            rotation = right
+            size = 64, 32
+        ]
+
+        component "core/Current Measurement" I_bat {
+            execution_rate = "2e-07"
+            override_signal_name = "True"
+            sig_output = "True"
+            signal_name = "I_bat"
+        }
+        [
+            position = 8112, 8132
+            rotation = down
+            size = 64, 32
+        ]
+
+        component "core/Voltage Measurement" V_bat {
+            execution_rate = "2e-07"
+            override_signal_name = "True"
+            signal_name = "V_bat"
+        }
+        [
+            position = 8384, 8216
+            rotation = right
+            size = 64, 32
+        ]
+
+        component "core/Current Measurement" I_out {
+            execution_rate = "2e-07"
+            override_signal_name = "True"
+            signal_name = "I_out"
+        }
+        [
+            position = 8532, 8140
+            rotation = right
+            size = 64, 32
+        ]
+
+        component "core/Probe" SOC_mes {
+            override_signal_name = "True"
+            signal_name = "SOC_mes"
+        }
+        [
+            position = 8564, 8688
+        ]
+
+        component "core/Voltage Measurement" Va1 {
+            execution_rate = "2e-07"
+            override_signal_name = "True"
+            signal_name = "V_S1"
+        }
+        [
+            position = 7608, 8160
+            rotation = right
+            size = 64, 32
+        ]
+
+        component "core/Constant" Constant8 {
+            execution_rate = "0.0001"
+        }
+        [
+            position = 7444, 7896
+        ]
+
+        component "core/Constant" Constant9 {
+            execution_rate = "0.0001"
+            value = "0.7677"
+        }
+        [
+            position = 7344, 7936
+        ]
+
+        component "core/Constant" Constant10 {
+            execution_rate = "0.0001"
+            value = "0.1377"
+        }
+        [
+            position = 7444, 7972
+        ]
+
+        component "core/PWM Modulator" PWM_Mod_S1 {
+            carrier_freq = "100000"
+            carr_ph_offset = "0.0"
+            phase_op_mode = "Fixed carrier phase offset"
+            d_time = "1e-6"
+            num_of_ch = "1"
+            ref_sig_min_max = "[0, 1.0]"
+            signal_access = "Public"
+        }
+        [
+            position = 7540, 7900
+        ]
+
+        component "core/PWM Modulator" PWM_Mod_S2 {
+            carrier_freq = "100000"
+            carr_ph_offset = "0.0"
+            phase_op_mode = "Fixed carrier phase offset"
+            d_time = "1e-6"
+            num_of_ch = "1"
+            ref_sig_min_max = "[0, 1.0]"
+            signal_access = "Public"
+        }
+        [
+            position = 7540, 7964
+        ]
+
+        component "core/Digital Input" "Digital Input1" {
+            execution_rate = "2e-7"
+        }
+        [
+            position = 7428, 8152
+        ]
+
+        component "core/Digital Input" "Digital Input2" {
+            execution_rate = "2e-7"
+        }
+        [
+            position = 7428, 8276
+        ]
+
+        component "core/Probe" PWM_S2 {
+            override_signal_name = "True"
+            signal_name = "PWM_S2"
+        }
+        [
+            position = 7508, 8240
+        ]
+
+        component "core/Probe" PWM_S1 {
+            override_signal_name = "True"
+            signal_name = "PWM_S1"
+        }
+        [
+            position = 7508, 8192
+        ]
+
+        tag From1 {
+            value = "Num_cel_serie_pv"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 7020, 8168
+            size = 60, 20
+        ]
+
+        tag Goto1 {
+            value = "Num_cel_serie_pv"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 6832, 8636
+            size = 132, 20
+        ]
+
+        tag Goto2 {
+            value = "Num_cel_par_pv"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 6832, 8692
+            size = 132, 20
+        ]
+
+        tag Goto3 {
+            value = "G_pv"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 6832, 8756
+            size = 132, 20
+        ]
+
+        tag Goto4 {
+            value = "Temp_pv"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 6832, 8820
+            size = 132, 20
+        ]
+
+        tag From2 {
+            value = "Num_cel_par_pv"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 7020, 8216
+            size = 60, 20
+        ]
+
+        tag From3 {
+            value = "G_pv"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 7020, 8264
+            size = 60, 20
+        ]
+
+        tag From4 {
+            value = "Temp_pv"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 7020, 8312
+            size = 60, 20
+        ]
+
+        tag Goto5 {
+            value = "SOC_inicial_bat"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 7216, 8640
+            size = 124, 20
+        ]
+
+        tag Goto6 {
+            value = "Num_cel_par_bat"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 7216, 8704
+            size = 124, 20
+        ]
+
+        tag Goto7 {
+            value = "Num_cel_serie_bat"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 7216, 8768
+            size = 124, 20
+        ]
+
+        tag Goto8 {
+            value = "modo_teste"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 7216, 8824
+            size = 124, 20
+        ]
+
+        tag From5 {
+            value = "SOC_inicial_bat"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 8064, 8180
+            size = 108, 20
+        ]
+
+        tag From6 {
+            value = "Num_cel_par_bat"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 8060, 8228
+            size = 108, 20
+        ]
+
+        tag From7 {
+            value = "Num_cel_serie_bat"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 8064, 8276
+            size = 108, 20
+        ]
+
+        tag From8 {
+            value = "modo_teste"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 8064, 8324
+            size = 108, 20
+        ]
+
+        tag From9 {
+            value = "SOC_inicial_bat"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 7488, 8756
+            size = 108, 20
+        ]
+
+        tag From10 {
+            value = "Num_cel_par_bat"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 7488, 8796
+            size = 108, 20
+        ]
+
+        tag From12 {
+            value = "modo_teste"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 7488, 8836
+            size = 108, 20
+        ]
+
+        tag From13 {
+            value = "Num_cel_par_bat"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 8192, 8688
+            size = 108, 20
+        ]
+
+        tag From14 {
+            value = "modo_teste"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 8196, 8728
+            size = 108, 20
+        ]
+
+        tag Goto9 {
+            value = "I_bat_mes"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 8144, 8060
+            size = 100, 20
+        ]
+
+        tag From15 {
+            value = "I_bat_mes"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 7488, 8636
+            size = 108, 20
         ]
 
         junction Junction1 pe
@@ -397,11 +798,6 @@ model "VR-BESS" {
             position = 7768, 8404
         ]
 
-        junction Junction6 pe
-        [
-            position = 7980, 8404
-        ]
-
         junction Junction9 pe
         [
             position = 7552, 8404
@@ -414,47 +810,12 @@ model "VR-BESS" {
 
         junction Junction14 pe
         [
-            position = 8432, 8092
+            position = 8452, 8092
         ]
 
         junction Junction15 pe
         [
-            position = 8432, 8404
-        ]
-
-        junction Junction16 pe
-        [
-            position = 8236, 8404
-        ]
-
-        junction Junction17 pe
-        [
-            position = 7980, 8216
-        ]
-
-        junction Junction18 sp
-        [
-            position = 7480, 8152
-        ]
-
-        junction Junction19 sp
-        [
-            position = 7484, 8272
-        ]
-
-        junction Junction20 pe
-        [
-            position = 7388, 8096
-        ]
-
-        junction Junction21 pe
-        [
-            position = 7388, 8408
-        ]
-
-        junction Junction22 pe
-        [
-            position = 8532, 8092
+            position = 8452, 8404
         ]
 
         junction Junction23 pe
@@ -462,22 +823,89 @@ model "VR-BESS" {
             position = 8532, 8404
         ]
 
-        connect Diode1.A Junction1 as Connection3
+        junction Junction28 pe
+        [
+            position = 7388, 8092
+        ]
+
+        junction Junction29 pe
+        [
+            position = 7388, 8404
+        ]
+
+        junction Junction30 pe
+        [
+            position = 7336, 8092
+        ]
+
+        junction Junction31 pe
+        [
+            position = 7336, 8404
+        ]
+
+        junction Junction32 pe
+        [
+            position = 8244, 8404
+        ]
+
+        junction Junction33 pe
+        [
+            position = 7980, 8216
+        ]
+
+        junction Junction34 pe
+        [
+            position = 8244, 8132
+        ]
+
+        junction Junction35 pe
+        [
+            position = 8384, 8404
+        ]
+
+        junction Junction36 pe
+        [
+            position = 8532, 8092
+        ]
+
+        junction Junction41 pe
+        [
+            position = 7580, 8092
+        ]
+
+        junction Junction42 pe
+        [
+            position = 7612, 8216
+        ]
+
+        junction Junction43 pe
+        [
+            position = 7980, 8404
+        ]
+
+        junction Junction44 sp
+        [
+            position = 7468, 8276
+        ]
+
+        junction Junction45 sp
+        [
+            position = 7460, 8152
+        ]
+
         connect Junction1 Ls.n_node as Connection4
         connect S1.D Junction1 as Connection5
-        connect Diode3.A Junction2 as Connection10
+        connect D2.A Junction2 as Connection10
         connect Junction2 gnd1.node as Connection11
-        connect Diode1.K Junction3 as Connection13
-        connect Junction3 Diode2.K as Connection14
-        connect Diode2.A Junction4 as Connection16
-        connect Junction4 Diode3.K as Connection17
+        connect D3.K Junction3 as Connection13
+        connect Junction3 D1.K as Connection14
+        connect D1.A Junction4 as Connection16
+        connect Junction4 D2.K as Connection17
         connect Lbat.p_node Junction4 as Connection18
         connect Junction5 Junction2 as Connection21
         [
             breakpoints = 7768, 8404
         ]
-        connect Cbat.n_node Junction6 as Connection23
-        connect Junction6 Junction5 as Connection24
         connect S2.S Junction9 as Connection32
         [
             breakpoints = 7552, 8304; 7552, 8312
@@ -494,77 +922,153 @@ model "VR-BESS" {
         [
             breakpoints = 7552, 8232
         ]
-        connect Junction4 Junction10 as Connection37
         connect Junction3 Junction14 as Connection50
         [
             breakpoints = 8136, 8092
         ]
         connect Junction14 Cvo.p_node as Connection51
+        [
+            breakpoints = 8452, 8092; 8452, 8180
+        ]
         connect Cvo.n_node Junction15 as Connection53
-        connect Constant5.out "PWM Modulator1.en" as Connection60
-        connect Constant6.out "PWM Modulator1.in" as Connection61
-        connect Constant7.out "PWM Modulator1.in1" as Connection62
-        connect Constant1.out Bat_array1.SOC_inicial as Connection70
-        connect Constant2.out Bat_array1.Np_bat as Connection71
-        connect Constant3.out Bat_array1.Ns_bat as Connection72
-        connect Constant4.out Bat_array1.modo_teste as Connection73
-        connect Junction15 Junction16 as Connection77
-        connect Junction16 Junction6 as Connection78
+        connect SOC_I_to_Ah.out SOC_it_integrator.in as Connection131
+        connect RLo.n_node Junction23 as Connection107
+        connect Junction23 Junction15 as Connection108
+        connect V_out.n_node Junction23 as Connection109
+        connect Num_cel_serie_pv.out Goto1 as Connection133
+        connect Num_cel_par_pv.out Goto2 as Connection134
+        connect G_pv.out Goto3 as Connection135
+        connect Temp_pv.out Goto4 as Connection136
+        connect From1 pv_array1.Ns_mod as Connection137
+        connect From2 pv_array1.Np_mod as Connection138
+        connect From3 pv_array1.G as Connection141
+        connect From4 pv_array1.T as Connection142
+        connect I_pv.p_node pv_array1.+ as Connection143
+        connect Ls.p_node Junction28 as Connection144
+        connect Junction28 Cpv.p_node as Connection145
         [
-            breakpoints = 8136, 8404; 7984, 8404
+            breakpoints = 7388, 8096
         ]
-        connect Bat_array1.- Junction16 as Connection79
-        connect Lbat.n_node Junction17 as Connection80
-        connect Junction17 Cbat.p_node as Connection81
-        [
-            breakpoints = 7980, 8216
-        ]
-        connect Bat_array1.+ Junction17 as Connection82
-        [
-            breakpoints = 8104, 8120; 7980, 8120; 7980, 8152; 7980, 8232
-        ]
-        connect "Digital Input1.out" Junction18 as Connection83
-        connect Junction18 S1.ctrl_in as Connection84
-        connect "Digital Probe1.in" Junction18 as Connection85
-        [
-            breakpoints = 7480, 8216; 7480, 8152
-        ]
-        connect "Digital Input2.out" Junction19 as Connection86
-        connect Junction19 S2.ctrl_in as Connection87
-        connect "Digital Probe2.in" Junction19 as Connection88
-        connect Cpv.p_node Junction20 as Connection89
-        connect Junction20 Ls.p_node as Connection90
-        connect pv_array1.+ Junction20 as Connection91
-        connect Cpv.n_node Junction21 as Connection92
-        connect Junction21 Junction9 as Connection93
+        connect Cpv.n_node Junction29 as Connection147
+        connect Junction29 Junction9 as Connection148
         [
             breakpoints = 7388, 8404; 7552, 8404
         ]
-        connect pv_array1.- Junction21 as Connection94
+        connect I_pv.n_node Junction30 as Connection150
+        connect Junction30 Junction28 as Connection151
+        connect V-pv.p_node Junction30 as Connection152
+        connect pv_array1.- Junction31 as Connection153
+        connect Junction31 Junction29 as Connection154
+        connect V-pv.n_node Junction31 as Connection155
+        connect modo_teste.out Goto8 as Connection156
+        connect Num_cel_serie_bat.out Goto7 as Connection157
+        connect Num_cel_par_bat.out Goto6 as Connection158
+        connect SOC_inicial_bat.out Goto5 as Connection159
+        connect From8 Bat_array1.modo_teste as Connection161
+        connect From7 Bat_array1.Ns_bat as Connection162
+        connect From6 Bat_array1.Np_bat as Connection163
+        connect From5 Bat_array1.SOC_inicial as Connection164
+        connect Bat_array1.- Junction32 as Connection167
+        connect Cbat.p_node Junction33 as Connection170
+        connect Junction33 Lbat.n_node as Connection171
+        connect I_bat.n_node Junction33 as Connection172
+        connect Bat_array1.+ Junction34 as Connection173
+        connect Junction34 I_bat.p_node as Connection174
+        connect V_bat.p_node Junction34 as Connection175
+        connect Junction15 Junction35 as Connection176
+        connect Junction35 Junction32 as Connection177
+        connect V_bat.n_node Junction35 as Connection178
         [
-            breakpoints = 7188, 8404; 7388, 8404
+            breakpoints = 8384, 8256; 8384, 8404
         ]
-        connect Constant8.out pv_array1.Ns_mod as Connection95
-        connect Constant9.out pv_array1.Np_mod as Connection96
-        connect Constant10.out pv_array1.G as Connection97
+        connect I_out.n_node RLo.p_node as Connection180
+        connect Junction14 Junction36 as Connection181
+        connect Junction36 V_out.p_node as Connection182
         [
-            breakpoints = 7088, 8272; 7088, 8236
+            breakpoints = 8532, 8092
         ]
-        connect Constant11.out pv_array1.T as Connection98
-        connect Bat_array1.SOC Probe1.in as Connection99
-        connect Bat_array1.V Probe3.in as Connection100
-        connect Bat_array1.I Probe2.in as Connection101
-        connect pv_array1.V Probe4.in as Connection102
-        connect pv_array1.I Probe5.in as Connection103
-        connect RLo.p_node Junction22 as Connection104
-        connect Junction22 Junction14 as Connection105
-        connect Va1.p_node Junction22 as Connection106
-        connect RLo.n_node Junction23 as Connection107
-        connect Junction23 Junction15 as Connection108
-        connect Va1.n_node Junction23 as Connection109
+        connect I_out.p_node Junction36 as Connection183
+        connect From9 SOC_it0_calc.SOC_inicial as Connection184
+        connect From10 SOC_it0_calc.Np_bat as Connection185
+        connect From12 SOC_it0_calc.modo_teste as Connection186
+        connect SOC_calc_top.Np_bat From13 as Connection187
+        connect SOC_calc_top.modo_teste From14 as Connection188
+        connect I_bat.out Goto9 as Connection189
+        connect SOC_calc_top.SOC SOC_mes.in as Connection191
+        connect D3.A Junction41 as Connection210
+        connect Junction41 Junction1 as Connection211
+        connect Va1.p_node Junction41 as Connection212
+        connect Junction4 Junction42 as Connection213
+        connect Junction42 Junction10 as Connection214
+        connect Va1.n_node Junction42 as Connection215
+        connect Junction32 Junction43 as Connection222
+        [
+            breakpoints = 8136, 8404
+        ]
+        connect Junction43 Junction5 as Connection223
+        [
+            breakpoints = 7984, 8404
+        ]
+        connect Cbat.n_node Junction43 as Connection224
+        connect Constant8.out PWM_Mod_S1.en as Connection250
+        connect Constant9.out PWM_Mod_S1.in as Connection251
+        connect Constant8.out PWM_Mod_S2.en as Connection255
+        connect Constant10.out PWM_Mod_S2.in as Connection256
+        connect From15 SOC_I_to_Ah.in as Connection256
+        connect SOC_it0_calc.it0 SOC_it_integrator.init_condition_port as Connection257
+        [
+            breakpoints = 7836, 8796
+        ]
+        connect SOC_it_integrator.out SOC_calc_top.it as Connection258
+        [
+            breakpoints = 8076, 8788; 8076, 8648; 8160, 8648
+        ]
+        connect "Digital Input2.out" Junction44 as Connection259
+        connect Junction44 S2.ctrl_in as Connection260
+        connect PWM_S2.in Junction44 as Connection261
+        connect "Digital Input1.out" Junction45 as Connection262
+        connect Junction45 S1.ctrl_in as Connection263
+        connect PWM_S1.in Junction45 as Connection264
     }
 
     default {
+        "core/C function" {
+            input_terminals = "real in;"
+            input_terminals_show_labels = "False;"
+            input_terminals_feedthrough = "True;"
+            input_terminals_dimensions = "inherit;"
+            output_terminals = "real out;"
+            output_terminals_show_labels = "False;"
+            output_terminals_feedthrough = "True;"
+            output_terminals_dimensions = "inherit;"
+            output_fnc = ""
+            update_fnc = ""
+            init_fnc = ""
+            global_variables = ""
+            parameters = ""
+            library_load_type = "Compile-time load"
+            dll_file_path = ""
+            dll_file_path_full = ""
+            arm_a9_file_path = ""
+            arm_a9_file_path_full = ""
+            arm_a53_file_path = ""
+            arm_a53_file_path_full = ""
+            h_file_path = ""
+            h_file_path_full = ""
+            add_src_path = ""
+            add_src_path_full = ""
+            convert_to_relative_dll = "True"
+            convert_to_relative_a = "True"
+            convert_to_relative_src = "True"
+            arb_defs = ""
+            add_macros = ""
+            skip_pre_cmpl_check = "False"
+            generate_for_hil = "True"
+            execution_rate = "inherit"
+            _supported_platforms = "[\'generic\']"
+            refresh = "refresh"
+        }
+
         "core/Capacitor" {
             signal_access = "inherit"
             capacitance = "1e-6"
@@ -587,13 +1091,11 @@ model "VR-BESS" {
             execution_rate = "100e-6"
         }
 
-        "core/Digital Probe" {
-            signal_access = "inherit"
-            override_signal_name = "False"
-            signal_name = ""
-            streaming_en = "False"
-            addr = "0"
-            streaming_er_idx = "0"
+        "core/Gain" {
+            gain = "1"
+            multiplication = "Element-wise(K.*u)"
+            force_tml = "True"
+            _tunable = "False"
             execution_rate = "inherit"
         }
 
@@ -603,6 +1105,21 @@ model "VR-BESS" {
             initial_current = "0.0"
             pole_shift_ignore = "False"
             visible = "True"
+        }
+
+        "core/Integrator" {
+            show_reset = "none"
+            reset_type = "asynchronous"
+            show_init_condition = "internal"
+            init_value = "0"
+            limit_output = "False"
+            limit_upper = "inf"
+            limit_lower = "-inf"
+            show_state = "False"
+            state_port_type = "inherit"
+            tml_file = "gen_accumulator_integrator"
+            mode = "integrator"
+            execution_rate = "inherit"
         }
 
         "core/PWM Modulator" {
@@ -644,6 +1161,30 @@ model "VR-BESS" {
             signals_data = "{}"
             selected_signals = "[]"
             user_range_data = "{}"
+        }
+
+        "core/Current Measurement" {
+            signal_access = "inherit"
+            bw_limit = "False"
+            frequency = "10e3"
+            comparator_enable = "False"
+            operator = "greater"
+            threshold = "0"
+            cmp_abs_value = "False"
+            feed_forward = "false"
+            sig_output = "False"
+            sig_output_filt_and_full_bw = "False"
+            execution_rate = "100e-6"
+            addr = "0"
+            nd_msr_estimation = "false"
+            dev_cpl_msr = "false"
+            host_device = "0"
+            output_to_device = "0"
+            dev_cpl_index = "0"
+            dev_cpl_var_nb = "0"
+            visible = "True"
+            override_signal_name = "False"
+            signal_name = ""
         }
 
         "core/Diode" {

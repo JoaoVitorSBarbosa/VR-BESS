@@ -4,3 +4,7 @@ typhoonsim/*Target files/
 # OS / editor cruft
 .DS_Store
 Thumbs.db
+
+#bakckup archives
+
+typhoonsim/*.bak

@@ -25,14 +25,30 @@ malha fechada. O artigo/dissertação em si (LaTeX) fica em `/home/joaovitor/Doc
 
 - Vo = 400 V (Ro = 160 Ω, Po = 1000 W); Vbat = 252 V (Ns_bat=15, Np_bat=1)
 - PV: Ns_mod=17, Np_mod=2 (painel com Vmp=18,228 V, Imp=2,96 A — parâmetros de Ayaz et al. 2014)
-- f_sw = 100 kHz; duty ciclos finais (autoconsistentes, não vêm do Vmp nominal): Di=13,77% (S2),
-  Dii=76,77% (S1) — ver `secoes/03-Metodologia.tex` no projeto do artigo para a derivação em
-  ponto fixo (a tensão real do painel depende da corrente que o conversor demanda).
+- f_sw = 100 kHz.
+- **Duty cycles — MATLAB vs Typhoon, valores diferentes e isso é esperado:**
+  - **MATLAB** (autoconsistentes, não vêm do Vmp nominal): Di=13,77% (S2), Dii=76,77% (S1) — ver
+    `secoes/03-Metodologia.tex` no projeto do artigo para a derivação em ponto fixo por balanço
+    volt-segundo (Eq. 5/6), que assume conversor **ideal/sem perdas** (a tensão real do painel
+    depende da corrente que o conversor demanda, mas diodos/chaves são tratados como ideais).
+  - **Typhoon** (`VR-BESS.tse`, `Constant9`/`Constant10`): Di=21%, Dii=84,5% — recalibrados
+    **empiricamente**, não recalculados pela mesma equação ideal. Motivo: o circuito Typhoon tem
+    perdas reais que a Eq. 5/6 não modela — os diodos `D1`/`D2`/`D3` usam o `Vd=1,2V` padrão do
+    `core/Diode` (nunca sobrescrito) e o dead-time (`d_time=1e-6`) é 10% do período de comutação
+    (1 µs em 10 µs), bem mais alto que o típico (1–2%). Com os valores ideais do MATLAB, o Typhoon
+    converge para um ponto de operação autoconsistente diferente do projetado (confirmado mesmo
+    depois de corrigir o bug do painel PV abaixo — ver `git log`, commits de recalibração). Ajuste
+    prático: `Di` define o ganho de tensão `Vo=Vpv/(1-Di)`; a janela `Dii-Di` (que por construção
+    corresponde a `Vbat/Vo`, o trecho do período em que S1 está fechada e S2 aberta) é o que
+    direciona corrente especificamente para carregar a bateria — mexer nela não afeta `Vo`
+    significativamente. Se os componentes/perdas do Typhoon forem ajustados no futuro, os duty
+    cycles do MATLAB voltam a ser o ponto de partida correto e essa recalibração precisa repetir.
 - Ls≈3,89 mH, Lbat≈4,23 mH, Co≈1,41 µF, Cbat≈0,109 µF
 - Limites de corrente da bateria: 0,5C=1,15 A (carga), 2C=4,6 A (descarga), via resistor série
   proporcional (não é clamp duro) dentro de `modelo_bateria`
 - MATLAB: solver **Local Solver** (Backward Euler, passo fixo 200 ns) — necessário pelo duty
-  estreito (13,77%) em 100 kHz; passo variável não resolve o pulso.
+  estreito (13,77%) em 100 kHz; passo variável não resolve o pulso. No Typhoon o equivalente foi
+  `simulation_time_step` fixo em 2e-7 (200 ns) em vez de `auto` — ver armadilhas abaixo.
 
 ## Convenções e armadilhas do Typhoon HIL (blocos "core/C function")
 
@@ -79,6 +95,28 @@ nova (ex.: se um dia portar mais alguma coisa do MATLAB para cá):
   também usada nos exemplos oficiais da Typhoon (ex.: `core/Three Phase Inverter` no exemplo "back
   to back converter"), então é uma alternativa válida quando não se quer mexer em `Initial
   Settings`/canais DIO.
+- **`execution_rate` precisa ser IGUAL em todos os componentes de um laço algébrico/dinâmico
+  (sensor → `core/C function` → atuador).** Descoberto duas vezes de forma independente nesta
+  sessão: (1) `Bat_array1.Integrator1`/`Sum2` não conseguiam herdar (`inherit`) a taxa porque as
+  entradas vinham de componentes em taxas diferentes; (2) pior ainda, no `pv_array.tlib`, `Va1`
+  (sensor de tensão) e `"C function1"` estavam explicitamente em `2e-7` mas `Isp1` (fonte de
+  corrente controlada, quem injeta a corrente calculada de volta no circuito) tinha ficado em
+  `inherit` (resolvendo para uma taxa ~500x mais lenta). Isso NÃO deu erro de compilação — o
+  circuito simulou normalmente, só que `Isp1` injetava um valor de corrente praticamente
+  congelado (perto do calculado em t≈0, quando V≈0), como se o painel nunca respondesse à própria
+  tensão de terminal. Sintoma: valores de tensão/corrente que não batem com a curva do
+  componente (ver bug do painel PV abaixo) mesmo com a fórmula e a fiação corretas — sempre
+  conferir `execution_rate` de TODO componente do laço antes de desconfiar da fórmula ou da
+  fiação.
+- **Erro de fiação já cometido: trocar dois `Goto`/`From` (ou duas portas) de mesmo tipo `real`
+  na hora de conectar — não dá erro de compilação, só produz resultado fisicamente errado.**
+  Em `pv_array.tlib`, os sinais `Ns_mod` e `T` (ambos `real`, mesma direção) ficaram trocados na
+  entrada de `"C function1"` (`Ns_mod` recebendo o valor de `Temp_pv`, `T` recebendo o valor de
+  `Num_cel_serie_pv`). Como os tipos batem, o compilador aceita numa boa — o bug só aparece como
+  comportamento fisicamente impossível em runtime (nesse caso, o Voc calculado saiu ~535V em vez
+  de ~364V, permitindo o painel sustentar corrente muito além do seu Voc real e entregar potência
+  acima do Pmax físico). Ao ligar várias entradas `real` de um `core/C function`, conferir cada
+  par `Goto`/`From` pelo **valor da tag**, não só pela ordem/posição das linhas `connect`.
 - **Sinal de dentro de uma library (`.tlib`) não aparece no Scope/Probe do simulador offline
   (TySim software, sem HIL real) — mensagem `"<sinal> is not supported by TyphoonSim yet. Signal
   will be zeroed."`.** Isso vale mesmo quando o sinal já sai por uma porta da subsystem exportada
@@ -100,13 +138,15 @@ nova (ex.: se um dia portar mais alguma coisa do MATLAB para cá):
     também aciona `S1.ctrl_in`. Ou seja, todo sinal visível no Scope/Probe do TySim offline vem de
     um produtor nativo no nível do schematic principal (medição física ou readback de I/O), nunca
     de dentro de uma library.
-  - Correção pendente / caminho a seguir: replicar o cálculo de SOC (integrador de Coulomb +
-    fórmula de `modelo_bateria`) direto no schematic principal, alimentado pelos sinais de
-    `I_bat`/`V_bat_mes` que já funcionam — mesmo padrão do fix de tensão/corrente. Duplica lógica
-    (risco de divergir se a fórmula dentro de `Bat_array.tlib` mudar), mas é o único jeito
-    encontrado até agora de ver o SOC no simulador offline. Alternativa não testada: rodar no HIL
-    real (não o TySim software) — a mensagem de erro diz "not supported by TyphoonSim **yet**",
-    sugerindo que é uma limitação específica do simulador local, não do hardware.
+  - **Resolvido:** o SOC foi replicado direto no schematic principal (`SOC_it0_calc` →
+    `SOC_I_to_Ah` + `SOC_it_integrator` → `SOC_calc_top`, em `VR-BESS.tse`), alimentado pelos
+    sinais `I_bat`/`V_bat` que já funcionam — mesmo padrão do fix de tensão/corrente, replicando a
+    fórmula de `modelo_bateria`/`calc_it0`. Visível no Scope como `SOC_mes`. Isso duplica lógica
+    (risco de divergir se a fórmula dentro de `Bat_array.tlib` mudar sem replicar a mudança aqui),
+    mas é o único jeito encontrado até agora de ver o SOC no simulador offline. Alternativa não
+    testada: rodar no HIL real (não o TySim software) — a mensagem de erro diz "not supported by
+    TyphoonSim **yet**", sugerindo que é uma limitação específica do simulador local, não do
+    hardware.
 
 ## Bug conhecido, não corrigido (`modelo_bateria`)
 
@@ -128,8 +168,23 @@ branco no Wayland (corrigido com `QT_QPA_PLATFORM=xcb typhoon_hil.sh`).
 ## Status
 
 - MATLAB/Simscape: modelo validado em malha aberta.
-- Typhoon HIL: porte em andamento — `Bat_array.tlib` e `pv_array.tlib` compilando (bug do
-  SOC=100% acima ainda não corrigido). Falta portar/validar o modelo completo VR-BESS com as 2
-  chaves e comparar contra os resultados do MATLAB.
-- Controlador FCS-MPC: ainda não implementado em nenhuma das duas plataformas.
+- Typhoon HIL: modelo completo VR-BESS (2 chaves, PV, bateria) simulando em malha aberta com
+  tensões/correntes próximas do projeto (Vbat≈252V, Vout≈400V, Vpv com ~2-9% de erro dependendo
+  da rodada — ver `git log` para o histórico de correções). Chaveamento PWM sincronizado
+  corretamente (`core/Initial Settings` + `vhil_adio_loopback`), modelo do painel PV corrigido
+  (bug de `Ns_mod`/`T` trocados), SOC visível no schematic principal, duty cycles recalibrados
+  empiricamente para as perdas reais do Typhoon (ver "Valores de projeto" acima).
+- **Atenção, estado atual não é o final:**
+  - **Proteção da bateria (sinal `S` de `modelo_bateria`) e limitador de corrente (`GainKi` em
+    `Bat_array.tlib`) estão DESLIGADOS** (`MOSFET1.ctrl_in` fixo numa constante, `GainKi=0`) —
+    feito para isolar o comportamento do conversor/painel durante a recalibração dos duty cycles.
+    Precisam ser religados e re-testados antes de qualquer validação/uso sério do modelo.
+  - `Cbat`/`Cvo`/`Cpv` têm ficado sem `initial_voltage` definido (partindo de 0V) mais de uma vez
+    nesta sessão, aparentemente revertido sozinho por algum salvamento da UI do TySim — causa
+    inrush de energização grande. Vale conferir se ainda está setado (`initial_voltage = "252"`
+    em `Cbat`, `"400"` em `Cvo`, `"346"` em `Cpv`) antes de rodar simulações longas/sensíveis.
+  - Bug do SOC=100% em `modelo_bateria` (ver seção acima) ainda não corrigido.
+- Controlador FCS-MPC: ainda não implementado em nenhuma das duas plataformas — próxima etapa,
+  necessária inclusive para resolver a diferença estrutural entre limitar corrente de carga e
+  regular a tensão de saída simultaneamente (ver commits de recalibração para o porquê).
 - KiCad: não iniciado.

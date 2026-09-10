@@ -79,6 +79,7 @@ library "pv_array" {
         component Subsystem pv_array {
             layout = dynamic
             component "core/Voltage Measurement" Va1 {
+                execution_rate = "2e-07"
                 sig_output = "True"
             }
             [
@@ -88,6 +89,7 @@ library "pv_array" {
             ]
 
             component "core/Signal Controlled Current Source" Isp1 {
+                execution_rate = "2e-07"
             }
             [
                 position = 8088, 8240
@@ -100,6 +102,7 @@ library "pv_array" {
                 arb_defs = "/*Begin code section*/
 
 /*End code section*/"
+                execution_rate = "2e-07"
                 init_fnc = "/*Begin code section*/
 
 /*End code section*/"
@@ -289,7 +292,7 @@ const real_t Isc_ref_1 = 3.14;
             ]
 
             tag From3 {
-                value = "T"
+                value = "Ns_mod"
                 scope = local
                 kind = sp
                 direction = out
@@ -300,7 +303,7 @@ const real_t Isc_ref_1 = 3.14;
             ]
 
             tag From4 {
-                value = "Ns_mod"
+                value = "T"
                 scope = local
                 kind = sp
                 direction = out

@@ -282,7 +282,7 @@ const real_t Q_1_real = 2.3;
             ]
 
             component "core/Gain" GainKi {
-                gain = "1000"
+                gain = "0"
             }
             [
                 position = 8084, 8704
@@ -349,6 +349,13 @@ const real_t Q_1_real = 2.3;
             }
             [
                 position = 8224, 8588
+            ]
+
+            component "core/Constant" Constant2 {
+                execution_rate = "2e-7"
+            }
+            [
+                position = 8216, 8244
             ]
 
             port - {
@@ -825,8 +832,6 @@ const real_t Q_1_real = 2.3;
             [
                 breakpoints = 8076, 8264; 8076, 8208
             ]
-            connect Iout.n_node MOSFET1.D as Connection10
-            connect MOSFET1.S RL1.p_node as Connection11
             connect Goto1 modelo_bateria.S as Connection12
             connect Goto3 modelo_bateria.I_max_pack as Connection13
             connect Goto2 modelo_bateria.SOC as Connection14
@@ -843,7 +848,6 @@ const real_t Q_1_real = 2.3;
             connect Junction2 - as Connection26
             connect Va1.n_node Junction2 as Connection27
             connect From9 RL1.In as Connection28
-            connect From10 MOSFET1.ctrl_in as Connection29
             connect Abs1.out SumFilt.in as Connection56
             [
                 breakpoints = 7848, 8696; 7848, 8580
@@ -883,6 +887,9 @@ const real_t Q_1_real = 2.3;
                 breakpoints = 7864, 8640
             ]
             connect IFilt.out Junction3 as Connection72
+            connect Iout.n_node MOSFET1.D as Connection79
+            connect RL1.p_node MOSFET1.S as Connection80
+            connect Constant2.out MOSFET1.ctrl_in as Connection81
         }
         [
             position = 4920, 4780

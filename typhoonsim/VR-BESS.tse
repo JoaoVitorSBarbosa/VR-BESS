@@ -120,7 +120,7 @@ model "VR-BESS" {
             model_load_legacy = "1"
         }
         [
-            position = 7648, 8092
+            position = 7680, 8092
             size = 64, 32
         ]
 
@@ -213,9 +213,9 @@ model "VR-BESS" {
         ]
 
         component "core/Scope" Scope1 {
-            selected_signals = "[\'PWM_Mod_S1.TOP_1\', \'PWM_Mod_S2.TOP_1\', \'I_bat\', \'SOC_mes\']"
-            signals_data = "{\"plot_settings\": {\"layout\": \"Vertical\", \"background_color\": \"white\", \"legend_visible\": true, \"signals_tooltips_enabled\": true}, \"signals\": {\"PWM_Mod_S1.TOP_1\": {\"viewports\": [1], \"type\": \"digital\", \"color\": {\"1\": \"#FF0000\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"PWM_Mod_S2.TOP_1\": {\"viewports\": [2], \"type\": \"digital\", \"color\": {\"2\": \"#FF0000\"}, \"display\": {\"2\": \"solid\"}, \"is_manual\": {\"2\": false}}, \"I_bat\": {\"viewports\": [3], \"type\": \"analog\", \"color\": {\"3\": \"#FF0000\"}, \"display\": {\"3\": \"solid\"}, \"is_manual\": {\"3\": false}}, \"SOC_mes\": {\"viewports\": [4], \"type\": \"analog\", \"color\": {\"4\": \"#FF0000\"}, \"display\": {\"4\": \"solid\"}, \"is_manual\": {\"4\": false}}}, \"viewports\": {\"1\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"2\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"3\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"4\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}}}"
-            user_range_data = "{\"1\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.0, 1.0]}, \"2\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.0, 1.0]}, \"3\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.0, 1.0]}, \"4\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.0, 1.0]}, \"5\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Manual\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-10.0, 30.0]}, \"6\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.0, 1.0]}}"
+            selected_signals = "[\'V_bat\', \'V_out\', \'I_bat\', \'V_pv\', \'I_out\', \'I_pv\', \'SOC_mes\']"
+            signals_data = "{\"plot_settings\": {\"layout\": \"Vertical\", \"background_color\": \"white\", \"legend_visible\": true, \"signals_tooltips_enabled\": true}, \"signals\": {\"V_bat\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"1\": \"#00CC00\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"V_out\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"1\": \"#FF0000\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"I_bat\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"1\": \"#0099FF\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"V_pv\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"1\": \"#0099FF\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"I_out\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"1\": \"#00CC00\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"I_pv\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"1\": \"#FF0000\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"SOC_mes\": {\"viewports\": [1], \"type\": \"analog\", \"color\": {\"1\": \"#FF0000\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}}, \"viewports\": {\"1\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"2\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"3\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"4\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"5\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"6\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}}}"
+            user_range_data = "{\"1\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-15.0, 38.0]}, \"2\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Manual\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-12.0, 25.0]}, \"3\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.0, 1.0]}, \"4\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-20.0, 45.0]}, \"5\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-10.0, 30.0]}, \"6\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.0, 1.0]}}"
         }
         [
             position = 7856, 7960
@@ -229,7 +229,7 @@ model "VR-BESS" {
         ]
 
         component "core/Constant" Num_cel_serie_pv {
-            execution_rate = "0.0001"
+            execution_rate = "2e-07"
             value = "17"
         }
         [
@@ -237,7 +237,7 @@ model "VR-BESS" {
         ]
 
         component "core/Constant" Num_cel_par_pv {
-            execution_rate = "0.0001"
+            execution_rate = "2e-07"
             value = "2"
         }
         [
@@ -245,7 +245,7 @@ model "VR-BESS" {
         ]
 
         component "core/Constant" G_pv {
-            execution_rate = "0.0001"
+            execution_rate = "2e-07"
             value = "1000"
         }
         [
@@ -253,7 +253,7 @@ model "VR-BESS" {
         ]
 
         component "core/Constant" Temp_pv {
-            execution_rate = "0.0001"
+            execution_rate = "2e-07"
             value = "25"
         }
         [
@@ -442,34 +442,33 @@ const real_t Q_1_real = 2.3;
         ]
 
         component "core/Constant" Constant8 {
-            execution_rate = "0.0001"
+            execution_rate = "2e-07"
         }
         [
             position = 7444, 7896
         ]
 
         component "core/Constant" Constant9 {
-            execution_rate = "0.0001"
-            value = "0.7677"
+            execution_rate = "2e-07"
+            value = "0.845"
         }
         [
             position = 7344, 7936
         ]
 
         component "core/Constant" Constant10 {
-            execution_rate = "0.0001"
-            value = "0.1377"
+            execution_rate = "2e-07"
+            value = "0.21"
         }
         [
             position = 7444, 7972
         ]
 
         component "core/PWM Modulator" PWM_Mod_S1 {
+            carrier = "Sawtooth - rising"
             carrier_freq = "100000"
-            carr_ph_offset = "0.0"
-            phase_op_mode = "Fixed carrier phase offset"
             d_time = "1e-6"
-            num_of_ch = "1"
+            load_mode = "on max"
             ref_sig_min_max = "[0, 1.0]"
             signal_access = "Public"
         }
@@ -478,11 +477,10 @@ const real_t Q_1_real = 2.3;
         ]
 
         component "core/PWM Modulator" PWM_Mod_S2 {
+            carrier = "Sawtooth - rising"
             carrier_freq = "100000"
-            carr_ph_offset = "0.0"
-            phase_op_mode = "Fixed carrier phase offset"
             d_time = "1e-6"
-            num_of_ch = "1"
+            load_mode = "on max"
             ref_sig_min_max = "[0, 1.0]"
             signal_access = "Public"
         }
@@ -498,6 +496,7 @@ const real_t Q_1_real = 2.3;
         ]
 
         component "core/Digital Input" "Digital Input2" {
+            addr = "2"
             execution_rate = "2e-7"
         }
         [
@@ -518,6 +517,25 @@ const real_t Q_1_real = 2.3;
         }
         [
             position = 7508, 8192
+        ]
+
+        component "core/Initial Settings" "Initial Settings1" {
+            digital_outputs = "[\'DO1;..PWM_Mod_S1.TOP_1;False;False;0\', \'DO2;..PWM_Mod_S2.TOP_1;False;False;0\']"
+            model_load_legacy = "1"
+        }
+        [
+            position = 7180, 7996
+        ]
+
+        component "core/Voltage Measurement" Va2 {
+            execution_rate = "2e-07"
+            override_signal_name = "True"
+            signal_name = "V_S2"
+        }
+        [
+            position = 7608, 8308
+            rotation = right
+            size = 64, 32
         ]
 
         tag From1 {
@@ -803,11 +821,6 @@ const real_t Q_1_real = 2.3;
             position = 7552, 8404
         ]
 
-        junction Junction10 pe
-        [
-            position = 7552, 8216
-        ]
-
         junction Junction14 pe
         [
             position = 8452, 8092
@@ -870,12 +883,7 @@ const real_t Q_1_real = 2.3;
 
         junction Junction41 pe
         [
-            position = 7580, 8092
-        ]
-
-        junction Junction42 pe
-        [
-            position = 7612, 8216
+            position = 7608, 8092
         ]
 
         junction Junction43 pe
@@ -891,6 +899,21 @@ const real_t Q_1_real = 2.3;
         junction Junction45 sp
         [
             position = 7460, 8152
+        ]
+
+        junction Junction46 pe
+        [
+            position = 7608, 8216
+        ]
+
+        junction Junction47 pe
+        [
+            position = 7552, 8216
+        ]
+
+        junction Junction48 pe
+        [
+            position = 7608, 8404
         ]
 
         connect Junction1 Ls.n_node as Connection4
@@ -909,18 +932,6 @@ const real_t Q_1_real = 2.3;
         connect S2.S Junction9 as Connection32
         [
             breakpoints = 7552, 8304; 7552, 8312
-        ]
-        connect Junction9 Junction5 as Connection33
-        [
-            breakpoints = 7552, 8404
-        ]
-        connect S1.S Junction10 as Connection35
-        [
-            breakpoints = 7552, 8192
-        ]
-        connect Junction10 S2.D as Connection36
-        [
-            breakpoints = 7552, 8232
         ]
         connect Junction3 Junction14 as Connection50
         [
@@ -998,9 +1009,6 @@ const real_t Q_1_real = 2.3;
         connect D3.A Junction41 as Connection210
         connect Junction41 Junction1 as Connection211
         connect Va1.p_node Junction41 as Connection212
-        connect Junction4 Junction42 as Connection213
-        connect Junction42 Junction10 as Connection214
-        connect Va1.n_node Junction42 as Connection215
         connect Junction32 Junction43 as Connection222
         [
             breakpoints = 8136, 8404
@@ -1013,7 +1021,9 @@ const real_t Q_1_real = 2.3;
         connect Constant8.out PWM_Mod_S1.en as Connection250
         connect Constant9.out PWM_Mod_S1.in as Connection251
         connect Constant8.out PWM_Mod_S2.en as Connection255
-        connect Constant10.out PWM_Mod_S2.in as Connection256
+        [
+            breakpoints = 7480, 7896; 7480, 7956
+        ]
         connect From15 SOC_I_to_Ah.in as Connection256
         connect SOC_it0_calc.it0 SOC_it_integrator.init_condition_port as Connection257
         [
@@ -1029,6 +1039,22 @@ const real_t Q_1_real = 2.3;
         connect "Digital Input1.out" Junction45 as Connection262
         connect Junction45 S1.ctrl_in as Connection263
         connect PWM_S1.in Junction45 as Connection264
+        connect Constant10.out PWM_Mod_S2.in as Connection265
+        connect Junction4 Junction46 as Connection267
+        connect Junction46 Va1.n_node as Connection268
+        [
+            breakpoints = 7608, 8216
+        ]
+        connect S1.S Junction47 as Connection270
+        connect Junction47 Junction46 as Connection271
+        connect S2.D Junction47 as Connection272
+        connect Va2.p_node Junction46 as Connection273
+        connect Junction9 Junction48 as Connection274
+        [
+            breakpoints = 7552, 8404
+        ]
+        connect Junction48 Junction5 as Connection275
+        connect Va2.n_node Junction48 as Connection276
     }
 
     default {
@@ -1105,6 +1131,15 @@ const real_t Q_1_real = 2.3;
             initial_current = "0.0"
             pole_shift_ignore = "False"
             visible = "True"
+        }
+
+        "core/Initial Settings" {
+            analog_outputs = "[]"
+            digital_outputs = "[]"
+            hil_id = "0"
+            overridable_switches_dict = "{}"
+            signal = ""
+            model_load_legacy = "0"
         }
 
         "core/Integrator" {

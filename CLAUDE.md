@@ -63,6 +63,22 @@ nova (ex.: se um dia portar mais alguma coisa do MATLAB para cá):
 - **Sinal no I/O digital sem mapear canal manualmente:** colocar um bloco **Probe** nomeado igual
   ao sinal-alvo funciona como sink implícito no I/O digital — mais simples que mexer em
   `channels`/`di_ctrl_addrs` de componentes como o PWM Modulator.
+- **`core/PWM Modulator` → `core/Digital Input` só funciona com dois requisitos, os DOIS, não só
+  um:** `vhil_adio_loopback = True` na `configuration` do modelo (habilita o loopback virtual de
+  I/O digital em simulação VHIL+ sem hardware real) **e** um bloco `core/Initial Settings`
+  (categoria "System" na paleta) mapeando explicitamente cada sinal do PWM Modulator para um canal
+  de saída digital, via a propriedade `digital_outputs` — ex.:
+  `digital_outputs = "['DO1;..PWM_Mod_S1.TOP_1;False;False;0', 'DO2;..PWM_Mod_S2.TOP_1;False;False;0']"`.
+  Sem esse mapeamento explícito, `vhil_adio_loopback=True` sozinho não basta: o sinal do PWM
+  Modulator nunca é colocado em nenhum canal DIO virtual, então `core/Digital Input` não tem nada
+  para ler de volta (fica preso em `ctrl_in` do MOSFET recebendo silêncio/zero, mesmo com
+  `ctrl_src = "Model"` correto e o PWM Modulator gerando pulso normalmente). Confirmado por resposta
+  oficial da Typhoon (fórum, usuário "Milan") depois de uma sessão inteira de debug em que
+  trocar `ctrl_src` para `"Internal modulator"` (cada chave gera seu próprio PWM interno, sem
+  I/O digital nenhum) foi o único jeito de fazer o chaveamento funcionar sem este bloco — abordagem
+  também usada nos exemplos oficiais da Typhoon (ex.: `core/Three Phase Inverter` no exemplo "back
+  to back converter"), então é uma alternativa válida quando não se quer mexer em `Initial
+  Settings`/canais DIO.
 - **Sinal de dentro de uma library (`.tlib`) não aparece no Scope/Probe do simulador offline
   (TySim software, sem HIL real) — mensagem `"<sinal> is not supported by TyphoonSim yet. Signal
   will be zeroed."`.** Isso vale mesmo quando o sinal já sai por uma porta da subsystem exportada

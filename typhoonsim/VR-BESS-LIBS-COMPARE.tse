@@ -1,0 +1,1586 @@
+version = 4.2
+
+//
+// Saved by sw version: 2026.2
+//
+
+model "VR-BESS-LIBS-COMPARE" {
+    configuration {
+        hil_device = "VHIL+"
+        hil_configuration_id = 1
+        simulation_method = exact
+        simulation_time_step = auto
+        simulation_discret_scaling = 1.0
+        dsp_timer_periods = 100e-6, 50e-3
+        ss_calc_method = "systematic elimination"
+        enb_pole_shift = True
+        enb_gds_oversampling = True
+        show_modes = False
+        device_ao_limit_enable = False
+        reset_analog_outputs_on_sim_stop = True
+        reset_analog_outputs_on_sim_stop_mode = Offset values
+        reset_digital_outputs_on_sim_stop = True
+        vhil_adio_loopback = False
+        dma_enable = False
+        cpl_stb = False
+        enb_dep_sw_detect = False
+        code_section = "internal memory"
+        data_section = "internal memory"
+        sys_sp_rate_1 = 0.0001
+        sys_sp_rate_2 = 0.05
+        sys_real_type_precision = "default"
+        user_real_type_precision = "default"
+        sys_cpu_optimization = "high"
+        user_cpu_optimization = "high"
+        user_cpu_part_option = "default"
+        matrix_based_reduction = True
+        cpl_dynamics_analysis = False
+        export_ss_to_pickle = False
+        ground_scope_core = False
+        dss_num_tol = 1e-15
+        cce_platform = "generic"
+        cce_use_relative_names = False
+        cce_type_mapping_real = "double"
+        cce_type_mapping_uint = "unsigned int"
+        cce_type_mapping_int = "int"
+        cce_platform = "generic"
+        cce_use_relative_names = False
+        cce_type_mapping_real = "double"
+        cce_type_mapping_uint = "unsigned int"
+        cce_type_mapping_int = "int"
+        cce_term_var_location = "local"
+        cce_directory = ""
+        cce_custom_type_int = ""
+        cce_custom_type_uint = ""
+        cce_custom_type_real = ""
+        tunable_params = "component defined"
+        sp_compiler_type = "C compiler"
+        sig_stim = "off"
+        export_resource_list = ""
+        export_dependency_list = ""
+        excluded_resource_list = ""
+        excluded_component_from_locking_list = ""
+        export_out_file = ""
+        export_lock_top_level = True
+        export_encrypt_library = True
+        export_encrypt_resources = True
+        solver_type = "DAE"
+        integration_method = "BDF"
+        max_sim_step = 2e-7
+        simulation_time = 1.0
+        abs_tol = 1e-3
+        rel_tol = 1e-3
+        init_sim_step = 1e-6
+        r_on_sw = 1e-3
+        v_on_diode = 0.1
+        data_sampling_rate = 0
+        feedthrough_validation_error_level = error
+    }
+
+    component Subsystem Root {
+        component "core/Capacitor" Cbat {
+            capacitance = "0.109e-6"
+        }
+        [
+            position = 8352, 8128
+            rotation = right
+        ]
+
+        component "core/Inductor" Ls {
+            inductance = "3.89e-3"
+        }
+        [
+            position = 7828, 7940
+        ]
+
+        component "core/Resistor" RLo {
+            resistance = "160"
+        }
+        [
+            position = 8904, 8064
+            rotation = right
+        ]
+
+        component "core/Capacitor" Cvo {
+            capacitance = "1.41e-6"
+        }
+        [
+            position = 8824, 8068
+            rotation = right
+        ]
+
+        component "core/Inductor" Lbat {
+            inductance = "4.23e-3"
+        }
+        [
+            position = 8252, 8064
+        ]
+
+        component "core/Diode" D3 {
+            model_load_legacy = "1"
+        }
+        [
+            position = 8052, 7940
+            size = 64, 32
+        ]
+
+        component "core/Diode" D1 {
+            model_load_legacy = "1"
+        }
+        [
+            position = 8140, 8000
+            rotation = left
+            size = 64, 32
+        ]
+
+        component "core/Diode" D2 {
+            model_load_legacy = "1"
+        }
+        [
+            position = 8140, 8128
+            rotation = left
+            size = 64, 32
+        ]
+
+        component "core/MOSFET" S1 {
+            ctrl_src = "Model"
+            model_load_legacy = "1"
+        }
+        [
+            position = 7924, 8000
+            size = 48, 64
+        ]
+
+        component "core/MOSFET" S2 {
+            ctrl_src = "Model"
+            model_load_legacy = "1"
+        }
+        [
+            position = 7924, 8120
+            size = 48, 64
+        ]
+
+        component "core/Capacitor" Cpv {
+            capacitance = "0.00022"
+        }
+        [
+            position = 7760, 8064
+            rotation = right
+        ]
+
+        component "core/Ground" gnd1 {
+        }
+        [
+            position = 8140, 8300
+        ]
+
+        component "core/Constant" SOC_inicial_bat {
+            execution_rate = "2e-7"
+            value = "50"
+        }
+        [
+            position = 7404, 8488
+        ]
+
+        component "core/Constant" Num_cel_par_bat {
+            execution_rate = "2e-7"
+        }
+        [
+            position = 7404, 8552
+        ]
+
+        component "core/Constant" Num_cel_serie_bat {
+            execution_rate = "2e-7"
+            value = "15"
+        }
+        [
+            position = 7404, 8616
+        ]
+
+        component "core/Constant" modo_teste {
+            execution_rate = "2e-7"
+            value = "0"
+        }
+        [
+            position = 7404, 8672
+        ]
+
+        component "Bat_array/Bat_array" Bat_array1 {
+        }
+        [
+            position = 8616, 8100
+            size = 176, 184
+        ]
+
+        component "core/Scope" Scope1 {
+            selected_signals = "[\'V_bat\', \'V_out\', \'I_bat\', \'V_pv\', \'I_out\', \'I_pv\', \'SOC_mes\']"
+            signals_data = "{\"plot_settings\": {\"layout\": \"Vertical\", \"background_color\": \"white\", \"legend_visible\": true, \"signals_tooltips_enabled\": true}, \"signals\": {\"V_bat\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"1\": \"#00CC00\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"V_out\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"1\": \"#FF0000\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"I_bat\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"1\": \"#0099FF\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"V_pv\": {\"viewports\": [2], \"type\": \"analog\", \"color\": {\"2\": \"#FF0000\"}, \"display\": {\"2\": \"solid\"}, \"is_manual\": {\"2\": false}}, \"I_out\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"1\": \"#00CC00\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"I_pv\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"1\": \"#FF0000\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"SOC_mes\": {\"viewports\": [1], \"type\": \"analog\", \"color\": {\"1\": \"#FF0000\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}}, \"viewports\": {\"1\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"2\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"3\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"4\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"5\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"6\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}}}"
+            user_range_data = "{\"1\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-15.0, 38.0]}, \"2\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Manual\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-12.0, 25.0]}, \"3\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.0, 1.0]}, \"4\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-20.0, 45.0]}, \"5\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-10.0, 30.0]}, \"6\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.0, 1.0]}}"
+        }
+        [
+            position = 8228, 7808
+        ]
+
+        component "core/C function" SOC_it0_calc {
+            arb_defs = "/*Begin code section*/
+
+/*End code section*/"
+            init_fnc = "/*Begin code section*/
+
+/*End code section*/"
+            input_terminals = "real SOC_inicial;real Np_bat;real modo_teste;"
+            input_terminals_dimensions = "inherit;inherit;inherit"
+            input_terminals_feedthrough = "True;True;True"
+            input_terminals_show_labels = "True;True;True"
+            output_fnc = "/*Begin code section*/
+const real_t Q_1_real = 2.3;
+const real_t Q_1_teste = 0.00055;
+real_t Q_1, Q, it0_calc;
+
+if (modo_teste == 1.0) {
+    Q_1 = Q_1_teste;
+} else {
+    Q_1 = Q_1_real;
+}
+
+Q = Q_1 * Np_bat;
+it0_calc = Q * (1.0 - SOC_inicial / 100.0);
+
+it0 = it0_calc;
+/*End code section*/"
+            output_terminals = "real it0;"
+            output_terminals_dimensions = "inherit"
+            output_terminals_feedthrough = "True"
+            output_terminals_show_labels = "True"
+            update_fnc = "/*Begin code section*/
+
+/*End code section*/"
+        }
+        [
+            position = 8052, 8644
+            size = 144, 120
+        ]
+
+        component "core/Gain" SOC_I_to_Ah {
+            gain = "0.000277777778"
+        }
+        [
+            position = 8004, 8484
+        ]
+
+        component "core/Integrator" SOC_it_integrator {
+            show_init_condition = "external"
+        }
+        [
+            position = 8340, 8636
+        ]
+
+        component "core/C function" SOC_calc_top {
+            arb_defs = "/*Begin code section*/
+
+/*End code section*/"
+            init_fnc = "/*Begin code section*/
+
+/*End code section*/"
+            input_terminals = "real it;real Np_bat;real modo_teste;"
+            input_terminals_dimensions = "inherit;inherit;inherit"
+            input_terminals_feedthrough = "True;True;True"
+            input_terminals_show_labels = "True;True;True"
+            output_fnc = "/*Begin code section*/
+const real_t Q_1_real = 2.3;
+  const real_t Q_1_teste = 0.00055;
+  real_t Q_1, Q, SOC_calc;
+
+  if (modo_teste == 1.0) {
+      Q_1 = Q_1_teste;
+  } else {
+      Q_1 = Q_1_real;
+  }
+
+  Q = Q_1 * Np_bat;
+  SOC_calc = 100.0 * (1.0 - it / Q);
+  if (SOC_calc < 0.0) SOC_calc = 0.0;
+  else if (SOC_calc > 100.0) SOC_calc = 100.0;
+
+  SOC = SOC_calc;
+/*End code section*/"
+            output_terminals = "real SOC;"
+            output_terminals_dimensions = "inherit"
+            output_terminals_feedthrough = "True"
+            output_terminals_show_labels = "True"
+            update_fnc = "/*Begin code section*/
+
+/*End code section*/"
+        }
+        [
+            position = 8796, 8536
+            size = 144, 120
+        ]
+
+        component "core/Voltage Measurement" V_out {
+            execution_rate = "2e-07"
+            override_signal_name = "True"
+            signal_name = "V_out"
+        }
+        [
+            position = 8972, 8068
+            rotation = right
+            size = 64, 32
+        ]
+
+        component "core/Current Measurement" I_pv {
+            execution_rate = "2e-07"
+            override_signal_name = "True"
+            signal_name = "I_pv"
+        }
+        [
+            position = 7652, 7940
+            size = 64, 32
+        ]
+
+        component "core/Voltage Measurement" V-pv {
+            execution_rate = "2e-07"
+            override_signal_name = "True"
+            signal_name = "V_pv"
+        }
+        [
+            position = 7708, 8112
+            rotation = right
+            size = 64, 32
+        ]
+
+        component "core/Current Measurement" I_bat {
+            execution_rate = "2e-07"
+            override_signal_name = "True"
+            sig_output = "True"
+            signal_name = "I_bat"
+        }
+        [
+            position = 8484, 7980
+            rotation = down
+            size = 64, 32
+        ]
+
+        component "core/Voltage Measurement" V_bat {
+            execution_rate = "2e-07"
+            override_signal_name = "True"
+            signal_name = "V_bat"
+        }
+        [
+            position = 8756, 8064
+            rotation = right
+            size = 64, 32
+        ]
+
+        component "core/Current Measurement" I_out {
+            execution_rate = "2e-07"
+            override_signal_name = "True"
+            signal_name = "I_out"
+        }
+        [
+            position = 8904, 7988
+            rotation = right
+            size = 64, 32
+        ]
+
+        component "core/Probe" SOC_mes {
+            override_signal_name = "True"
+            signal_name = "SOC_mes"
+        }
+        [
+            position = 8936, 8536
+        ]
+
+        component "core/Voltage Measurement" Va1 {
+            execution_rate = "2e-07"
+            override_signal_name = "True"
+            signal_name = "V_S1"
+        }
+        [
+            position = 7980, 8008
+            rotation = right
+            size = 64, 32
+        ]
+
+        component "core/Constant" Constant8 {
+            execution_rate = "2e-07"
+        }
+        [
+            position = 7816, 7744
+        ]
+
+        component "core/Constant" Constant9 {
+            execution_rate = "2e-07"
+            value = "0.845"
+        }
+        [
+            position = 7716, 7784
+        ]
+
+        component "core/Constant" Constant10 {
+            execution_rate = "2e-07"
+            value = "0.21"
+        }
+        [
+            position = 7816, 7820
+        ]
+
+        component "core/PWM Modulator" PWM_Mod_S1 {
+            carrier = "Sawtooth - rising"
+            carrier_freq = "100000"
+            d_time = "1e-6"
+            load_mode = "on max"
+            ref_sig_min_max = "[0, 1.0]"
+            signal_access = "Public"
+        }
+        [
+            position = 7912, 7748
+        ]
+
+        component "core/PWM Modulator" PWM_Mod_S2 {
+            carrier = "Sawtooth - rising"
+            carrier_freq = "100000"
+            d_time = "1e-6"
+            load_mode = "on max"
+            ref_sig_min_max = "[0, 1.0]"
+            signal_access = "Public"
+        }
+        [
+            position = 7912, 7812
+        ]
+
+        component "core/Digital Input" "Digital Input1" {
+            execution_rate = "2e-7"
+        }
+        [
+            position = 7800, 8000
+        ]
+
+        component "core/Digital Input" "Digital Input2" {
+            addr = "2"
+            execution_rate = "2e-7"
+        }
+        [
+            position = 7800, 8124
+        ]
+
+        component "core/Probe" PWM_S2 {
+            override_signal_name = "True"
+            signal_name = "PWM_S2"
+        }
+        [
+            position = 7880, 8088
+        ]
+
+        component "core/Probe" PWM_S1 {
+            override_signal_name = "True"
+            signal_name = "PWM_S1"
+        }
+        [
+            position = 7880, 8040
+        ]
+
+        component "core/Initial Settings" "Initial Settings1" {
+            digital_outputs = "[\'DO1;..PWM_Mod_S1.TOP_1;False;False;0\', \'DO2;..PWM_Mod_S2.TOP_1;False;False;0\']"
+            model_load_legacy = "1"
+        }
+        [
+            position = 7552, 7844
+        ]
+
+        component "core/Voltage Measurement" Va2 {
+            execution_rate = "2e-07"
+            override_signal_name = "True"
+            signal_name = "V_S2"
+        }
+        [
+            position = 7980, 8156
+            rotation = right
+            size = 64, 32
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel1" {
+        }
+        [
+            position = 6404, 8020
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel2" {
+        }
+        [
+            position = 6404, 8120
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel3" {
+        }
+        [
+            position = 6404, 8220
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel4" {
+        }
+        [
+            position = 6404, 8320
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel5" {
+        }
+        [
+            position = 6404, 8440
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel6" {
+        }
+        [
+            position = 6404, 8540
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel7" {
+        }
+        [
+            position = 6404, 8640
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel8" {
+        }
+        [
+            position = 6404, 8740
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel9" {
+        }
+        [
+            position = 6404, 8848
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel10" {
+        }
+        [
+            position = 6404, 8948
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel11" {
+        }
+        [
+            position = 6404, 9048
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel12" {
+        }
+        [
+            position = 6404, 9148
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel13" {
+        }
+        [
+            position = 6404, 9268
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel14" {
+        }
+        [
+            position = 6404, 9368
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel15" {
+        }
+        [
+            position = 6404, 9468
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel16" {
+        }
+        [
+            position = 6404, 9568
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel17" {
+        }
+        [
+            position = 6404, 9672
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel18" {
+        }
+        [
+            position = 6624, 8020
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel19" {
+        }
+        [
+            position = 6624, 8120
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel20" {
+        }
+        [
+            position = 6624, 8220
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel21" {
+        }
+        [
+            position = 6624, 8320
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel22" {
+        }
+        [
+            position = 6624, 8440
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel23" {
+        }
+        [
+            position = 6624, 8540
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel24" {
+        }
+        [
+            position = 6624, 8640
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel25" {
+        }
+        [
+            position = 6624, 8740
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel26" {
+        }
+        [
+            position = 6624, 8848
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel27" {
+        }
+        [
+            position = 6624, 8948
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel28" {
+        }
+        [
+            position = 6624, 9048
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel29" {
+        }
+        [
+            position = 6624, 9148
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel30" {
+        }
+        [
+            position = 6624, 9268
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel31" {
+        }
+        [
+            position = 6624, 9368
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel32" {
+        }
+        [
+            position = 6624, 9468
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel33" {
+        }
+        [
+            position = 6624, 9568
+            rotation = right
+            size = 64, 64
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel34" {
+        }
+        [
+            position = 6624, 9672
+            rotation = right
+            size = 64, 64
+        ]
+
+        tag Goto5 {
+            value = "SOC_inicial_bat"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 7588, 8488
+            size = 124, 20
+        ]
+
+        tag Goto6 {
+            value = "Num_cel_par_bat"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 7588, 8552
+            size = 124, 20
+        ]
+
+        tag Goto7 {
+            value = "Num_cel_serie_bat"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 7588, 8616
+            size = 124, 20
+        ]
+
+        tag Goto8 {
+            value = "modo_teste"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 7588, 8672
+            size = 124, 20
+        ]
+
+        tag From5 {
+            value = "SOC_inicial_bat"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 8436, 8028
+            size = 108, 20
+        ]
+
+        tag From6 {
+            value = "Num_cel_par_bat"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 8432, 8076
+            size = 108, 20
+        ]
+
+        tag From7 {
+            value = "Num_cel_serie_bat"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 8436, 8124
+            size = 108, 20
+        ]
+
+        tag From8 {
+            value = "modo_teste"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 8436, 8172
+            size = 108, 20
+        ]
+
+        tag From9 {
+            value = "SOC_inicial_bat"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 7860, 8604
+            size = 108, 20
+        ]
+
+        tag From10 {
+            value = "Num_cel_par_bat"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 7860, 8644
+            size = 108, 20
+        ]
+
+        tag From12 {
+            value = "modo_teste"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 7860, 8684
+            size = 108, 20
+        ]
+
+        tag From13 {
+            value = "Num_cel_par_bat"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 8564, 8536
+            size = 108, 20
+        ]
+
+        tag From14 {
+            value = "modo_teste"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 8568, 8576
+            size = 108, 20
+        ]
+
+        tag Goto9 {
+            value = "I_bat_mes"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 8516, 7908
+            size = 100, 20
+        ]
+
+        tag From15 {
+            value = "I_bat_mes"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 7860, 8484
+            size = 108, 20
+        ]
+
+        junction Junction1 pe
+        [
+            position = 7924, 7940
+        ]
+
+        junction Junction2 pe
+        [
+            position = 8140, 8252
+        ]
+
+        junction Junction3 pe
+        [
+            position = 8140, 7940
+        ]
+
+        junction Junction4 pe
+        [
+            position = 8140, 8064
+        ]
+
+        junction Junction5 pe
+        [
+            position = 8140, 8252
+        ]
+
+        junction Junction9 pe
+        [
+            position = 7924, 8252
+        ]
+
+        junction Junction14 pe
+        [
+            position = 8824, 7940
+        ]
+
+        junction Junction15 pe
+        [
+            position = 8824, 8252
+        ]
+
+        junction Junction23 pe
+        [
+            position = 8904, 8252
+        ]
+
+        junction Junction28 pe
+        [
+            position = 7760, 7940
+        ]
+
+        junction Junction29 pe
+        [
+            position = 7760, 8252
+        ]
+
+        junction Junction30 pe
+        [
+            position = 7708, 7940
+        ]
+
+        junction Junction32 pe
+        [
+            position = 8616, 8252
+        ]
+
+        junction Junction33 pe
+        [
+            position = 8352, 8064
+        ]
+
+        junction Junction34 pe
+        [
+            position = 8616, 7980
+        ]
+
+        junction Junction35 pe
+        [
+            position = 8756, 8252
+        ]
+
+        junction Junction36 pe
+        [
+            position = 8904, 7940
+        ]
+
+        junction Junction41 pe
+        [
+            position = 7980, 7940
+        ]
+
+        junction Junction43 pe
+        [
+            position = 8352, 8252
+        ]
+
+        junction Junction44 sp
+        [
+            position = 7840, 8124
+        ]
+
+        junction Junction45 sp
+        [
+            position = 7832, 8000
+        ]
+
+        junction Junction46 pe
+        [
+            position = 7980, 8064
+        ]
+
+        junction Junction47 pe
+        [
+            position = 7924, 8064
+        ]
+
+        junction Junction48 pe
+        [
+            position = 7980, 8252
+        ]
+
+        junction Junction49 pe
+        [
+            position = 7708, 8260
+        ]
+
+        junction Junction50 pe
+        [
+            position = 6624, 7980
+        ]
+
+        junction Junction51 pe
+        [
+            position = 6624, 9716
+        ]
+
+        connect Junction1 Ls.n_node as Connection4
+        connect S1.D Junction1 as Connection5
+        connect D2.A Junction2 as Connection10
+        connect Junction2 gnd1.node as Connection11
+        connect D3.K Junction3 as Connection13
+        connect Junction3 D1.K as Connection14
+        connect D1.A Junction4 as Connection16
+        connect Junction4 D2.K as Connection17
+        connect Lbat.p_node Junction4 as Connection18
+        connect Junction5 Junction2 as Connection21
+        [
+            breakpoints = 8140, 8252
+        ]
+        connect S2.S Junction9 as Connection32
+        [
+            breakpoints = 7924, 8152; 7924, 8160
+        ]
+        connect Junction3 Junction14 as Connection50
+        [
+            breakpoints = 8508, 7940
+        ]
+        connect Junction14 Cvo.p_node as Connection51
+        [
+            breakpoints = 8824, 7940; 8824, 8028
+        ]
+        connect Cvo.n_node Junction15 as Connection53
+        connect SOC_I_to_Ah.out SOC_it_integrator.in as Connection131
+        connect RLo.n_node Junction23 as Connection107
+        connect Junction23 Junction15 as Connection108
+        connect V_out.n_node Junction23 as Connection109
+        connect Ls.p_node Junction28 as Connection144
+        connect Junction28 Cpv.p_node as Connection145
+        [
+            breakpoints = 7760, 7944
+        ]
+        connect Cpv.n_node Junction29 as Connection147
+        connect Junction29 Junction9 as Connection148
+        [
+            breakpoints = 7760, 8252; 7924, 8252
+        ]
+        connect I_pv.n_node Junction30 as Connection150
+        connect Junction30 Junction28 as Connection151
+        connect V-pv.p_node Junction30 as Connection152
+        connect modo_teste.out Goto8 as Connection156
+        connect Num_cel_serie_bat.out Goto7 as Connection157
+        connect Num_cel_par_bat.out Goto6 as Connection158
+        connect SOC_inicial_bat.out Goto5 as Connection159
+        connect From8 Bat_array1.modo_teste as Connection161
+        connect From7 Bat_array1.Ns_bat as Connection162
+        connect From6 Bat_array1.Np_bat as Connection163
+        connect From5 Bat_array1.SOC_inicial as Connection164
+        connect Bat_array1.- Junction32 as Connection167
+        connect Cbat.p_node Junction33 as Connection170
+        connect Junction33 Lbat.n_node as Connection171
+        connect I_bat.n_node Junction33 as Connection172
+        connect Bat_array1.+ Junction34 as Connection173
+        connect Junction34 I_bat.p_node as Connection174
+        connect V_bat.p_node Junction34 as Connection175
+        connect Junction15 Junction35 as Connection176
+        connect Junction35 Junction32 as Connection177
+        connect V_bat.n_node Junction35 as Connection178
+        [
+            breakpoints = 8756, 8104; 8756, 8252
+        ]
+        connect I_out.n_node RLo.p_node as Connection180
+        connect Junction14 Junction36 as Connection181
+        connect Junction36 V_out.p_node as Connection182
+        [
+            breakpoints = 8904, 7940
+        ]
+        connect I_out.p_node Junction36 as Connection183
+        connect From9 SOC_it0_calc.SOC_inicial as Connection184
+        connect From10 SOC_it0_calc.Np_bat as Connection185
+        connect From12 SOC_it0_calc.modo_teste as Connection186
+        connect SOC_calc_top.Np_bat From13 as Connection187
+        connect SOC_calc_top.modo_teste From14 as Connection188
+        connect I_bat.out Goto9 as Connection189
+        connect SOC_calc_top.SOC SOC_mes.in as Connection191
+        connect D3.A Junction41 as Connection210
+        connect Junction41 Junction1 as Connection211
+        connect Va1.p_node Junction41 as Connection212
+        connect Junction32 Junction43 as Connection222
+        [
+            breakpoints = 8508, 8252
+        ]
+        connect Junction43 Junction5 as Connection223
+        [
+            breakpoints = 8356, 8252
+        ]
+        connect Cbat.n_node Junction43 as Connection224
+        connect Constant8.out PWM_Mod_S1.en as Connection250
+        connect Constant9.out PWM_Mod_S1.in as Connection251
+        connect Constant8.out PWM_Mod_S2.en as Connection255
+        [
+            breakpoints = 7852, 7744; 7852, 7804
+        ]
+        connect From15 SOC_I_to_Ah.in as Connection256
+        connect SOC_it0_calc.it0 SOC_it_integrator.init_condition_port as Connection257
+        [
+            breakpoints = 8208, 8644
+        ]
+        connect SOC_it_integrator.out SOC_calc_top.it as Connection258
+        [
+            breakpoints = 8448, 8636; 8448, 8496; 8532, 8496
+        ]
+        connect "Digital Input2.out" Junction44 as Connection259
+        connect Junction44 S2.ctrl_in as Connection260
+        connect PWM_S2.in Junction44 as Connection261
+        connect "Digital Input1.out" Junction45 as Connection262
+        connect Junction45 S1.ctrl_in as Connection263
+        connect PWM_S1.in Junction45 as Connection264
+        connect Constant10.out PWM_Mod_S2.in as Connection265
+        connect Junction4 Junction46 as Connection267
+        connect Junction46 Va1.n_node as Connection268
+        [
+            breakpoints = 7980, 8064
+        ]
+        connect S1.S Junction47 as Connection270
+        connect Junction47 Junction46 as Connection271
+        connect S2.D Junction47 as Connection272
+        connect Va2.p_node Junction46 as Connection273
+        connect Junction9 Junction48 as Connection274
+        [
+            breakpoints = 7924, 8252
+        ]
+        connect Junction48 Junction5 as Connection275
+        connect Va2.n_node Junction48 as Connection276
+        connect "Photovoltaic Panel1.n_node" "Photovoltaic Panel2.p_node" as Connection278
+        connect "Photovoltaic Panel2.n_node" "Photovoltaic Panel3.p_node" as Connection279
+        connect "Photovoltaic Panel3.n_node" "Photovoltaic Panel4.p_node" as Connection280
+        connect "Photovoltaic Panel4.n_node" "Photovoltaic Panel5.p_node" as Connection281
+        connect "Photovoltaic Panel5.n_node" "Photovoltaic Panel6.p_node" as Connection282
+        connect "Photovoltaic Panel18.n_node" "Photovoltaic Panel19.p_node" as Connection283
+        connect "Photovoltaic Panel19.n_node" "Photovoltaic Panel20.p_node" as Connection285
+        connect "Photovoltaic Panel20.n_node" "Photovoltaic Panel21.p_node" as Connection286
+        connect "Photovoltaic Panel21.n_node" "Photovoltaic Panel22.p_node" as Connection287
+        connect "Photovoltaic Panel22.n_node" "Photovoltaic Panel23.p_node" as Connection288
+        connect "Photovoltaic Panel23.n_node" "Photovoltaic Panel24.p_node" as Connection289
+        connect "Photovoltaic Panel24.n_node" "Photovoltaic Panel25.p_node" as Connection290
+        connect "Photovoltaic Panel6.n_node" "Photovoltaic Panel7.p_node" as Connection291
+        connect "Photovoltaic Panel7.n_node" "Photovoltaic Panel8.p_node" as Connection292
+        connect "Photovoltaic Panel8.n_node" "Photovoltaic Panel9.p_node" as Connection293
+        connect "Photovoltaic Panel25.n_node" "Photovoltaic Panel26.p_node" as Connection294
+        connect "Photovoltaic Panel9.n_node" "Photovoltaic Panel10.p_node" as Connection295
+        connect "Photovoltaic Panel10.n_node" "Photovoltaic Panel11.p_node" as Connection296
+        connect "Photovoltaic Panel11.n_node" "Photovoltaic Panel12.p_node" as Connection297
+        connect "Photovoltaic Panel12.n_node" "Photovoltaic Panel13.p_node" as Connection298
+        connect "Photovoltaic Panel13.n_node" "Photovoltaic Panel14.p_node" as Connection299
+        connect "Photovoltaic Panel26.n_node" "Photovoltaic Panel27.p_node" as Connection300
+        connect "Photovoltaic Panel27.n_node" "Photovoltaic Panel28.p_node" as Connection301
+        connect "Photovoltaic Panel28.n_node" "Photovoltaic Panel29.p_node" as Connection302
+        connect "Photovoltaic Panel29.n_node" "Photovoltaic Panel30.p_node" as Connection303
+        connect "Photovoltaic Panel30.n_node" "Photovoltaic Panel31.p_node" as Connection304
+        connect "Photovoltaic Panel31.n_node" "Photovoltaic Panel32.p_node" as Connection305
+        connect "Photovoltaic Panel14.n_node" "Photovoltaic Panel15.p_node" as Connection306
+        connect "Photovoltaic Panel15.n_node" "Photovoltaic Panel16.p_node" as Connection307
+        connect "Photovoltaic Panel16.n_node" "Photovoltaic Panel17.p_node" as Connection308
+        connect "Photovoltaic Panel32.n_node" "Photovoltaic Panel33.p_node" as Connection309
+        connect "Photovoltaic Panel33.n_node" "Photovoltaic Panel34.p_node" as Connection310
+        connect V-pv.n_node Junction49 as Connection311
+        connect Junction49 Junction29 as Connection312
+        [
+            breakpoints = 7708, 8252
+        ]
+        connect "Photovoltaic Panel1.p_node" Junction50 as Connection314
+        connect Junction50 "Photovoltaic Panel18.p_node" as Connection315
+        connect I_pv.p_node Junction50 as Connection316
+        connect "Photovoltaic Panel34.n_node" Junction51 as Connection317
+        connect Junction51 Junction49 as Connection318
+        connect "Photovoltaic Panel17.n_node" Junction51 as Connection319
+    }
+
+    default {
+        "core/C function" {
+            input_terminals = "real in;"
+            input_terminals_show_labels = "False;"
+            input_terminals_feedthrough = "True;"
+            input_terminals_dimensions = "inherit;"
+            output_terminals = "real out;"
+            output_terminals_show_labels = "False;"
+            output_terminals_feedthrough = "True;"
+            output_terminals_dimensions = "inherit;"
+            output_fnc = ""
+            update_fnc = ""
+            init_fnc = ""
+            global_variables = ""
+            parameters = ""
+            library_load_type = "Compile-time load"
+            dll_file_path = ""
+            dll_file_path_full = ""
+            arm_a9_file_path = ""
+            arm_a9_file_path_full = ""
+            arm_a53_file_path = ""
+            arm_a53_file_path_full = ""
+            h_file_path = ""
+            h_file_path_full = ""
+            add_src_path = ""
+            add_src_path_full = ""
+            convert_to_relative_dll = "True"
+            convert_to_relative_a = "True"
+            convert_to_relative_src = "True"
+            arb_defs = ""
+            add_macros = ""
+            skip_pre_cmpl_check = "False"
+            generate_for_hil = "True"
+            execution_rate = "inherit"
+            _supported_platforms = "[\'generic\']"
+            refresh = "refresh"
+        }
+
+        "core/Capacitor" {
+            signal_access = "inherit"
+            capacitance = "1e-6"
+            initial_voltage = "0"
+            pole_shift_ignore = "False"
+            visible = "True"
+        }
+
+        "core/Constant" {
+            value = "1"
+            signal_type = "real"
+            execution_rate = "100e-6"
+            _tunable = "False"
+        }
+
+        "core/Digital Input" {
+            addr = "1"
+            invert = "false"
+            signal_type = "uint"
+            execution_rate = "100e-6"
+        }
+
+        "core/Gain" {
+            gain = "1"
+            multiplication = "Element-wise(K.*u)"
+            force_tml = "True"
+            _tunable = "False"
+            execution_rate = "inherit"
+        }
+
+        "core/Inductor" {
+            signal_access = "inherit"
+            inductance = "1e-3"
+            initial_current = "0.0"
+            pole_shift_ignore = "False"
+            visible = "True"
+        }
+
+        "core/Initial Settings" {
+            analog_outputs = "[]"
+            digital_outputs = "[]"
+            hil_id = "0"
+            overridable_switches_dict = "{}"
+            signal = ""
+            model_load_legacy = "0"
+        }
+
+        "core/Integrator" {
+            show_reset = "none"
+            reset_type = "asynchronous"
+            show_init_condition = "internal"
+            init_value = "0"
+            limit_output = "False"
+            limit_upper = "inf"
+            limit_lower = "-inf"
+            show_state = "False"
+            state_port_type = "inherit"
+            tml_file = "gen_accumulator_integrator"
+            mode = "integrator"
+            execution_rate = "inherit"
+        }
+
+        "core/PWM Modulator" {
+            signal_access = "inherit"
+            status = "False"
+            carrier = "Triangle"
+            op_mode = "Fixed carrier frequency"
+            carrier_freq = "10000.0"
+            phase_op_mode = "Fixed carrier phase offset"
+            carr_ph_offset = "0.0"
+            num_of_ch = "1"
+            channels = "[]"
+            di_ctrl_addrs = "[]"
+            override_PWM_by_DI = "False"
+            d_time = "5e-6"
+            ref_sig_min_max = "[-1.0, 1.0]"
+            load_mode = "on min"
+            execution_rate = "inherit"
+            _supported_platforms = "[\'hil\', \'vhil\']"
+        }
+
+        "core/Probe" {
+            signal_access = "inherit"
+            addr = "0"
+            override_signal_name = "False"
+            signal_name = ""
+            signal_type = "generic"
+            streaming_en = "False"
+            streaming_er_idx = "0"
+            execution_rate = "inherit"
+        }
+
+        "core/Resistor" {
+            resistance = "1"
+            param_set = ""
+        }
+
+        "core/Scope" {
+            signals_data = "{}"
+            selected_signals = "[]"
+            user_range_data = "{}"
+        }
+
+        "core/Current Measurement" {
+            signal_access = "inherit"
+            bw_limit = "False"
+            frequency = "10e3"
+            comparator_enable = "False"
+            operator = "greater"
+            threshold = "0"
+            cmp_abs_value = "False"
+            feed_forward = "false"
+            sig_output = "False"
+            sig_output_filt_and_full_bw = "False"
+            execution_rate = "100e-6"
+            addr = "0"
+            nd_msr_estimation = "false"
+            dev_cpl_msr = "false"
+            host_device = "0"
+            output_to_device = "0"
+            dev_cpl_index = "0"
+            dev_cpl_var_nb = "0"
+            visible = "True"
+            override_signal_name = "False"
+            signal_name = ""
+        }
+
+        "core/Diode" {
+            signal_access = "inherit"
+            switches_names_at_mask = "[]"
+            switches_names_at_mask_previous = "[]"
+            switches_option = "False"
+            resistance = "1.0"
+            snb_type = "none"
+            R = "100e3"
+            C = "1e-6"
+            show_monitoring = "False"
+            losses_estimation = "False"
+            load_xml_en = "User tables"
+            Import_diode_xml = "not selected"
+            xml_data = "{}"
+            diode_data = "{\'package_class\': \'Diode\', \'variables\': {}, \'constants\': {}, \'custom_tables\': {}, \'turn_on_losses\': {\'type\': \'Table only\', \'formula\': None, \'current_axis\': [0.0, 400.0, 800.0, 1200.0], \'voltage_axis\': [0.0, 1800.0], \'temperature_axis\': [25.0, 125.0], \'energy\': [[[0.0, 0.0, 0.0, 0.0], [0.0, 0.4068, 1.001, 1.822]], [[0.0, 0.0, 0.0, 0.0], [0.0, 0.6317, 1.38, 1.784]]], \'parsed_formula\': \'E_turn_on_losses\'}, \'turn_off_losses\': {\'type\': \'Table only\', \'formula\': None, \'current_axis\': [0.0, 400.0, 800.0, 1200.0], \'voltage_axis\': [0.0, 1800.0], \'temperature_axis\': [25.0, 125.0], \'energy\': [[[0.0, 0.0, 0.0, 0.0], [0.0, 0.6, 0.88, 1.177]], [[0.0, 0.0, 0.0, 0.0], [0.0, 0.9094, 1.25, 1.784]]], \'parsed_formula\': \'E_turn_off_losses\'}, \'conduction_losses\': {\'type\': \'Table only\', \'formula\': None, \'current_axis\': [0.0, 100.0, 200.0, 400.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 1200.0, 1400.0, 1600.0], \'temperature_axis\': [25.0, 125.0], \'voltage_drop\': [[0.0, 1.5, 1.8, 2.3, 2.69, 2.9, 3.1, 3.25, 3.41, 3.73, 4.0, 4.31], [0.0, 1.63, 2.09, 2.77, 3.37, 3.63, 3.8, 4.11, 4.37, 4.81, 5.29, 5.7]], \'parsed_formula\': \'v_conduction_losses\'}, \'c_function_code\': {\'output_fnc\': \'E_turn_on_losses = lookup3d(turn_on_losses_table, i, v, T, current_axis_turn_on_losses, voltage_axis_turn_on_losses, temperature_axis_turn_on_losses, 4, 2, 2);\nE_turn_off_losses = lookup3d(turn_off_losses_table, i, v, T,current_axis_turn_off_losses, voltage_axis_turn_off_losses, temperature_axis_turn_off_losses, 4, 2, 2);\nv_conduction_losses = lookup2d(conduction_losses_table, i, T,current_axis_conduction_losses, temperature_axis_conduction_losses, 12, 2);\ne_t_on = E_turn_on_losses;\ne_t_off = E_turn_off_losses;\nv_ce = v_conduction_losses;\n\', \'arb_defs\': \'real current_axis_turn_off_losses[4] = { 0.0, 400.0, 800.0, 1200.0 };\nreal voltage_axis_turn_off_losses[2] = { 0.0, 1800.0 };\nreal temperature_axis_turn_off_losses[2] = { 25.0, 125.0 };\nreal E_turn_off_losses;\nreal turn_off_losses_table[16] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.6, 0.88, 1.177, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9094, 1.25, 1.784 };\nreal current_axis_conduction_losses[12] = { 0.0, 100.0, 200.0, 400.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 1200.0, 1400.0, 1600.0 };\nreal temperature_axis_conduction_losses[2] = { 25.0, 125.0 };\nreal v_conduction_losses;\nreal conduction_losses_table[24] = { 0.0, 1.5, 1.8, 2.3, 2.69, 2.9, 3.1, 3.25, 3.41, 3.73, 4.0, 4.31, 0.0, 1.63, 2.09, 2.77, 3.37, 3.63, 3.8, 4.11, 4.37, 4.81, 5.29, 5.7 };\nreal current_axis_turn_on_losses[4] = { 0.0, 400.0, 800.0, 1200.0 };\nreal voltage_axis_turn_on_losses[2] = { 0.0, 1800.0 };\nreal temperature_axis_turn_on_losses[2] = { 25.0, 125.0 };\nreal E_turn_on_losses;\nreal turn_on_losses_table[16] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.4068, 1.001, 1.822, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6317, 1.38, 1.784 };\n\'}}"
+            transistor_data = "{\'package_class\': \'IGBT\', \'variables\': {}, \'constants\': {}, \'custom_tables\': {}, \'turn_on_losses\': {\'type\': \'Table only\', \'formula\': None, \'current_axis\': [0.0, 400.0, 800.0, 1200.0], \'voltage_axis\': [0.0, 1800.0], \'temperature_axis\': [25.0, 125.0], \'energy\': [[[0.0, 0.0, 0.0, 0.0], [0.0, 0.4068, 1.001, 1.822]], [[0.0, 0.0, 0.0, 0.0], [0.0, 0.6317, 1.38, 1.784]]], \'parsed_formula\': \'E_turn_on_losses\'}, \'turn_off_losses\': {\'type\': \'Table only\', \'formula\': None, \'current_axis\': [0.0, 400.0, 800.0, 1200.0], \'voltage_axis\': [0.0, 1800.0], \'temperature_axis\': [25.0, 125.0], \'energy\': [[[0.0, 0.0, 0.0, 0.0], [0.0, 0.6, 0.88, 1.177]], [[0.0, 0.0, 0.0, 0.0], [0.0, 0.9094, 1.25, 1.784]]], \'parsed_formula\': \'E_turn_off_losses\'}, \'conduction_losses\': {\'type\': \'Table only\', \'formula\': None, \'current_axis\': [0.0, 100.0, 200.0, 400.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 1200.0, 1400.0, 1600.0], \'temperature_axis\': [25.0, 125.0], \'voltage_drop\': [[0.0, 1.5, 1.8, 2.3, 2.69, 2.9, 3.1, 3.25, 3.41, 3.73, 4.0, 4.31], [0.0, 1.63, 2.09, 2.77, 3.37, 3.63, 3.8, 4.11, 4.37, 4.81, 5.29, 5.7]], \'parsed_formula\': \'v_conduction_losses\'}, \'c_function_code\': {\'output_fnc\': \'E_turn_on_losses = lookup3d(turn_on_losses_table, i, v, T, current_axis_turn_on_losses, voltage_axis_turn_on_losses, temperature_axis_turn_on_losses, 4, 2, 2);\nE_turn_off_losses = lookup3d(turn_off_losses_table, i, v, T,current_axis_turn_off_losses, voltage_axis_turn_off_losses, temperature_axis_turn_off_losses, 4, 2, 2);\nv_conduction_losses = lookup2d(conduction_losses_table, i, T,current_axis_conduction_losses, temperature_axis_conduction_losses, 12, 2);\ne_t_on = E_turn_on_losses;\ne_t_off = E_turn_off_losses;\nv_ce = v_conduction_losses;\n\', \'arb_defs\': \'real current_axis_turn_off_losses[4] = { 0.0, 400.0, 800.0, 1200.0 };\nreal voltage_axis_turn_off_losses[2] = { 0.0, 1800.0 };\nreal temperature_axis_turn_off_losses[2] = { 25.0, 125.0 };\nreal E_turn_off_losses;\nreal turn_off_losses_table[16] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.6, 0.88, 1.177, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9094, 1.25, 1.784 };\nreal current_axis_conduction_losses[12] = { 0.0, 100.0, 200.0, 400.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 1200.0, 1400.0, 1600.0 };\nreal temperature_axis_conduction_losses[2] = { 25.0, 125.0 };\nreal v_conduction_losses;\nreal conduction_losses_table[24] = { 0.0, 1.5, 1.8, 2.3, 2.69, 2.9, 3.1, 3.25, 3.41, 3.73, 4.0, 4.31, 0.0, 1.63, 2.09, 2.77, 3.37, 3.63, 3.8, 4.11, 4.37, 4.81, 5.29, 5.7 };\nreal current_axis_turn_on_losses[4] = { 0.0, 400.0, 800.0, 1200.0 };\nreal voltage_axis_turn_on_losses[2] = { 0.0, 1800.0 };\nreal temperature_axis_turn_on_losses[2] = { 25.0, 125.0 };\nreal E_turn_on_losses;\nreal turn_on_losses_table[16] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.4068, 1.001, 1.822, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6317, 1.38, 1.784 };\n\'}}"
+            user_vars_diode = "User variables diode"
+            Vd = "1.2"
+            Rd = "0"
+            i_sw = "[0.0, 6.0, 12.0, 18.0, 24.0]"
+            v_sw = "[0.0, 600.0]"
+            temp_sw = "[25.0, 50.0, 75.0, 100.0, 125.0]"
+            vd_table_out = "[1.2, 1.2, 1.2, 1.2, 1.2]"
+            ed_off_table_out = "[[0.0, 0.0275e-3, 0.15e-3, 0.275e-3, 0.3e-3], [0.35*2.2e-3, 0.4*2.2e-3, 0.8*2.2e-3, 0.68*2.2e-3, 0.9*2.2e-3], [0.65*2.2e-3, 0.9*2.2e-3, 1.2*2.2e-3, 1.5*2.2e-3, 1.7*2.2e-3], [0.9*2.2e-3, 1.3*2.2e-3, 1.7*2.2e-3, 1.9*2.2e-3, 2.25*2.2e-3], [1.1*2.2e-3, 1.7*2.2e-3, 2.1*2.2e-3, 2.3*2.2e-3, 2.5*2.2e-3]]"
+            load_switching_data_from_xml = "Import losses data from xml files"
+            temp_estimation = "False"
+            thermal_networks_type = "Foster"
+            diode_Rth = "[0.159, 0.133, 0.120, 0.038]"
+            diode_Tth = "[1.1e-1, 1.56e-2, 1.35e-3, 1.51e-4]"
+            diode_Cth = "[0.0029, 0.0097, 0.1068, 0.8500]"
+            loss_exec_rate = "100e-6"
+            dtsm_switch_name = ""
+            model_load_legacy = "0"
+        }
+
+        "core/MOSFET" {
+            signal_access = "inherit"
+            switches_option = "False"
+            resistance = "1.0"
+            ctrl_src = "Digital inputs"
+            dtsm_switch_name = ""
+            dtsm_switch_ctrl = ""
+            op_mode = "Fixed carrier frequency"
+            carrier_freq = "10000.0"
+            carr_ph_offset = "0.0"
+            d_time = "5e-6"
+            ref_sig_min_max = "[-1.0, 1.0]"
+            load_mode = "on min"
+            switches_names_at_mask = "[\'S1\']"
+            switches_names_at_mask_previous = "[\'S1\']"
+            S1 = "1"
+            S1_logic = "active high"
+            execution_rate = "inherit"
+            snb_type = "none"
+            R = "100e3"
+            C = "1e-6"
+            spc_nb = "0"
+            addr = "0"
+            show_monitoring = "False"
+            pwm_enabling = "False"
+            pwm_enable_di = "13"
+            pwm_enable_inv = "active high"
+            model_load_legacy = "0"
+            losses_estimation = "False"
+            load_xml_en = "User tables"
+            Import_igbt_xml = "not selected"
+            Import_diode_xml = "not selected"
+            xml_data = "{}"
+            transistor_data = "{\'package_class\': \'IGBT\', \'variables\': {}, \'constants\': {}, \'custom_tables\': {}, \'turn_on_losses\': {\'type\': \'Table only\', \'formula\': None, \'current_axis\': [0.0, 400.0, 800.0, 1200.0], \'voltage_axis\': [0.0, 1800.0], \'temperature_axis\': [25.0, 125.0], \'energy\': [[[0.0, 0.0, 0.0, 0.0], [0.0, 0.4068, 1.001, 1.822]], [[0.0, 0.0, 0.0, 0.0], [0.0, 0.6317, 1.38, 1.784]]], \'parsed_formula\': \'E_turn_on_losses\'}, \'turn_off_losses\': {\'type\': \'Table only\', \'formula\': None, \'current_axis\': [0.0, 400.0, 800.0, 1200.0], \'voltage_axis\': [0.0, 1800.0], \'temperature_axis\': [25.0, 125.0], \'energy\': [[[0.0, 0.0, 0.0, 0.0], [0.0, 0.6, 0.88, 1.177]], [[0.0, 0.0, 0.0, 0.0], [0.0, 0.9094, 1.25, 1.784]]], \'parsed_formula\': \'E_turn_off_losses\'}, \'conduction_losses\': {\'type\': \'Table only\', \'formula\': None, \'current_axis\': [0.0, 100.0, 200.0, 400.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 1200.0, 1400.0, 1600.0], \'temperature_axis\': [25.0, 125.0], \'voltage_drop\': [[0.0, 1.5, 1.8, 2.3, 2.69, 2.9, 3.1, 3.25, 3.41, 3.73, 4.0, 4.31], [0.0, 1.63, 2.09, 2.77, 3.37, 3.63, 3.8, 4.11, 4.37, 4.81, 5.29, 5.7]], \'parsed_formula\': \'v_conduction_losses\'}, \'c_function_code\': {\'output_fnc\': \'E_turn_on_losses = lookup3d(turn_on_losses_table, i, v, T, current_axis_turn_on_losses, voltage_axis_turn_on_losses, temperature_axis_turn_on_losses, 4, 2, 2);\nE_turn_off_losses = lookup3d(turn_off_losses_table, i, v, T,current_axis_turn_off_losses, voltage_axis_turn_off_losses, temperature_axis_turn_off_losses, 4, 2, 2);\nv_conduction_losses = lookup2d(conduction_losses_table, i, T,current_axis_conduction_losses, temperature_axis_conduction_losses, 12, 2);\ne_t_on = E_turn_on_losses;\ne_t_off = E_turn_off_losses;\nv_ce = v_conduction_losses;\n\', \'arb_defs\': \'real current_axis_turn_off_losses[4] = { 0.0, 400.0, 800.0, 1200.0 };\nreal voltage_axis_turn_off_losses[2] = { 0.0, 1800.0 };\nreal temperature_axis_turn_off_losses[2] = { 25.0, 125.0 };\nreal E_turn_off_losses;\nreal turn_off_losses_table[16] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.6, 0.88, 1.177, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9094, 1.25, 1.784 };\nreal current_axis_conduction_losses[12] = { 0.0, 100.0, 200.0, 400.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 1200.0, 1400.0, 1600.0 };\nreal temperature_axis_conduction_losses[2] = { 25.0, 125.0 };\nreal v_conduction_losses;\nreal conduction_losses_table[24] = { 0.0, 1.5, 1.8, 2.3, 2.69, 2.9, 3.1, 3.25, 3.41, 3.73, 4.0, 4.31, 0.0, 1.63, 2.09, 2.77, 3.37, 3.63, 3.8, 4.11, 4.37, 4.81, 5.29, 5.7 };\nreal current_axis_turn_on_losses[4] = { 0.0, 400.0, 800.0, 1200.0 };\nreal voltage_axis_turn_on_losses[2] = { 0.0, 1800.0 };\nreal temperature_axis_turn_on_losses[2] = { 25.0, 125.0 };\nreal E_turn_on_losses;\nreal turn_on_losses_table[16] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.4068, 1.001, 1.822, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6317, 1.38, 1.784 };\n\'}}"
+            diode_data = "{\'package_class\': \'Diode\', \'variables\': {}, \'constants\': {}, \'custom_tables\': {}, \'turn_on_losses\': {\'type\': \'Table only\', \'formula\': None, \'current_axis\': [0.0, 400.0, 800.0, 1200.0], \'voltage_axis\': [0.0, 1800.0], \'temperature_axis\': [25.0, 125.0], \'energy\': [[[0.0, 0.0, 0.0, 0.0], [0.0, 0.4068, 1.001, 1.822]], [[0.0, 0.0, 0.0, 0.0], [0.0, 0.6317, 1.38, 1.784]]], \'parsed_formula\': \'E_turn_on_losses\'}, \'turn_off_losses\': {\'type\': \'Table only\', \'formula\': None, \'current_axis\': [0.0, 400.0, 800.0, 1200.0], \'voltage_axis\': [0.0, 1800.0], \'temperature_axis\': [25.0, 125.0], \'energy\': [[[0.0, 0.0, 0.0, 0.0], [0.0, 0.6, 0.88, 1.177]], [[0.0, 0.0, 0.0, 0.0], [0.0, 0.9094, 1.25, 1.784]]], \'parsed_formula\': \'E_turn_off_losses\'}, \'conduction_losses\': {\'type\': \'Table only\', \'formula\': None, \'current_axis\': [0.0, 100.0, 200.0, 400.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 1200.0, 1400.0, 1600.0], \'temperature_axis\': [25.0, 125.0], \'voltage_drop\': [[0.0, 1.5, 1.8, 2.3, 2.69, 2.9, 3.1, 3.25, 3.41, 3.73, 4.0, 4.31], [0.0, 1.63, 2.09, 2.77, 3.37, 3.63, 3.8, 4.11, 4.37, 4.81, 5.29, 5.7]], \'parsed_formula\': \'v_conduction_losses\'}, \'c_function_code\': {\'output_fnc\': \'E_turn_on_losses = lookup3d(turn_on_losses_table, i, v, T, current_axis_turn_on_losses, voltage_axis_turn_on_losses, temperature_axis_turn_on_losses, 4, 2, 2);\nE_turn_off_losses = lookup3d(turn_off_losses_table, i, v, T,current_axis_turn_off_losses, voltage_axis_turn_off_losses, temperature_axis_turn_off_losses, 4, 2, 2);\nv_conduction_losses = lookup2d(conduction_losses_table, i, T,current_axis_conduction_losses, temperature_axis_conduction_losses, 12, 2);\ne_t_on = E_turn_on_losses;\ne_t_off = E_turn_off_losses;\nv_ce = v_conduction_losses;\n\', \'arb_defs\': \'real current_axis_turn_off_losses[4] = { 0.0, 400.0, 800.0, 1200.0 };\nreal voltage_axis_turn_off_losses[2] = { 0.0, 1800.0 };\nreal temperature_axis_turn_off_losses[2] = { 25.0, 125.0 };\nreal E_turn_off_losses;\nreal turn_off_losses_table[16] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.6, 0.88, 1.177, 0.0, 0.0, 0.0, 0.0, 0.0, 0.9094, 1.25, 1.784 };\nreal current_axis_conduction_losses[12] = { 0.0, 100.0, 200.0, 400.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 1200.0, 1400.0, 1600.0 };\nreal temperature_axis_conduction_losses[2] = { 25.0, 125.0 };\nreal v_conduction_losses;\nreal conduction_losses_table[24] = { 0.0, 1.5, 1.8, 2.3, 2.69, 2.9, 3.1, 3.25, 3.41, 3.73, 4.0, 4.31, 0.0, 1.63, 2.09, 2.77, 3.37, 3.63, 3.8, 4.11, 4.37, 4.81, 5.29, 5.7 };\nreal current_axis_turn_on_losses[4] = { 0.0, 400.0, 800.0, 1200.0 };\nreal voltage_axis_turn_on_losses[2] = { 0.0, 1800.0 };\nreal temperature_axis_turn_on_losses[2] = { 25.0, 125.0 };\nreal E_turn_on_losses;\nreal turn_on_losses_table[16] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.4068, 1.001, 1.822, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6317, 1.38, 1.784 };\n\'}}"
+            user_vars_transistor = "User variables transistor"
+            user_vars_diode = "User variables diode"
+            i_sw = "[0.0, 6.0, 12.0, 18.0, 24.0]"
+            v_sw = "[0.0, 600.0]"
+            temp_sw = "[25.0, 50.0, 75.0, 100.0, 125.0]"
+            vce_table_out = "[1.3, 1.3, 1.3, 1.3, 1.3]"
+            vd_table_out = "[1.2, 1.2, 1.2, 1.2, 1.2]"
+            et_on_table_out = "[[0.0, 0.0275e-3, 0.15e-3, 0.275e-3, 0.3e-3], [0.35*3.8e-3, 0.4*3.8e-3, 0.8*3.8e-3, 0.68*3.8e-3, 0.9*3.8e-3], [0.65*3.8e-3, 0.9*3.8e-3, 1.2*3.8e-3, 1.5*3.8e-3, 1.7*3.8e-3], [0.9*3.8e-3, 1.3*3.8e-3, 1.7*3.8e-3, 1.9*3.8e-3, 2.25*3.8e-3], [1.1*3.8e-3, 1.7*3.8e-3, 2.1*3.8e-3, 2.3*3.8e-3, 2.5*3.8e-3]]"
+            et_off_table_out = "[[0.0, 0.0275e-3, 0.15e-3, 0.275e-3, 0.3e-3], [0.35*2.1e-3, 0.4*2.1e-3, 0.8*2.1e-3, 0.68*2.1e-3, 0.9*2.1e-3], [0.65*2.1e-3, 0.9*2.1e-3, 1.2*2.1e-3, 1.5*2.1e-3, 1.7*2.1e-3], [0.9*2.1e-3, 1.3*2.1e-3, 1.7*2.1e-3, 1.9*2.1e-3, 2.25*2.1e-3], [1.1*2.1e-3, 1.7*2.1e-3, 2.1*2.1e-3, 2.3*2.1e-3, 2.5*2.1e-3]]"
+            ed_off_table_out = "[[0.0, 0.0275e-3, 0.15e-3, 0.275e-3, 0.3e-3], [0.35*2.2e-3, 0.4*2.2e-3, 0.8*2.2e-3, 0.68*2.2e-3, 0.9*2.2e-3], [0.65*2.2e-3, 0.9*2.2e-3, 1.2*2.2e-3, 1.5*2.2e-3, 1.7*2.2e-3], [0.9*2.2e-3, 1.3*2.2e-3, 1.7*2.2e-3, 1.9*2.2e-3, 2.25*2.2e-3], [1.1*2.2e-3, 1.7*2.2e-3, 2.1*2.2e-3, 2.3*2.2e-3, 2.5*2.2e-3]]"
+            load_switching_data_from_xml = "Import losses data from xml files"
+            temp_estimation = "False"
+            thermal_networks_type = "Foster"
+            switch_Rth = "[0.159, 0.133, 0.120, 0.038]"
+            switch_Tth = "[1.1e-1, 1.56e-2, 1.35e-3, 1.51e-4]"
+            switch_Cth = "[0.0029, 0.0097, 0.1068, 0.8500]"
+            loss_exec_rate = "100e-6"
+        }
+
+        "core/Photovoltaic Panel" {
+            signal_access = "inherit"
+            Cpv = "1e-6"
+            initial_voltage = "0"
+            sp_enable = "False"
+            mpp_enable = "False"
+            execution_rate = "100e-6"
+            en50530_en = "True"
+            normalized_en = "False"
+            Tslow = "200e-6"
+            hil_cpu_core_id = "0"
+            control = "SCADA"
+            filename_init = "not selected"
+            illumination_init = "1000.0"
+            temperature_init = "25.0"
+            isc_init = "10.0"
+            voc_init = "100.0"
+            preview_init = "Preview"
+            filename_en50530 = "not selected"
+            illumination_control = "Constant"
+            illumination = "1000.0"
+            illumination_profile = "[1000.0, 800.0, 600.0]"
+            illumination_time_points = "[0.0, 1.0, 1.1]"
+            illumination_ramp_type = "Linear"
+            preview_illumination = "Preview illumination"
+            temperature_control = "Constant"
+            temperature = "25.0"
+            temperature_profile = "[25.0, 22.0, 20.0]"
+            temperature_time_points = "[0.0, 1.0, 1.1]"
+            temperature_ramp_type = "Linear"
+            preview_temperature = "Preview temperature"
+            filename_normalized = "not selected"
+            isc_control = "Constant"
+            isc = "10.0"
+            isc_profile = "[8.1, 7.8, 7.5]"
+            isc_time_points = "[0.0, 1.0, 1.1]"
+            isc_ramp_type = "Linear"
+            preview_isc = "Preview isc"
+            voc_control = "Constant"
+            voc = "100.0"
+            voc_profile = "[36.6, 35.0, 34.0]"
+            voc_time_points = "[0.0, 1.0, 1.1]"
+            voc_ramp_type = "Linear"
+            preview_voc = "Preview voc"
+            enable_isc_stc_input = "False"
+            enable_voc_stc_input = "False"
+            enable_ffu_input = "False"
+            enable_ffi_input = "False"
+            enable_cg_input = "False"
+            enable_cv_input = "False"
+            enable_cr_input = "False"
+            enable_vl2h_input = "False"
+            enable_alpha_input = "False"
+            enable_beta_input = "False"
+            normalized_data_size = "500"
+            enable_normalized_data_v_input = "False"
+            enable_normalized_data_i_input = "False"
+            enable_negcurrent_input = "False"
+            preview_en50530 = "Preview EN50530 Compatible"
+            preview_normalized = "Preview Normalized IV"
+        }
+
+        "core/Voltage Measurement" {
+            signal_access = "inherit"
+            bw_limit = "False"
+            frequency = "10e3"
+            comparator_enable = "False"
+            operator = "greater"
+            threshold = "0"
+            cmp_abs_value = "False"
+            feed_forward = "false"
+            sig_output = "False"
+            sig_output_filt_and_full_bw = "False"
+            execution_rate = "100e-6"
+            addr = "0"
+            nd_msr_estimation = "false"
+            dev_cpl_msr = "false"
+            host_device = "0"
+            output_to_device = "0"
+            dev_cpl_index = "0"
+            dev_cpl_var_nb = "0"
+            visible = "True"
+            override_signal_name = "False"
+            signal_name = ""
+        }
+    }
+}

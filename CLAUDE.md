@@ -68,10 +68,12 @@ nova (ex.: se um dia portar mais alguma coisa do MATLAB para cá):
   (`Cannot write to the terminal 'V'. Input terminals are read-only.`). Sempre copie para uma
   variável local antes de modificar: `real_t V_clamped = V;`.
 - **Debug de erro de compilação confuso:** leia o C gerado direto em
-  `~/.local/share/typhoon/TySim 2026.2/apps/schematic_editor/code_generation/offline_simulator/c_code/root.c`
+  `~/.local/share/typhoon/TySim 2026.3/apps/schematic_editor/code_generation/offline_simulator/c_code/root.c`
   (sobrescrito a cada tentativa de compilação) — mostra os nomes reais das variáveis em vez de
   adivinhar pelo texto do erro. Log de erro de compilação:
-  `~/.local/share/typhoon/TySim 2026.2/logs/errlog.txt`.
+  `~/.local/share/typhoon/TySim 2026.3/logs/errlog.txt` (esse log só registra crashes da aplicação,
+  não erros de validação/compilação do modelo — para esses últimos, checar o console de saída do
+  Schematic Editor).
 - **Erro "pop from an empty set" ao compilar:** normalmente é um `Goto`/`From` com tag que não
   bate (ex.: `Iout_mes` vs `I_out_mes`, faltando underscore) — o correlacionador de tags do
   compilador (`c_code_exporter/interfaces.py:_add_tags_to_corr_interface`) estoura ao não achar
@@ -148,6 +150,69 @@ nova (ex.: se um dia portar mais alguma coisa do MATLAB para cá):
     TyphoonSim **yet**", sugerindo que é uma limitação específica do simulador local, não do
     hardware.
 
+## Modelo nativo `core/Photovoltaic Panel`/`core/Battery` como alternativa aos `.tlib`
+
+Motivação: contornar o bug do `core/C function` na 2026.3 (ver acima) sem depender só do downgrade
+pra 2026.2 — usar componentes nativos da Typhoon (`core/Photovoltaic Panel`, `core/Battery`) no lugar
+de `pv_array.tlib`/`Bat_array.tlib`. Em andamento em `VR-BESS-LIBS-COMPARE.tse`, ainda não validado
+formalmente contra o modelo `.tlib` original (nem religadas proteção/limitador, mesma ressalva do
+`VR-BESS.tse` — ver "Status").
+
+- **`core/Photovoltaic Panel` não tem campo Ns/Np pra representar um arranjo** — confirmado nos docs
+  oficiais instalados localmente (`.../Documentation/html/pv_generator_api.html`): nenhum dos 3
+  modelos (`Detailed`, `EN50530 Compatible`, `Normalized IV`) tem parâmetro de composição
+  série/paralelo. `Nc` ("número de células") precisa ser fisicamente coerente com `Voc_ref` (tensão
+  por célula ~0,59V pra c-Si — bate com o painel Ayaz real: 21,4V/36 células). Escalar
+  `Voc_ref`/`Isc_ref` pro arranjo inteiro (17×21,4V=363,8V) mantendo `Nc=36` (escala de módulo) dá
+  ~10,1V/célula — fisicamente absurdo — e degenera o ajuste do diodo único (força um `I0`
+  praticamente zero pra "esticar" a curva), gerando um painel com potência ~0W em qualquer ponto de
+  operação real. Usar o `Nc` fisicamente correto pro arranjo inteiro (612=36×17) evita esse
+  degeneramento mas esbarra no limite numérico já documentado na memória do projeto (overflow no fit
+  interno, mesmo sintoma de antes). Ou seja: **não existe par (Nc, Voc_ref) que resolva o arranjo
+  inteiro num único bloco `core/Photovoltaic Panel`.**
+  - **Fix que funcionou:** usar o `.ipvx` de **um módulo só** (fisicamente são) e montar o arranjo
+    **fisicamente no esquemático** — 17 instâncias de `core/Photovoltaic Panel` em série (string) ×
+    2 strings em paralelo, 34 blocos ao todo, todos carregando o mesmo `.ipvx` de módulo único.
+    Implementado e funcionando em `VR-BESS-LIBS-COMPARE.tse` (`Photovoltaic Panel1`...`Panel34`;
+    fiação conferida: `Panel1→...→Panel17` e `Panel18→...→Panel34` são as duas strings, unidas em
+    paralelo nos dois extremos via `Junction56`/`Junction57`).
+  - **Achado confuso, não é bug real:** o arquivo `ayaz_pv_array_17s2p.ipvx` (nome sugere arranjo
+    inteiro) foi reescrito ao vivo — provavelmente pela própria ferramenta de fit de painel do
+    Schematic Editor — com valores de **módulo único** (Voc_ref=21,4V, Nc=36), mas com
+    `dIsc_dT`/`dV_dI_ref`/`Vg` diferentes (mais refinados, presumivelmente de um fit real feito na
+    UI) dos que estão em `ayaz_pv_module.ipvx`/`gerar_pv_array.py` (que geram a versão
+    ARRAY-escalada, abordagem abandonada). **`ayaz_pv_array_17s2p.ipvx` é o que está efetivamente em
+    uso pelos 34 blocos hoje e deve ser tratado como fonte de verdade atual** — `Vg` nele aparece
+    como `1.12` (eV, o valor numérico de `"cSi"` já resolvido) em vez da string `"cSi"`. Renomeado
+    pra `typhoonsim/modelo_painel_unicel.ipvx` (os 34 `filename_init` foram atualizados junto).
+    `ayaz_pv_module.ipvx` e `gerar_pv_array.py` (raiz do repo, versão antiga array-escalada) estão
+    desatualizados/não usados — podem ser removidos numa limpeza futura.
+
+- **A janela `Dii - Di` do PWM precisa ser recalibrada em conjunto com `Di`, não isoladamente,
+  senão a bateria para de carregar mesmo com `Vo` correto.** Achado nesta sessão com números reais
+  medidos em `VR-BESS-LIBS-COMPARE.tse`. Por construção `Dii - Di ≈ Vbat/Vo` (ver "Valores de
+  projeto" acima) é a heurística de partida, mas **não é um preditor exato** pra essa topologia —
+  uma primeira tentativa (`Di=0,28`/`Dii` parado em 0,88, janela 0,60, tensão média estimada
+  ≈240V < 252V) foi descartada por essa conta dar errado, mas o valor final que funcionou
+  (`Dii=0,9`) ficou com janela 0,558 — **menor** que a tentativa descartada, e mesmo assim carrega.
+  Ou seja, a aproximação volt-segundo simples (`(Dii-Di)×Vo`) serve só de direção inicial; o ponto de
+  operação real depende de `Lbat`/`Cbat`/dinâmica de carga, então **validar sempre por simulação
+  real**, não só pela fórmula.
+  - **Valores confirmados funcionando (Scope real, `t≈0,067s`, regime permanente):** `Di=0,342`,
+    `Dii=0,9`. Medido: `V_bat=252,71V`, `V_out=396,77V`, `V_pv=292,42V`, `I_bat=-2,40A` (negativo =
+    carregando, pela convenção de sinal de `I_bat` — ver "Convenções e armadilhas"), `I_out=2,48A`,
+    `I_pv=5,40A`, `SOC_mes=50,01%` (partiu de 50%, subindo). Bateria carregando confirmado.
+  - Esses valores (`Di=0,342`/`Dii=0,9`) são específicos da topologia de painéis nativos (34 blocos)
+    de `VR-BESS-LIBS-COMPARE.tse` — **não confundir com os duty cycles do `VR-BESS.tse` original
+    (`.tlib`), que continuam Di=21%/Dii=84,5%** (ver "Valores de projeto"); são calibrações
+    empíricas independentes porque a física de perdas dos dois modelos de painel/bateria é
+    diferente.
+
+- Parâmetros do `Battery1` nativo (`core/Battery`, `battery_type="User defined"`) em
+  `VR-BESS-LIBS-COMPARE.tse`: `nominal_voltage=252`, `capacity=2.3` (Ah — consistente com os limites
+  de corrente do projeto, 0,5C=1,15A/2C=4,6A), `initial_soc=50`, `R_series=0.15`, `Kdisc_I=100`,
+  `Ke_exp=103`, `Ke_full=113.1`, `Kq_exp=4.91`, `Kq_nom=50`, `execution_rate=0.0001`.
+
 ## Bug conhecido, não corrigido (`modelo_bateria`)
 
 Com os parâmetros estimados de forma da curva LiFePO4 (E0_1=13,32, A_1=1,4), na carga cheia
@@ -159,11 +224,59 @@ atuais de `E0_1`/`A_1` antes de assumir que já foi corrigido.
 
 ## Instalação/ambiente do Typhoon HIL (Linux) — ver detalhes e comandos completos no README
 
-Instalado em `/opt/typhoon/typhoonsim_2026.2/` via instalador oficial (`sudo bash
-typhoon_hil_control_center_<versão>.sh -- --accept_license_agreement`), licença ativada com
-`typhoon_hil_activation --activate --activation-key <arquivo>.lic`. Dois problemas resolvidos:
-permissão de `~/.cache/typhoon` (ficou do root por ter rodado como sudo na primeira vez) e tela em
-branco no Wayland (corrigido com `QT_QPA_PLATFORM=xcb typhoon_hil.sh`).
+**Dois produtos Typhoon distintos instalados, não confundir:**
+
+- **TyphoonSim** (o simulador em si) — voltado de propósito pra **2026.2** em 20/09/2026, pra
+  contornar o bug do `core/C function` da 2026.3 (ver abaixo). Instalado em
+  `/opt/typhoon/typhoonsim_2026.2/`, **sem atalho de desktop** (reinstalação manual via `.run`, sem
+  `.desktop` gerado) — abrir com `QT_QPA_PLATFORM=xcb /opt/typhoon/typhoonsim_2026.2/bin/typhoon_hil.sh`.
+- **Typhoon HIL Control Center** (app de gestão/licença, produto separado) — ficou na **2026.3**,
+  em `/opt/typhoon/typhoon_hil_control_center_2026.3/`, com atalho de desktop (mas o `Name=` do
+  `.desktop` saiu vazio — bug do instalador da Typhoon, variável sem aspas na linha `app_name=Typhoon
+  HIL Control Center`, cosmético, não corrigido). Abrir com
+  `QT_QPA_PLATFORM=xcb /opt/typhoon/typhoon_hil_control_center_2026.3/typhoon_hil.exe`.
+
+Se essas versões mudarem de novo, atualizar também os caminhos de log/cache citados neste arquivo,
+que têm o número da versão no path, ex. `~/.local/share/typhoon/TySim 2026.3/...`.
+
+Instalado via instalador oficial (`sudo bash typhoon_hil_control_center_<versão>.sh --
+--accept_license_agreement`), licença ativada com `typhoon_hil_activation --activate
+--activation-key <arquivo>.lic`. Problemas conhecidos — **reaparecem a cada instalação/reinstalação
+nova**, já se repetiram de forma independente nas instalações da 2026.2 e da 2026.3 do Control
+Center nesta mesma sessão, então checar de novo sempre que rodar o instalador:
+
+- Permissão de `~/.cache/typhoon` (ficou do root por ter rodado como sudo na primeira vez).
+- Tela em branco no Wayland — `QT_QPA_PLATFORM=xcb typhoon_hil.sh`.
+- `libreadline.so.8` empacotada pela Typhoon incompatível com esse sistema rolling-release — sem
+  isso o `typhoon_hil.exe` crasha com `signal 6/ABRT` ao iniciar. Fix: `sudo mv
+  libreadline.so.8 libreadline.so.8.orig && sudo ln -s /usr/lib/libreadline.so.8 libreadline.so.8`
+  dentro do diretório de instalação.
+- **`linux_install_script.sh` (embutido em todo instalador `.run` da Typhoon) não reconhece
+  CachyOS** (`ID=cachyos` em `/etc/os-release`) — o `case $distro` interno só cobre
+  `centos|rhel|fedora` e `debian|ubuntu`; qualquer outra distro cai no `*) echo Not supported Linux
+  distribution. Stopping installation. exit -1`, abortando ANTES de criar regras udev/PATH/atalho de
+  desktop — mas DEPOIS de copiar os arquivos pro diretório alvo (a cópia não se perde, só falta o
+  resto). Fix: extrair sem rodar (`bash <instalador>.run --noprogress --nox11 --target <dir>
+  --noexec`), editar `linux_install_script.sh` acrescentando um ramo `arch|cachyos|manjaro|
+  endeavouros)` antes do `*)`, usando só `TAG+="uaccess"` nas regras udev (sem `GROUP=`, dispensa
+  grupo — ACL moderna via udev/logind) e `pacman -S --needed` pros pacotes de dependência; depois
+  rodar `sudo bash linux_install_script.sh --accept_license_agreement` de dentro do diretório
+  extraído. Confirmado funcionando em 20/09/2026 (criou `/etc/udev/rules.d/50-arch-typhoon-hil.rules`,
+  PATH em `/etc/bash.bashrc`, `.desktop` em `/usr/share/applications/`). Patch completo (diff do
+  script) salvo na memória do Claude Code deste projeto — reaplicar em qualquer instalador `.run`
+  futuro da Typhoon nesta máquina.
+
+**Bug conhecido, não resolvido, na 2026.3 (TyphoonSim especificamente — é por isso que o TyphoonSim
+está voltado pra 2026.2 acima):** qualquer modelo `.tse` com um componente `core/C function` falha ao
+compilar no TyphoonSim offline com `Unable to prepare signal processing code! Please, contact Typhoon
+HIL.` — confirmado que não é cache, não é migração de arquivo antigo, não é o compilador C do sistema
+(nem chega a ser invocado). Repro mínimo em `sp_codegen_test.tse` na raiz do repo. Sem workaround
+encontrado além do downgrade pra 2026.2 (já aplicado). Isso bloqueia qualquer simulação em malha
+fechada na 2026.3 (o controlador FCS-MPC vai precisar de `core/C function` ou equivalente) até
+resolver — na 2026.2 esse bug não existe, então o downgrade também desbloqueia isso, não só o
+`core/C function` dos `.tlib` atuais. Detalhes da investigação (incluindo uma tentativa anterior
+inconclusiva de mexer no `cc1`/`gcc` do sistema, já desfeita por update do pacote) na memória do
+Claude Code deste projeto, não repetidos aqui pra não inflar este arquivo.
 
 ## Status
 
@@ -184,6 +297,16 @@ branco no Wayland (corrigido com `QT_QPA_PLATFORM=xcb typhoon_hil.sh`).
     inrush de energização grande. Vale conferir se ainda está setado (`initial_voltage = "252"`
     em `Cbat`, `"400"` em `Cvo`, `"346"` em `Cpv`) antes de rodar simulações longas/sensíveis.
   - Bug do SOC=100% em `modelo_bateria` (ver seção acima) ainda não corrigido.
+- **Ambiente Typhoon (20/09/2026):** TyphoonSim rodando na **2026.2** (downgrade intencional pra
+  contornar o bug do `core/C function` da 2026.3), Typhoon HIL Control Center instalado à parte na
+  2026.3 (produto diferente, ver "Instalação/ambiente" acima).
+- **`VR-BESS-LIBS-COMPARE.tse` (alternativa com componentes nativos, sem `core/C function`):** PV
+  reconstruído como 34 blocos `core/Photovoltaic Panel` (17 série × 2 paralelo,
+  `typhoonsim/modelo_painel_unicel.ipvx`) + `Battery1` nativo (`core/Battery`), no lugar dos
+  `.tlib`. **Duty cycles calibrados e confirmados funcionando por medição real**: `Di=0,342`,
+  `Dii=0,9` → `V_out≈397V`, `V_bat≈252,7V`, bateria carregando (`I_bat≈-2,4A`) — ver seção "Modelo
+  nativo" acima pro resto dos sinais medidos. Ainda não comparado formalmente contra o `VR-BESS.tse`
+  original (curvas/dinâmica lado a lado) nem religadas proteção/limitador.
 - Controlador FCS-MPC: ainda não implementado em nenhuma das duas plataformas — próxima etapa,
   necessária inclusive para resolver a diferença estrutural entre limitar corrente de carga e
   regular a tensão de saída simultaneamente (ver commits de recalibração para o porquê).

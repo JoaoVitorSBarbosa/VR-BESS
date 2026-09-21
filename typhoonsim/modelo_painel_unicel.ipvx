@@ -1,0 +1,12 @@
+
+<ipvx_settings>
+    <pv_model>Detailed</pv_model>
+    <Voc_ref>21.4</Voc_ref>
+    <Isc_ref>3.14</Isc_ref>
+    <dIsc_dT>0.002198</dIsc_dT>
+    <Nc>36</Nc>
+    <dV_dI_ref>-0.030555555555555558</dV_dI_ref>
+    <Vg>1.12</Vg>
+    <n>1.2</n>
+    <negative_current>False</negative_current>
+</ipvx_settings>

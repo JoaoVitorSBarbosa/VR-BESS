@@ -70,7 +70,7 @@ model "VR-BESS-LIBS-COMPARE" {
         simulation_time = 1.0
         abs_tol = 1e-3
         rel_tol = 1e-3
-        init_sim_step = 1e-6
+        init_sim_step = 2e-7
         r_on_sw = 1e-3
         v_on_diode = 0.1
         data_sampling_rate = 0
@@ -189,14 +189,6 @@ model "VR-BESS-LIBS-COMPARE" {
             position = 7404, 8552
         ]
 
-        component "core/Constant" Num_cel_serie_bat {
-            execution_rate = "2e-7"
-            value = "15"
-        }
-        [
-            position = 7404, 8616
-        ]
-
         component "core/Constant" modo_teste {
             execution_rate = "2e-7"
             value = "0"
@@ -205,17 +197,10 @@ model "VR-BESS-LIBS-COMPARE" {
             position = 7404, 8672
         ]
 
-        component "Bat_array/Bat_array" Bat_array1 {
-        }
-        [
-            position = 8616, 8100
-            size = 176, 184
-        ]
-
         component "core/Scope" Scope1 {
-            selected_signals = "[\'V_bat\', \'V_out\', \'I_bat\', \'V_pv\', \'I_out\', \'I_pv\', \'SOC_mes\']"
-            signals_data = "{\"plot_settings\": {\"layout\": \"Vertical\", \"background_color\": \"white\", \"legend_visible\": true, \"signals_tooltips_enabled\": true}, \"signals\": {\"V_bat\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"1\": \"#00CC00\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"V_out\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"1\": \"#FF0000\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"I_bat\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"1\": \"#0099FF\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"V_pv\": {\"viewports\": [2], \"type\": \"analog\", \"color\": {\"2\": \"#FF0000\"}, \"display\": {\"2\": \"solid\"}, \"is_manual\": {\"2\": false}}, \"I_out\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"1\": \"#00CC00\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"I_pv\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"1\": \"#FF0000\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"SOC_mes\": {\"viewports\": [1], \"type\": \"analog\", \"color\": {\"1\": \"#FF0000\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}}, \"viewports\": {\"1\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"2\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"3\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"4\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"5\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"6\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}}}"
-            user_range_data = "{\"1\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-15.0, 38.0]}, \"2\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Manual\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-12.0, 25.0]}, \"3\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.0, 1.0]}, \"4\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-20.0, 45.0]}, \"5\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-10.0, 30.0]}, \"6\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.0, 1.0]}}"
+            selected_signals = "[\'V_bat\', \'V_out\', \'I_bat\', \'V_pv\', \'I_out\', \'SOC_mes\', \'I_pv\']"
+            signals_data = "{\"plot_settings\": {\"layout\": \"Vertical\", \"background_color\": \"white\", \"legend_visible\": true, \"signals_tooltips_enabled\": true}, \"signals\": {\"V_bat\": {\"viewports\": [2], \"type\": \"analog\", \"color\": {\"2\": \"#0099FF\"}, \"display\": {\"2\": \"solid\"}, \"is_manual\": {\"2\": false}}, \"V_out\": {\"viewports\": [2], \"type\": \"analog\", \"color\": {\"2\": \"#00CC00\"}, \"display\": {\"2\": \"solid\"}, \"is_manual\": {\"2\": false}}, \"I_bat\": {\"viewports\": [3], \"type\": \"analog\", \"color\": {\"3\": \"#FF0000\"}, \"display\": {\"3\": \"solid\"}, \"is_manual\": {\"3\": false}}, \"V_pv\": {\"viewports\": [2], \"type\": \"analog\", \"color\": {\"2\": \"#FF0000\"}, \"display\": {\"2\": \"solid\"}, \"is_manual\": {\"2\": false}}, \"I_out\": {\"viewports\": [3], \"type\": \"analog\", \"color\": {\"3\": \"#00CC00\"}, \"display\": {\"3\": \"solid\"}, \"is_manual\": {\"3\": false}}, \"SOC_mes\": {\"viewports\": [1], \"type\": \"analog\", \"color\": {\"1\": \"#FF0000\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"I_pv\": {\"viewports\": [3], \"type\": \"analog\", \"color\": {\"3\": \"#0099FF\"}, \"display\": {\"3\": \"solid\"}, \"is_manual\": {\"3\": false}}}, \"viewports\": {\"1\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"2\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"3\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"4\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"5\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"6\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}}}"
+            user_range_data = "{\"1\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-15.0, 38.0]}, \"2\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-12.0, 25.0]}, \"3\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Manual\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-2.0, 3.0]}, \"4\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-20.0, 45.0]}, \"5\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-10.0, 30.0]}, \"6\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.0, 1.0]}}"
         }
         [
             position = 8228, 7808
@@ -328,16 +313,6 @@ const real_t Q_1_real = 2.3;
             size = 64, 32
         ]
 
-        component "core/Current Measurement" I_pv {
-            execution_rate = "2e-07"
-            override_signal_name = "True"
-            signal_name = "I_pv"
-        }
-        [
-            position = 7652, 7940
-            size = 64, 32
-        ]
-
         component "core/Voltage Measurement" V-pv {
             execution_rate = "2e-07"
             override_signal_name = "True"
@@ -411,7 +386,7 @@ const real_t Q_1_real = 2.3;
 
         component "core/Constant" Constant9 {
             execution_rate = "2e-07"
-            value = "0.845"
+            value = "0.9"
         }
         [
             position = 7716, 7784
@@ -419,7 +394,7 @@ const real_t Q_1_real = 2.3;
 
         component "core/Constant" Constant10 {
             execution_rate = "2e-07"
-            value = "0.21"
+            value = "0.342"
         }
         [
             position = 7816, 7820
@@ -499,274 +474,371 @@ const real_t Q_1_real = 2.3;
             size = 64, 32
         ]
 
-        component "core/Photovoltaic Panel" "Photovoltaic Panel1" {
+        component "core/Battery" Battery1 {
+            Kdisc_I = "100"
+            Ke_exp = "103"
+            Ke_full = "113.1"
+            Kq_exp = "4.91"
+            Kq_nom = "50"
+            R_series = "0.15"
+            battery_type = "User defined"
+            capacity = "2.3"
+            execution_rate = "0.0001"
+            initial_soc = "50"
+            nominal_voltage = "252"
         }
         [
-            position = 6404, 8020
+            position = 8600, 8104
+            rotation = right
+            size = 64, 48
+        ]
+
+        component "core/Current Measurement" I_pv {
+            execution_rate = "2e-07"
+            override_signal_name = "True"
+            signal_name = "I_pv"
+        }
+        [
+            position = 7608, 7940
+            size = 64, 32
+        ]
+
+        component "core/Photovoltaic Panel" "Photovoltaic Panel1" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
+        }
+        [
+            position = 6952, 7388
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel2" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6404, 8120
+            position = 6952, 7468
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel3" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6404, 8220
+            position = 6952, 7556
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel4" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6404, 8320
+            position = 6952, 7644
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel5" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6404, 8440
+            position = 6952, 7736
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel6" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6404, 8540
+            position = 6952, 7816
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel7" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6404, 8640
+            position = 6952, 7904
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel8" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6404, 8740
+            position = 6952, 7992
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel9" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6404, 8848
+            position = 6952, 8088
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel10" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6404, 8948
+            position = 6952, 8168
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel11" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6404, 9048
+            position = 6952, 8256
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel12" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6404, 9148
+            position = 6952, 8344
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel13" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6404, 9268
+            position = 6952, 8436
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel14" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6404, 9368
+            position = 6952, 8516
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel15" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6404, 9468
+            position = 6952, 8604
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel16" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6404, 9568
+            position = 6952, 8692
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel17" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6404, 9672
+            position = 6952, 8780
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel18" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6624, 8020
+            position = 7148, 7388
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel19" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6624, 8120
+            position = 7148, 7468
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel20" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6624, 8220
+            position = 7148, 7556
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel21" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6624, 8320
+            position = 7148, 7644
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel22" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6624, 8440
+            position = 7148, 7736
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel23" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6624, 8540
+            position = 7148, 7816
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel24" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6624, 8640
+            position = 7148, 7904
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel25" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6624, 8740
+            position = 7148, 7992
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel26" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6624, 8848
+            position = 7148, 8088
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel27" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6624, 8948
+            position = 7148, 8168
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel28" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6624, 9048
+            position = 7148, 8256
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel29" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6624, 9148
+            position = 7148, 8344
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel30" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6624, 9268
+            position = 7148, 8436
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel31" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6624, 9368
+            position = 7148, 8516
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel32" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6624, 9468
+            position = 7148, 8604
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel33" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6624, 9568
+            position = 7148, 8692
             rotation = right
             size = 64, 64
         ]
 
         component "core/Photovoltaic Panel" "Photovoltaic Panel34" {
+            execution_rate = "0.0001"
+            filename_init = "modelo_painel_unicel.ipvx"
         }
         [
-            position = 6624, 9672
+            position = 7148, 8780
             rotation = right
             size = 64, 64
         ]
@@ -793,17 +865,6 @@ const real_t Q_1_real = 2.3;
             size = 124, 20
         ]
 
-        tag Goto7 {
-            value = "Num_cel_serie_bat"
-            scope = local
-            kind = sp
-            direction = in
-        }
-        [
-            position = 7588, 8616
-            size = 124, 20
-        ]
-
         tag Goto8 {
             value = "modo_teste"
             scope = local
@@ -813,50 +874,6 @@ const real_t Q_1_real = 2.3;
         [
             position = 7588, 8672
             size = 124, 20
-        ]
-
-        tag From5 {
-            value = "SOC_inicial_bat"
-            scope = local
-            kind = sp
-            direction = out
-        }
-        [
-            position = 8436, 8028
-            size = 108, 20
-        ]
-
-        tag From6 {
-            value = "Num_cel_par_bat"
-            scope = local
-            kind = sp
-            direction = out
-        }
-        [
-            position = 8432, 8076
-            size = 108, 20
-        ]
-
-        tag From7 {
-            value = "Num_cel_serie_bat"
-            scope = local
-            kind = sp
-            direction = out
-        }
-        [
-            position = 8436, 8124
-            size = 108, 20
-        ]
-
-        tag From8 {
-            value = "modo_teste"
-            scope = local
-            kind = sp
-            direction = out
-        }
-        [
-            position = 8436, 8172
-            size = 108, 20
         ]
 
         tag From9 {
@@ -991,24 +1008,9 @@ const real_t Q_1_real = 2.3;
             position = 7760, 8252
         ]
 
-        junction Junction30 pe
-        [
-            position = 7708, 7940
-        ]
-
-        junction Junction32 pe
-        [
-            position = 8616, 8252
-        ]
-
         junction Junction33 pe
         [
             position = 8352, 8064
-        ]
-
-        junction Junction34 pe
-        [
-            position = 8616, 7980
         ]
 
         junction Junction35 pe
@@ -1056,19 +1058,34 @@ const real_t Q_1_real = 2.3;
             position = 7980, 8252
         ]
 
-        junction Junction49 pe
+        junction Junction52 pe
         [
-            position = 7708, 8260
+            position = 8600, 7980
         ]
 
-        junction Junction50 pe
+        junction Junction53 pe
         [
-            position = 6624, 7980
+            position = 8600, 8252
         ]
 
-        junction Junction51 pe
+        junction Junction54 pe
         [
-            position = 6624, 9716
+            position = 7708, 7940
+        ]
+
+        junction Junction55 pe
+        [
+            position = 7708, 8252
+        ]
+
+        junction Junction56 pe
+        [
+            position = 7148, 8820
+        ]
+
+        junction Junction57 pe
+        [
+            position = 7116, 7348
         ]
 
         connect Junction1 Ls.n_node as Connection4
@@ -1111,26 +1128,13 @@ const real_t Q_1_real = 2.3;
         [
             breakpoints = 7760, 8252; 7924, 8252
         ]
-        connect I_pv.n_node Junction30 as Connection150
-        connect Junction30 Junction28 as Connection151
-        connect V-pv.p_node Junction30 as Connection152
         connect modo_teste.out Goto8 as Connection156
-        connect Num_cel_serie_bat.out Goto7 as Connection157
         connect Num_cel_par_bat.out Goto6 as Connection158
         connect SOC_inicial_bat.out Goto5 as Connection159
-        connect From8 Bat_array1.modo_teste as Connection161
-        connect From7 Bat_array1.Ns_bat as Connection162
-        connect From6 Bat_array1.Np_bat as Connection163
-        connect From5 Bat_array1.SOC_inicial as Connection164
-        connect Bat_array1.- Junction32 as Connection167
         connect Cbat.p_node Junction33 as Connection170
         connect Junction33 Lbat.n_node as Connection171
         connect I_bat.n_node Junction33 as Connection172
-        connect Bat_array1.+ Junction34 as Connection173
-        connect Junction34 I_bat.p_node as Connection174
-        connect V_bat.p_node Junction34 as Connection175
         connect Junction15 Junction35 as Connection176
-        connect Junction35 Junction32 as Connection177
         connect V_bat.n_node Junction35 as Connection178
         [
             breakpoints = 8756, 8104; 8756, 8252
@@ -1152,10 +1156,6 @@ const real_t Q_1_real = 2.3;
         connect D3.A Junction41 as Connection210
         connect Junction41 Junction1 as Connection211
         connect Va1.p_node Junction41 as Connection212
-        connect Junction32 Junction43 as Connection222
-        [
-            breakpoints = 8508, 8252
-        ]
         connect Junction43 Junction5 as Connection223
         [
             breakpoints = 8356, 8252
@@ -1198,49 +1198,73 @@ const real_t Q_1_real = 2.3;
         ]
         connect Junction48 Junction5 as Connection275
         connect Va2.n_node Junction48 as Connection276
-        connect "Photovoltaic Panel1.n_node" "Photovoltaic Panel2.p_node" as Connection278
-        connect "Photovoltaic Panel2.n_node" "Photovoltaic Panel3.p_node" as Connection279
-        connect "Photovoltaic Panel3.n_node" "Photovoltaic Panel4.p_node" as Connection280
-        connect "Photovoltaic Panel4.n_node" "Photovoltaic Panel5.p_node" as Connection281
-        connect "Photovoltaic Panel5.n_node" "Photovoltaic Panel6.p_node" as Connection282
-        connect "Photovoltaic Panel18.n_node" "Photovoltaic Panel19.p_node" as Connection283
-        connect "Photovoltaic Panel19.n_node" "Photovoltaic Panel20.p_node" as Connection285
-        connect "Photovoltaic Panel20.n_node" "Photovoltaic Panel21.p_node" as Connection286
-        connect "Photovoltaic Panel21.n_node" "Photovoltaic Panel22.p_node" as Connection287
-        connect "Photovoltaic Panel22.n_node" "Photovoltaic Panel23.p_node" as Connection288
-        connect "Photovoltaic Panel23.n_node" "Photovoltaic Panel24.p_node" as Connection289
-        connect "Photovoltaic Panel24.n_node" "Photovoltaic Panel25.p_node" as Connection290
-        connect "Photovoltaic Panel6.n_node" "Photovoltaic Panel7.p_node" as Connection291
-        connect "Photovoltaic Panel7.n_node" "Photovoltaic Panel8.p_node" as Connection292
-        connect "Photovoltaic Panel8.n_node" "Photovoltaic Panel9.p_node" as Connection293
-        connect "Photovoltaic Panel25.n_node" "Photovoltaic Panel26.p_node" as Connection294
-        connect "Photovoltaic Panel9.n_node" "Photovoltaic Panel10.p_node" as Connection295
-        connect "Photovoltaic Panel10.n_node" "Photovoltaic Panel11.p_node" as Connection296
-        connect "Photovoltaic Panel11.n_node" "Photovoltaic Panel12.p_node" as Connection297
-        connect "Photovoltaic Panel12.n_node" "Photovoltaic Panel13.p_node" as Connection298
-        connect "Photovoltaic Panel13.n_node" "Photovoltaic Panel14.p_node" as Connection299
-        connect "Photovoltaic Panel26.n_node" "Photovoltaic Panel27.p_node" as Connection300
-        connect "Photovoltaic Panel27.n_node" "Photovoltaic Panel28.p_node" as Connection301
-        connect "Photovoltaic Panel28.n_node" "Photovoltaic Panel29.p_node" as Connection302
-        connect "Photovoltaic Panel29.n_node" "Photovoltaic Panel30.p_node" as Connection303
-        connect "Photovoltaic Panel30.n_node" "Photovoltaic Panel31.p_node" as Connection304
-        connect "Photovoltaic Panel31.n_node" "Photovoltaic Panel32.p_node" as Connection305
-        connect "Photovoltaic Panel14.n_node" "Photovoltaic Panel15.p_node" as Connection306
-        connect "Photovoltaic Panel15.n_node" "Photovoltaic Panel16.p_node" as Connection307
-        connect "Photovoltaic Panel16.n_node" "Photovoltaic Panel17.p_node" as Connection308
-        connect "Photovoltaic Panel32.n_node" "Photovoltaic Panel33.p_node" as Connection309
-        connect "Photovoltaic Panel33.n_node" "Photovoltaic Panel34.p_node" as Connection310
-        connect V-pv.n_node Junction49 as Connection311
-        connect Junction49 Junction29 as Connection312
+        connect I_bat.p_node Junction52 as Connection322
+        connect Junction52 V_bat.p_node as Connection323
+        [
+            breakpoints = 8616, 7980
+        ]
+        connect Battery1.p_node Junction52 as Connection324
+        connect Junction43 Junction53 as Connection325
+        [
+            breakpoints = 8508, 8252
+        ]
+        connect Junction53 Junction35 as Connection326
+        connect Battery1.n_node Junction53 as Connection327
+        connect Junction28 Junction54 as Connection335
+        connect Junction54 V-pv.p_node as Connection336
+        [
+            breakpoints = 7708, 7940
+        ]
+        connect I_pv.n_node Junction54 as Connection337
+        connect "Photovoltaic Panel2.p_node" "Photovoltaic Panel1.n_node" as Connection343
+        connect "Photovoltaic Panel4.p_node" "Photovoltaic Panel3.n_node" as Connection344
+        connect "Photovoltaic Panel2.n_node" "Photovoltaic Panel3.p_node" as Connection345
+        connect "Photovoltaic Panel6.p_node" "Photovoltaic Panel5.n_node" as Connection346
+        connect "Photovoltaic Panel8.p_node" "Photovoltaic Panel7.n_node" as Connection347
+        connect "Photovoltaic Panel6.n_node" "Photovoltaic Panel7.p_node" as Connection348
+        connect "Photovoltaic Panel5.p_node" "Photovoltaic Panel4.n_node" as Connection349
+        connect "Photovoltaic Panel10.p_node" "Photovoltaic Panel9.n_node" as Connection350
+        connect "Photovoltaic Panel12.p_node" "Photovoltaic Panel11.n_node" as Connection351
+        connect "Photovoltaic Panel10.n_node" "Photovoltaic Panel11.p_node" as Connection352
+        connect "Photovoltaic Panel14.p_node" "Photovoltaic Panel13.n_node" as Connection353
+        connect "Photovoltaic Panel16.p_node" "Photovoltaic Panel15.n_node" as Connection354
+        connect "Photovoltaic Panel14.n_node" "Photovoltaic Panel15.p_node" as Connection355
+        connect "Photovoltaic Panel13.p_node" "Photovoltaic Panel12.n_node" as Connection356
+        connect "Photovoltaic Panel9.p_node" "Photovoltaic Panel8.n_node" as Connection357
+        connect "Photovoltaic Panel17.p_node" "Photovoltaic Panel16.n_node" as Connection358
+        connect "Photovoltaic Panel19.p_node" "Photovoltaic Panel18.n_node" as Connection359
+        connect "Photovoltaic Panel21.p_node" "Photovoltaic Panel20.n_node" as Connection360
+        connect "Photovoltaic Panel19.n_node" "Photovoltaic Panel20.p_node" as Connection361
+        connect "Photovoltaic Panel23.p_node" "Photovoltaic Panel22.n_node" as Connection362
+        connect "Photovoltaic Panel25.p_node" "Photovoltaic Panel24.n_node" as Connection363
+        connect "Photovoltaic Panel23.n_node" "Photovoltaic Panel24.p_node" as Connection364
+        connect "Photovoltaic Panel22.p_node" "Photovoltaic Panel21.n_node" as Connection365
+        connect "Photovoltaic Panel27.p_node" "Photovoltaic Panel26.n_node" as Connection366
+        connect "Photovoltaic Panel29.p_node" "Photovoltaic Panel28.n_node" as Connection367
+        connect "Photovoltaic Panel27.n_node" "Photovoltaic Panel28.p_node" as Connection368
+        connect "Photovoltaic Panel31.p_node" "Photovoltaic Panel30.n_node" as Connection369
+        connect "Photovoltaic Panel33.p_node" "Photovoltaic Panel32.n_node" as Connection370
+        connect "Photovoltaic Panel31.n_node" "Photovoltaic Panel32.p_node" as Connection371
+        connect "Photovoltaic Panel30.p_node" "Photovoltaic Panel29.n_node" as Connection372
+        connect "Photovoltaic Panel26.p_node" "Photovoltaic Panel25.n_node" as Connection373
+        connect "Photovoltaic Panel34.p_node" "Photovoltaic Panel33.n_node" as Connection374
+        connect V-pv.n_node Junction55 as Connection376
+        connect Junction55 Junction29 as Connection377
         [
             breakpoints = 7708, 8252
         ]
-        connect "Photovoltaic Panel1.p_node" Junction50 as Connection314
-        connect Junction50 "Photovoltaic Panel18.p_node" as Connection315
-        connect I_pv.p_node Junction50 as Connection316
-        connect "Photovoltaic Panel34.n_node" Junction51 as Connection317
-        connect Junction51 Junction49 as Connection318
-        connect "Photovoltaic Panel17.n_node" Junction51 as Connection319
+        connect "Photovoltaic Panel34.n_node" Junction56 as Connection379
+        connect Junction56 Junction55 as Connection380
+        connect "Photovoltaic Panel17.n_node" Junction56 as Connection381
+        [
+            breakpoints = 6976, 8876
+        ]
+        connect "Photovoltaic Panel18.p_node" Junction57 as Connection382
+        connect Junction57 "Photovoltaic Panel1.p_node" as Connection383
+        connect I_pv.p_node Junction57 as Connection384
+        [
+            breakpoints = 7272, 7320
+        ]
     }
 
     default {
@@ -1382,6 +1406,24 @@ const real_t Q_1_real = 2.3;
             signals_data = "{}"
             selected_signals = "[]"
             user_range_data = "{}"
+        }
+
+        "core/Battery" {
+            signal_access = "inherit"
+            sig_output = "False"
+            lut = "False"
+            battery_type = "Lead-Acid"
+            nominal_voltage = "12.0"
+            capacity = "1.2"
+            initial_soc = "100.0"
+            execution_rate = "100e-6"
+            Ke_full = "108.0"
+            Kdisc_I = "5.0"
+            R_series = "0.25"
+            Kq_nom = "50.0"
+            Kq_exp = "0.9"
+            Ke_exp = "102.5"
+            preview = "Preview SOC Curve"
         }
 
         "core/Current Measurement" {

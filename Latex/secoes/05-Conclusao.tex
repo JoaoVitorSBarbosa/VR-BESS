@@ -1,0 +1,49 @@
+\section{Conclusão}
+\label{sec:conclusao}
+
+Este trabalho apresentou o desenvolvimento do conversor CC-CC de três
+portas do tipo VR-BESS para integração de painel fotovoltaico, banco de
+baterias e carga, com vistas à futura aplicação da técnica FCS-MPC. Foram
+implementados, como blocos mascarados próprios em substituição às
+bibliotecas nativas do Simscape Electrical (indisponíveis no ambiente
+MATLAB Online utilizado), os modelos do painel fotovoltaico de diodo único
+e da bateria de íon-lítio segundo a formulação de Shepherd, integrados ao
+domínio físico do conversor por meio de sensores e fontes controladas.
+
+A validação em malha aberta, conduzida com as chaves sob razão cíclica
+fixa, confirmou a correta integração entre esses subsistemas e o
+conversor: as grandezas de regime permanente observadas em cada porta --
+corrente do arranjo fotovoltaico, tensão e corrente de bateria, estado de
+carga e tensão de saída -- mostraram-se coerentes com os parâmetros de
+projeto adotados (configuração série/paralelo dos arranjos, parâmetros de
+catálogo do painel e da bateria), inclusive quanto à variação do estado de
+carga frente à corrente de bateria integrada. Esses resultados consolidam
+a base de simulação -- planta, sensores e atuadores no domínio físico --
+sobre a qual o controlador será desenvolvido.
+
+A validação também evidenciou que a tensão do arranjo fotovoltaico em
+regime depende da corrente demandada pelo conversor -- e não apenas da
+associação série/paralelo adotada --, de modo que a razão cíclica de
+$S_2$ precisou ser calculada a partir do ponto de operação
+autoconsistente do arranjo sob a corrente do Modo~1
+(Seção~\ref{subsec:duty_cycle}), e não a partir da tensão de máxima
+potência nominal. Essa calibração é válida para a corrente de
+carregamento de bateria observada nesta validação; variações nessa
+corrente -- decorrentes, por exemplo, da evolução do estado de carga da
+bateria ou de mudanças na irradiância -- deslocam o ponto de operação e
+exigiriam uma nova calibração da razão cíclica, o que reforça a
+necessidade do controlador em malha fechada proposto para a etapa
+subsequente do trabalho.
+
+O trabalho não abrangeu, até o momento, a implementação da malha de
+controle: os resultados aqui apresentados refletem o comportamento do
+conversor sob comutação em malha aberta, sem regulação ativa de tensão de
+saída ou de corrente de bateria, e para um único ponto de operação, sem
+degraus de irradiância, carga ou referência. A etapa subsequente deste
+trabalho consiste em implementar o controlador FCS-MPC descrito na
+Seção~\ref{subsec:fcsmpc} sobre a planta validada, avaliando sua capacidade
+de regulação da tensão de saída e de gerenciamento da corrente de bateria
+frente a esses cenários, bem como investigar o emprego dos observadores de
+estado apresentados na Seção~\ref{subsec:observadores} como alternativa
+para redução do número de sensores físicos necessários à implementação do
+controlador.

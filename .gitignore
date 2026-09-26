@@ -1,6 +1,15 @@
 # Typhoon HIL build output (regenerated on every compile, machine-specific)
 typhoonsim/*Target files/
 
+# LaTeX build output (regenerated on every compile)
+Latex/*.aux
+Latex/*.bbl
+Latex/*.blg
+Latex/*.fdb_latexmk
+Latex/*.fls
+Latex/*.log
+Latex/*.out
+
 # OS / editor cruft
 .DS_Store
 Thumbs.db

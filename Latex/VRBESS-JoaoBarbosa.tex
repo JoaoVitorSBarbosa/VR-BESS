@@ -1,0 +1,78 @@
+%===============================================================================
+\documentclass[a4paper]{ifacconf}
+
+% Pacotes Essenciais
+\usepackage{graphicx,amsmath,url}
+\usepackage[round]{natbib}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{circuitikz}
+\usepackage{tikz}
+
+% Configuração de Idioma e Codificação
+\usepackage[english,brazil]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{ae}
+
+% Definições de Ambientes Matemáticos
+\newtheorem{teorema}[thm]{{\em Teorema}}{ }
+\newtheorem{lema}[thm]{{\em Lema}}{ }
+\newtheorem{corolario}[thm]{{\em Corolário}}{ }
+\newenvironment{prova}{{\bf Prova.}}{ }
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Desenvolvimento e Controle de Conversor CC-CC de Três Portas Utilizando Técnica FCS-MPC para Sistemas Fotovoltaicos com Armazenamento}
+
+\author[First]{João Vitor Santos Barbosa}
+\author[First]{Silvia Costa Ferreira}
+
+\address[First]{Departamento de Automática, Universidade Federal de Lavras, MG.}
+
+% --- RESUMO E ABSTRACT ---
+\selectlanguage{english}
+\renewcommand{\abstractname}{} % Limpa o título padrão do template para inserirmos manualmente
+\begin{abstract}
+\selectlanguage{brazil}
+{\noindent \bf Resumo}:
+A crescente inserção da geração fotovoltaica em micro-redes exige sistemas eficientes de armazenamento e regulação para mitigar a intermitência solar. Este trabalho propõe o desenvolvimento e a simulação computacional de um conversor CC-CC de três portas do tipo VR-BESS (Voltage Regulator - Battery Energy Storage System), a ser controlado pela técnica de Controle Preditivo Baseado em Modelo com Conjunto Finito de Controle (FCS-MPC). A topologia adotada reduz a contagem de componentes ao utilizar um indutor compartilhado e apenas duas chaves semicondutoras para gerenciar o fluxo de potência entre o painel fotovoltaico, o banco de baterias e a carga. A modelagem matemática do sistema foi implementada em ambiente MATLAB/Simulink, combinando funções analíticas no domínio de sinal para a planta fotovoltaica e a bateria de íon-lítio com a simulação física do conversor no Simscape Electrical. Nesta etapa do trabalho, os subsistemas de painel fotovoltaico e banco de baterias, desenvolvidos como blocos mascarados próprios em substituição às bibliotecas nativas do Simscape (indisponíveis no ambiente MATLAB Online utilizado), foram integrados ao conversor VR-BESS e validados em malha aberta, com as chaves operando sob sinais PWM de razão cíclica fixa, recalculada a partir do ponto de operação autoconsistente do arranjo fotovoltaico. Os resultados confirmam a correta integração entre os domínios de sinal e físico do Simscape e a coerência das tensões e do estado de carga observados com os parâmetros de projeto adotados, consolidando a base de simulação sobre a qual o controlador FCS-MPC será implementado e avaliado na próxima etapa do trabalho.
+
+\vskip 3mm
+\selectlanguage{english}
+{\noindent \bf Abstract}:
+The increasing penetration of photovoltaic generation in microgrids requires efficient storage and regulation systems to mitigate solar intermittency. This paper presents the development and computational simulation of a three-port DC-DC converter of the VR-BESS (Voltage Regulator - Battery Energy Storage System) type, to be controlled by the Finite Control Set Model Predictive Control (FCS-MPC) technique. The adopted topology reduces component count by using a shared inductor and only two semiconductor switches to manage the power flow among the photovoltaic panel, the battery bank, and the load. The mathematical modeling of the system was implemented in the MATLAB/Simulink environment, combining analytical functions in the signal domain for the photovoltaic plant and the lithium-ion battery with the physical simulation of the converter in Simscape Electrical. At this stage of the work, the photovoltaic panel and battery bank subsystems, developed as custom masked blocks in place of the native Simscape libraries (unavailable in the MATLAB Online environment used), were integrated with the VR-BESS converter and validated in open loop, with the switches driven by fixed duty-cycle PWM signals recalculated from the self-consistent operating point of the photovoltaic array. Results confirm the correct integration between the signal and physical domains of Simscape and the consistency of the observed voltages and state of charge with the adopted design parameters, consolidating the simulation baseline upon which the FCS-MPC controller will be implemented and evaluated in the next stage of the work.
+\end{abstract}
+
+% --- PALAVRAS-CHAVE ---
+\begin{keyword}
+\selectlanguage{brazil}
+{\noindent\it Palavras-chaves:} Controle Preditivo Baseado em Modelo, Conversor de Três Portas, Sistemas Fotovoltaicos, Armazenamento de Energia, FCS-MPC.
+
+\vskip 2mm
+\selectlanguage{english}
+{\noindent\it Keywords:} Model Predictive Control, Three-Port Converter, Photovoltaic Systems, Energy Storage, FCS-MPC.
+\end{keyword}
+
+\selectlanguage{brazil}
+\end{frontmatter}
+
+%===============================================================================
+% CORPO DO TEXTO
+%===============================================================================
+
+\input{secoes/01-introducao}
+\input{secoes/02-RefTeorico}
+\input{secoes/03-Metodologia}
+\input{secoes/04-Resultados}
+\input{secoes/05-Conclusao}
+
+%===============================================================================
+% REFERÊNCIAS
+%===============================================================================
+\bibliography{ifacconf}
+
+\end{document}

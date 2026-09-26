@@ -21,6 +21,15 @@ malha fechada. O artigo/dissertação em si (LaTeX) fica em `/home/joaovitor/Doc
   (gitignored, recriada a cada build).
 - `kicad/` — vazio, reservado para o hardware (placa).
 
+## Convenção: documentar dependências instaladas no README
+
+Sempre que uma dependência/pacote for instalada no sistema pra viabilizar alguma parte do projeto
+(ex.: `sudo pacman -S texlive-...` pra compilar o LaTeX do TCC, um pacote Python, etc.), registrar
+no `README.md`: o comando exato usado, o que ele instala, e por que foi necessário (qual parte do
+projeto depende disso) — mesmo padrão já usado na seção de instalação do Typhoon HIL do README
+(bloco de comando + explicação em prosa ao redor). Objetivo: manter o ambiente reproduzível pra quem
+clonar o repo depois, sem precisar redescobrir essas dependências na unha.
+
 ## Valores de projeto (Modo 1 — regula tensão + carrega bateria)
 
 - Vo = 400 V (Ro = 160 Ω, Po = 1000 W); Vbat = 252 V (Ns_bat=15, Np_bat=1)

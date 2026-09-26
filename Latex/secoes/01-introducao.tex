@@ -1,0 +1,62 @@
+\section{Introdução}
+\label{sec:introducao}
+
+A crescente penetração da geração fotovoltaica nas redes elétricas tem sido
+acompanhada por desafios relacionados à intermitência e à variabilidade
+dessa fonte, que comprometem a estabilidade do fornecimento de energia e a
+qualidade de tensão em sistemas de pequeno e médio porte
+\citep{ayaz2014improved}. Para mitigar esses efeitos, sistemas de
+armazenamento de energia em baterias (\textit{Battery Energy Storage
+System} -- BESS) têm sido amplamente incorporados a instalações
+fotovoltaicas, atuando como reguladores de potência e garantindo o
+suprimento contínuo da carga mesmo sob variações bruscas de irradiância.
+
+A integração entre o painel fotovoltaico, o banco de baterias e a carga é
+tradicionalmente realizada por meio de conversores CC-CC independentes, um
+para cada fonte, conectados a um barramento comum. Essa abordagem, embora
+simples, implica maior número de componentes, perdas adicionais de
+conversão e custo elevado. Como alternativa, conversores CC-CC de múltiplas
+portas têm sido propostos para integrar essas três interfaces em um único
+estágio de potência, reduzindo a complexidade do sistema sem comprometer a
+flexibilidade no gerenciamento do fluxo de energia \citep{zhang2025adaptive}.
+
+Por outro lado, a operação desses conversores envolve o acoplamento entre
+múltiplas portas, incertezas paramétricas e perturbações de carga não
+lineares, fatores que reduzem a eficácia de controladores clássicos de
+ganho fixo, como o PID, frente a variações bruscas de operação
+\citep{zhang2025adaptive}. Técnicas de controle preditivo baseado em modelo
+têm-se mostrado uma alternativa robusta para esse cenário, por incorporar
+diretamente, na própria formulação do problema de controle, as restrições
+físicas do sistema e suas múltiplas variáveis. Dentro dessa classe de
+controladores, o Controle Preditivo Baseado em Modelo com Conjunto Finito
+de Controle (\textit{Finite Control Set Model Predictive Control} --
+FCS-MPC) explora diretamente a natureza discreta dos conversores
+eletrônicos de potência, prescindindo da etapa de modulação por largura de
+pulso (PWM) e permitindo respostas dinâmicas rápidas mesmo em sistemas
+multivariáveis \citep{ferreira2018finite, wang2023fcsmpc}.
+
+Neste trabalho, adota-se a topologia de conversor de três portas do tipo
+VR-BESS (\textit{Voltage Regulator -- Battery Energy Storage System}), que
+integra a porta fotovoltaica, a porta de armazenamento e a porta de carga
+utilizando apenas duas chaves semicondutoras e um indutor compartilhado,
+operando como conversor \textit{Buck} durante o carregamento da bateria e
+como \textit{Boost} na regulação da tensão de saída. O número reduzido de
+chaves resulta em um conjunto de estados de comutação naturalmente pequeno,
+o que torna essa topologia particularmente adequada à aplicação direta do
+FCS-MPC, cujo custo computacional cresce com o número de estados avaliados
+a cada período de amostragem.
+
+O objetivo deste trabalho é desenvolver e simular o controle do conversor
+VR-BESS por meio da técnica FCS-MPC, a partir da modelagem em espaço de
+estados do conversor e do painel fotovoltaico associado. Além disso, serão
+estudados observadores de estado como alternativa para reduzir a
+quantidade de sensores físicos necessários à implementação do
+controlador, contribuindo para uma solução de controle mais simples e de
+menor custo de instrumentação. Como etapa prévia à síntese do controlador,
+este trabalho apresenta a modelagem e a validação em malha aberta do
+conversor VR-BESS e de seus subsistemas de painel fotovoltaico e banco de
+baterias, implementados como bibliotecas próprias no Simscape Electrical.
+Essa validação estabelece a base de simulação sobre a qual o controlador
+FCS-MPC será desenvolvido e avaliado, em cenários de variação de
+irradiância, carga e referência de tensão, na etapa subsequente do
+trabalho.

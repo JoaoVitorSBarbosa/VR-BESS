@@ -95,6 +95,32 @@ versionada — é recriada localmente a cada compilação.
 - **Distro não reconhecida pelo instalador** (ver passo 1 acima) — patch e reprocedimento
   documentados no `CLAUDE.md`.
 
+### `Latex/`
+
+Fonte LaTeX do artigo/TCC (baixado do Overleaf), arquivo principal `VRBESS-JoaoBarbosa.tex`
+(renomeado do `sbaconf.tex` original do template; classe `ifacconf`, formato IFAC). Compilação local
+testada com sucesso (7 páginas, `VRBESS-JoaoBarbosa.pdf`), com `latexmk`
+resolvendo sozinho as passadas de BibTeX (bibliografia usa `ifacconf.bst`, já incluído na pasta —
+`\bibliographystyle` é definido dentro de `ifacconf.cls`, nada externo).
+
+```
+sudo pacman -S texlive-basic texlive-latex texlive-latexextra texlive-latexrecommended \
+  texlive-pictures texlive-fontsrecommended texlive-langportuguese texlive-binextra
+```
+
+Instala o TeX Live necessário pra compilar o `VRBESS-JoaoBarbosa.tex`: núcleo do LaTeX e `graphicx`/`amsmath`/
+`url` (`texlive-basic`/`texlive-latex`), `natbib`/`subcaption` (`texlive-latexrecommended`), `tikz`/
+`circuitikz` (`texlive-pictures`), pacote `ae` (`texlive-fontsrecommended`), hifenização em
+português pro `babel` (`texlive-langportuguese`), e `latexmk` (`texlive-binextra`) pra não precisar
+rodar `pdflatex`/`bibtex` manualmente em sequência. Optou-se pelo TeX Live completo (em vez de algo
+mais leve como `tectonic`) por compatibilidade — o documento usa `natbib`+BibTeX com `.bst` próprio,
+mais seguro no TeX Live tradicional.
+
+**Como compilar:**
+```
+cd Latex && latexmk -pdf VRBESS-JoaoBarbosa.tex
+```
+
 ### `kicad/`
 
 Reservado para o projeto de hardware (placa do conversor). Ainda vazio.

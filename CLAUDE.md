@@ -696,9 +696,19 @@ recalculados com os parâmetros reais deste projeto (ver "Valores de projeto" ac
     ficar perto de `400µF` com opção de catálogo real: `390µF` (E12, mais próximo do artigo) ou
     `470µF` (E6/E12, mais fácil de achar/mais barato, com alguma margem a mais)** — valor final
     exato ainda não escolhido pelo usuário, registrar aqui quando decidir. Teste de degrau de `G`
-    considerado satisfatório pelo usuário — passou pra testar variação de temperatura (`T`) em
-    seguida.
-  3. [ ] Degrau de carga (`Ro` muda).
+    considerado satisfatório pelo usuário.
+  - **Degrau de temperatura testado (12/10/2026) — OK.** Degraus `25→0→45→65→25°C` com `G=1000`
+    fixo, resultado satisfatório pelo usuário. Nenhum ajuste de código foi necessário (diferente de
+    `G`, o teto `ILs_mpp` não escala com `T` — o coeficiente de corrente `Ki` é pequeno o bastante
+    pra não precisar, e o `Co` maior já absorve a variação de tensão por `Kv`).
+  3. [ ] Degrau de carga (`Ro` muda) — **ainda não testado**. Achado antes de testar: `Po_ref` no
+    `output_fnc` é uma **constante fixa** (`1000W = Vo_ref²/Ro_nominal`), não lê `Ro` real da
+    simulação — se `Ro` mudar de verdade (não só a carga momentânea), o controlador continua
+    mirando `1000W`, fazendo `Vo` se estabilizar longe de `400V` (`P=V²/R` com `P` fixo e `R` maior
+    → `V` sobe). Duas opções discutidas, nenhuma decidida ainda: (a) testar assim mesmo e
+    documentar como limitação conhecida, ou (b) calcular a potência-alvo a partir de `V_out×I_out`
+    medidos (sensores já existem no esquemático) em vez da constante, pra perseguir `Vo=400V`
+    independente de `Ro`.
   - Comparação lado a lado com malha aberta não foi priorizada (o PWM fixo será removido, não
     mantido como fallback) — se precisar comparar depois, salvar uma cópia do `.tse` antes de
     remover `Constant9`/`Constant10`/`PWM_Mod_S1`/`PWM_Mod_S2`.

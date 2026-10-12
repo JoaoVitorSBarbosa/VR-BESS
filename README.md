@@ -133,12 +133,32 @@ Reservado para o projeto de hardware (placa do conversor). Ainda vazio.
   componentes nativos (`VR-BESS-LIBS-COMPARE.tse`).
 - **Controlador FCS-MPC: implementado e funcionando em `VR-BESS.tse`**, substituindo
   definitivamente o PWM fixo. Regula `V_out≈400V` em regime permanente (testado com `SOC=50%` e
-  `100%`) e é robusto a variação de irradiância (`G` de `0` a `1400W/m²`). Teste de variação de
-  temperatura em andamento. Proteção/limitador antigos da bateria permanecem desligados — o
-  FCS-MPC assume os limites de corrente via saturação da referência. Ver `CLAUDE.md` (seção
-  "Roteiro: controlador FCS-MPC") para o detalhamento completo das decisões de projeto e da
-  depuração.
+  `100%`), robusto a variação de irradiância (`G` de `0` a `1400W/m²`) e de temperatura
+  (`25→0→45→65→25°C`). Proteção/limitador antigos da bateria permanecem desligados — o FCS-MPC
+  assume os limites de corrente via saturação da referência. Ver `CLAUDE.md` (seção "Roteiro:
+  controlador FCS-MPC") para o detalhamento completo das decisões de projeto e da depuração.
 - KiCad: não iniciado.
+
+## Pendências (checklist)
+
+- [ ] **Degrau de carga (`Ro`)** — ainda não testado. `Po_ref` hoje é uma constante fixa (`1000W`),
+  não lê `Ro` real; se `Ro` mudar de verdade, `Vo` provavelmente foge de `400V`. Decidir: testar
+  assim mesmo (documentar limitação) ou calcular a potência-alvo a partir de `V_out×I_out` medidos
+  antes de testar.
+- [ ] **Valor comercial final do `Cvo`** — hoje testado em `400µF` (igual ao artigo), decidir entre
+  `390µF` (mais próximo do valor validado) ou `470µF` (mais fácil de achar/mais barato).
+- [ ] **Documentação do TCC**: reescrever a derivação do modelo discreto (hoje só em
+  `Latex/secoes/old.tex`, fora do documento ativo, com valores de outro trabalho) com os valores
+  reais deste projeto; adicionar ao `Latex/ifacconf.bib` as entradas que faltam:
+  `braga2022controle`, `marcello22019modelagem`, `delay`, e **`paper_4440`** (usado pra validar o
+  `Co` — Braga, Carvalho, Ferreira, Pacheco, Pereira, "Controle Preditivo Baseado em Modelo para
+  Conversores de 3 Portas: o Sistema VR-BESS").
+- [ ] **Escopo prático do TCC** (hardware real) — ainda não decidido: protótipo físico completo
+  (KiCad + fabricação + bancada), projeto de hardware especificado sem montar, ou ficar só na
+  simulação validada. Depende do prazo restante do trabalho.
+- [ ] Reavaliar se a proteção da bateria (sinal `S`) e o limitador de corrente (`GainKi`) precisam
+  ser religados antes de qualquer uso além de simulação/validação.
+- [ ] KiCad: não iniciado — depende da decisão de escopo acima.
 
 ## Roteiro: controlador FCS-MPC
 

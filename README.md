@@ -130,7 +130,32 @@ Reservado para o projeto de hardware (placa do conversor). Ainda vazio.
 - MATLAB/Simscape: modelo validado em malha aberta.
 - Typhoon HIL: modelo completo simulando em malha aberta, tensões/correntes próximas do projeto
   (Vo≈400V, Vbat≈252V), tanto na versão `.tlib` (`VR-BESS.tse`) quanto na alternativa com
-  componentes nativos (`VR-BESS-LIBS-COMPARE.tse`). Proteção/limitador da bateria ainda
-  desligados pra fins de calibração, controlador FCS-MPC ainda não implementado — ver `CLAUDE.md`
-  para o detalhamento completo do estado atual e das ressalvas.
+  componentes nativos (`VR-BESS-LIBS-COMPARE.tse`).
+- **Controlador FCS-MPC: implementado e funcionando em `VR-BESS.tse`**, substituindo
+  definitivamente o PWM fixo. Regula `V_out≈400V` em regime permanente (testado com `SOC=50%` e
+  `100%`) e é robusto a variação de irradiância (`G` de `0` a `1400W/m²`). Teste de variação de
+  temperatura em andamento. Proteção/limitador antigos da bateria permanecem desligados — o
+  FCS-MPC assume os limites de corrente via saturação da referência. Ver `CLAUDE.md` (seção
+  "Roteiro: controlador FCS-MPC") para o detalhamento completo das decisões de projeto e da
+  depuração.
 - KiCad: não iniciado.
+
+## Roteiro: controlador FCS-MPC
+
+Resumo da implementação final — detalhamento completo (decisões, porquês, jornada de depuração)
+na seção "Roteiro: controlador FCS-MPC" do `CLAUDE.md`:
+
+- Plataforma base: `VR-BESS.tse` (`.tlib`), substituindo definitivamente o PWM fixo
+  (`Constant9`/`Constant10` + `PWM_Mod_S1`/`PWM_Mod_S2`), sem fallback comutável.
+- Escopo: 3 estados de chaveamento `(1,1)`/`(1,0)`/`(0,1)` (`(0,0)` é estruturalmente redundante,
+  removido), `Ts=1µs`, horizonte de predição de 2 passos.
+- Referências: `i_Ls*` por balanço de potência com teto de MPP escalado pela irradiância medida
+  (`G`); `i_Lbat*` por balanço de potência usando `P_pv` medido em tempo real, saturado nos
+  limites de projeto (0,5C carga / 2C descarga). Ambas com limitador de taxa de variação.
+- Função custo com normalização linear entre os termos de corrente (fiel à dissertação da Isadora
+  Braga, `braga2022controle`).
+- `Cvo` (capacitor de saída) aumentado de `1,41µF` pra `~400µF` — necessário pro FCS-MPC
+  (frequência de chaveamento variável), validado contra `paper_4440.pdf` (mesmo grupo de pesquisa,
+  resultado equivalente).
+- Proteção/limitador antigos da bateria permanecem desligados — o FCS-MPC assume os limites de
+  corrente via saturação da referência.

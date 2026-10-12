@@ -80,6 +80,7 @@ model "VR-BESS" {
     component Subsystem Root {
         component "core/Capacitor" Cbat {
             capacitance = "0.109e-6"
+            initial_voltage = "252"
         }
         [
             position = 7980, 8280
@@ -102,7 +103,8 @@ model "VR-BESS" {
         ]
 
         component "core/Capacitor" Cvo {
-            capacitance = "1.41e-6"
+            capacitance = "400e-6"
+            initial_voltage = "400"
         }
         [
             position = 8452, 8220
@@ -162,6 +164,7 @@ model "VR-BESS" {
 
         component "core/Capacitor" Cpv {
             capacitance = "0.00022"
+            initial_voltage = "346"
         }
         [
             position = 7388, 8216
@@ -176,7 +179,7 @@ model "VR-BESS" {
 
         component "core/Constant" SOC_inicial_bat {
             execution_rate = "2e-7"
-            value = "50"
+            value = "100"
         }
         [
             position = 7032, 8640
@@ -213,9 +216,9 @@ model "VR-BESS" {
         ]
 
         component "core/Scope" Scope1 {
-            selected_signals = "[\'V_bat\', \'V_out\', \'I_bat\', \'V_pv\', \'I_out\', \'SOC_mes\', \'I_pv\']"
-            signals_data = "{\"plot_settings\": {\"layout\": \"Vertical\", \"background_color\": \"white\", \"legend_visible\": true, \"signals_tooltips_enabled\": true}, \"signals\": {\"V_bat\": {\"viewports\": [2], \"type\": \"analog\", \"color\": {\"2\": \"#FF0000\"}, \"display\": {\"2\": \"solid\"}, \"is_manual\": {\"2\": false}}, \"V_out\": {\"viewports\": [2], \"type\": \"analog\", \"color\": {\"2\": \"#00CC00\"}, \"display\": {\"2\": \"solid\"}, \"is_manual\": {\"2\": false}}, \"I_bat\": {\"viewports\": [3], \"type\": \"analog\", \"color\": {\"3\": \"#FF0000\"}, \"display\": {\"3\": \"solid\"}, \"is_manual\": {\"3\": false}}, \"V_pv\": {\"viewports\": [2], \"type\": \"analog\", \"color\": {\"2\": \"#0099FF\"}, \"display\": {\"2\": \"solid\"}, \"is_manual\": {\"2\": false}}, \"I_out\": {\"viewports\": [3], \"type\": \"analog\", \"color\": {\"3\": \"#00CC00\"}, \"display\": {\"3\": \"solid\"}, \"is_manual\": {\"3\": false}}, \"SOC_mes\": {\"viewports\": [1], \"type\": \"analog\", \"color\": {\"1\": \"#FF0000\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"I_pv\": {\"viewports\": [3], \"type\": \"analog\", \"color\": {\"3\": \"#0099FF\"}, \"display\": {\"3\": \"solid\"}, \"is_manual\": {\"3\": false}}}, \"viewports\": {\"1\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"2\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"3\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"4\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"5\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"6\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}}}"
-            user_range_data = "{\"1\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-15.0, 38.0]}, \"2\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-12.0, 25.0]}, \"3\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Manual\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-10.0, 30.0]}, \"4\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-20.0, 45.0]}, \"5\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-10.0, 30.0]}, \"6\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.0, 1.0]}}"
+            selected_signals = "[\'V_bat\', \'V_out\', \'I_bat\', \'V_pv\', \'I_out\', \'SOC_mes\', \'I_pv\', \'S1_opt\', \'S2_opt\', \'dbg_ILbat_ref\', \'dbg_ILs_ref\', \'dbg_cost00\', \'dbg_cost01\', \'dbg_cost10\', \'dbg_cost11\', \'dbg_Vpv_m\', \'dbg_Vo_m\', \'dbg_Vbat_m\', \'G_pv\', \'dbg_ILs_m\']"
+            signals_data = "{\"plot_settings\": {\"layout\": \"Vertical\", \"background_color\": \"white\", \"legend_visible\": true, \"signals_tooltips_enabled\": true}, \"signals\": {\"V_bat\": {\"viewports\": [2], \"type\": \"analog\", \"color\": {\"2\": \"#FF0000\"}, \"display\": {\"2\": \"solid\"}, \"is_manual\": {\"2\": false}}, \"V_out\": {\"viewports\": [2], \"type\": \"analog\", \"color\": {\"2\": \"#00CC00\"}, \"display\": {\"2\": \"solid\"}, \"is_manual\": {\"2\": false}}, \"I_bat\": {\"viewports\": [4], \"type\": \"analog\", \"color\": {\"4\": \"#FF0000\"}, \"display\": {\"4\": \"solid\"}, \"is_manual\": {\"4\": false}}, \"V_pv\": {\"viewports\": [2], \"type\": \"analog\", \"color\": {\"2\": \"#0099FF\"}, \"display\": {\"2\": \"solid\"}, \"is_manual\": {\"2\": false}}, \"I_out\": {\"viewports\": [4], \"type\": \"analog\", \"color\": {\"4\": \"#00CC00\"}, \"display\": {\"4\": \"solid\"}, \"is_manual\": {\"4\": false}}, \"SOC_mes\": {\"viewports\": [1], \"type\": \"analog\", \"color\": {\"1\": \"#FF0000\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"I_pv\": {\"viewports\": [4], \"type\": \"analog\", \"color\": {\"4\": \"#0099FF\"}, \"display\": {\"4\": \"solid\"}, \"is_manual\": {\"4\": false}}, \"S1_opt\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"4\": \"#FF0000\"}, \"display\": {\"4\": \"solid\"}, \"is_manual\": {\"4\": false}}, \"S2_opt\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"4\": \"#00CC00\"}, \"display\": {\"4\": \"solid\"}, \"is_manual\": {\"4\": false}}, \"dbg_ILbat_ref\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"5\": \"#FF0000\"}, \"display\": {\"5\": \"solid\"}, \"is_manual\": {\"5\": false}}, \"dbg_ILs_ref\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"5\": \"#00CC00\"}, \"display\": {\"5\": \"solid\"}, \"is_manual\": {\"5\": false}}, \"dbg_cost00\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"6\": \"#FF0000\"}, \"display\": {\"6\": \"solid\"}, \"is_manual\": {\"6\": false}}, \"dbg_cost01\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"6\": \"#00CC00\"}, \"display\": {\"6\": \"solid\"}, \"is_manual\": {\"6\": false}}, \"dbg_cost10\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"6\": \"#0099FF\"}, \"display\": {\"6\": \"solid\"}, \"is_manual\": {\"6\": false}}, \"dbg_cost11\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"6\": \"#FFCC00\"}, \"display\": {\"6\": \"solid\"}, \"is_manual\": {\"6\": false}}, \"dbg_Vpv_m\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"3\": \"#0099FF\"}, \"display\": {\"3\": \"solid\"}, \"is_manual\": {\"3\": false}}, \"dbg_Vo_m\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"3\": \"#00CC00\"}, \"display\": {\"3\": \"solid\"}, \"is_manual\": {\"3\": false}}, \"dbg_Vbat_m\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"3\": \"#FF0000\"}, \"display\": {\"3\": \"solid\"}, \"is_manual\": {\"3\": false}}, \"G_pv\": {\"viewports\": [3], \"type\": \"analog\", \"color\": {\"3\": \"#FF0000\"}, \"display\": {\"3\": \"solid\"}, \"is_manual\": {\"3\": false}}, \"dbg_ILs_m\": {\"viewports\": [], \"type\": \"analog\", \"color\": {\"5\": \"#0099FF\"}, \"display\": {\"5\": \"solid\"}, \"is_manual\": {\"5\": false}}}, \"viewports\": {\"1\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"2\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"3\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"4\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"5\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"6\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}}}"
+            user_range_data = "{\"1\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-15.0, 38.0]}, \"2\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-12.0, 25.0]}, \"3\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-10.0, 30.0]}, \"4\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Manual\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-10.0, 10.0]}, \"5\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-10.0, 30.0]}, \"6\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.5, 2.0]}}"
         }
         [
             position = 7856, 7960
@@ -242,22 +245,6 @@ model "VR-BESS" {
         }
         [
             position = 6684, 8692
-        ]
-
-        component "core/Constant" G_pv {
-            execution_rate = "2e-07"
-            value = "1000"
-        }
-        [
-            position = 6684, 8756
-        ]
-
-        component "core/Constant" Temp_pv {
-            execution_rate = "2e-07"
-            value = "25"
-        }
-        [
-            position = 6684, 8820
         ]
 
         component "core/C function" SOC_it0_calc {
@@ -359,6 +346,7 @@ const real_t Q_1_real = 2.3;
         component "core/Voltage Measurement" V_out {
             execution_rate = "2e-07"
             override_signal_name = "True"
+            sig_output = "True"
             signal_name = "V_out"
         }
         [
@@ -370,6 +358,7 @@ const real_t Q_1_real = 2.3;
         component "core/Current Measurement" I_pv {
             execution_rate = "2e-07"
             override_signal_name = "True"
+            sig_output = "True"
             signal_name = "I_pv"
         }
         [
@@ -380,6 +369,7 @@ const real_t Q_1_real = 2.3;
         component "core/Voltage Measurement" V-pv {
             execution_rate = "2e-07"
             override_signal_name = "True"
+            sig_output = "True"
             signal_name = "V_pv"
         }
         [
@@ -403,6 +393,7 @@ const real_t Q_1_real = 2.3;
         component "core/Voltage Measurement" V_bat {
             execution_rate = "2e-07"
             override_signal_name = "True"
+            sig_output = "True"
             signal_name = "V_bat"
         }
         [
@@ -441,90 +432,12 @@ const real_t Q_1_real = 2.3;
             size = 64, 32
         ]
 
-        component "core/Constant" Constant8 {
-            execution_rate = "2e-07"
-        }
-        [
-            position = 7444, 7896
-        ]
-
-        component "core/Constant" Constant9 {
-            execution_rate = "2e-07"
-            value = "0.845"
-        }
-        [
-            position = 7344, 7936
-        ]
-
-        component "core/Constant" Constant10 {
-            execution_rate = "2e-07"
-            value = "0.21"
-        }
-        [
-            position = 7444, 7972
-        ]
-
-        component "core/PWM Modulator" PWM_Mod_S1 {
-            carrier = "Sawtooth - rising"
-            carrier_freq = "100000"
-            d_time = "1e-6"
-            load_mode = "on max"
-            ref_sig_min_max = "[0, 1.0]"
-            signal_access = "Public"
-        }
-        [
-            position = 7540, 7900
-        ]
-
-        component "core/PWM Modulator" PWM_Mod_S2 {
-            carrier = "Sawtooth - rising"
-            carrier_freq = "100000"
-            d_time = "1e-6"
-            load_mode = "on max"
-            ref_sig_min_max = "[0, 1.0]"
-            signal_access = "Public"
-        }
-        [
-            position = 7540, 7964
-        ]
-
-        component "core/Digital Input" "Digital Input1" {
-            execution_rate = "2e-7"
-        }
-        [
-            position = 7428, 8152
-        ]
-
-        component "core/Digital Input" "Digital Input2" {
-            addr = "2"
-            execution_rate = "2e-7"
-        }
-        [
-            position = 7428, 8276
-        ]
-
-        component "core/Probe" PWM_S2 {
-            override_signal_name = "True"
-            signal_name = "PWM_S2"
-        }
-        [
-            position = 7508, 8240
-        ]
-
-        component "core/Probe" PWM_S1 {
-            override_signal_name = "True"
-            signal_name = "PWM_S1"
-        }
-        [
-            position = 7508, 8192
-        ]
-
         component "core/Initial Settings" "Initial Settings1" {
             digital_outputs = "[\'DO1;..PWM_Mod_S1.TOP_1;False;False;0\', \'DO2;..PWM_Mod_S2.TOP_1;False;False;0\']"
             model_load_legacy = "1"
         }
         [
-            position = 7180, 7996
+            position = 7984, 7960
         ]
 
         component "core/Voltage Measurement" Va2 {
@@ -536,6 +449,400 @@ const real_t Q_1_real = 2.3;
             position = 7608, 8308
             rotation = right
             size = 64, 32
+        ]
+
+        component "core/C function" "C function1" {
+            arb_defs = "/*Begin code section*/
+
+/*End code section*/"
+            init_fnc = "/*Begin code section*/
+
+/*End code section*/"
+            input_terminals = "real V_pv;inherit V_bat;inherit V_o;inherit I_pv;inherit I_bat;inherit G_in;"
+            input_terminals_dimensions = "inherit;inherit;inherit;inherit;inherit;inherit"
+            input_terminals_feedthrough = "True;True;True;True;True;True"
+            input_terminals_show_labels = "True;True;True;True;True;False"
+            output_fnc = "/*Begin code section*/
+const real_t Ls = 3.89e-3;
+const real_t Lbat = 4.23e-3;
+const real_t Co = 1.41e-6;
+const real_t Ro = 160.0;
+const real_t Ts = 1e-6;
+const real_t Po_ref = 1000.0;
+const real_t ILs_mpp_stc = 5.92;
+const real_t Ibat_chg_max = 1.15;
+const real_t Ibat_disc_max = 4.6;
+const real_t dILs_max = 0.02;
+const real_t dILbat_max = 0.02;
+
+static real_t S1_prev = 1.0;
+static real_t S2_prev = 1.0;
+static real_t ILs_ref_prev = 3.7;
+static real_t ILbat_ref_prev = -1.0;
+
+real_t Vpv_m, Vbat_m, Vo_m, ILs_m, ILbat_m, G_m;
+real_t Vpv_safe, Vbat_safe, ILs_mpp;
+real_t Pbat_target, ILs_ref_l;
+real_t Ppv_est, ILbat_ref_l;
+real_t wLs, wLbat;
+real_t gamma_prev, m_prev, dVo_dt1;
+real_t ILbat_k1, ILs_k1, Vo_k1;
+real_t m_c, gamma_c, ILbat_k2, ILs_k2;
+real_t erro_Ls, erro_Lbat;
+real_t cost11, cost10, cost01;
+real_t best_cost, S1_best, S2_best;
+
+Vpv_m = V_pv;
+Vbat_m = V_bat;
+Vo_m = V_o;
+ILs_m = I_pv;
+ILbat_m = I_bat;
+G_m = G_in;
+
+ILs_mpp = ILs_mpp_stc * (G_m / 1000.0);
+if (ILs_mpp < 0.0) ILs_mpp = 0.0;
+if (ILs_mpp > ILs_mpp_stc) ILs_mpp = ILs_mpp_stc;
+
+Vpv_safe = Vpv_m;
+if (Vpv_safe < 1.0) Vpv_safe = 1.0;
+Vbat_safe = Vbat_m;
+if (Vbat_safe < 1.0) Vbat_safe = 1.0;
+
+Pbat_target = Ibat_chg_max * Vbat_safe;
+ILs_ref_l = (Po_ref + Pbat_target) / Vpv_safe;
+if (ILs_ref_l > ILs_ref_prev + dILs_max) {
+    ILs_ref_l = ILs_ref_prev + dILs_max;
+}
+if (ILs_ref_l < ILs_ref_prev - dILs_max) {
+    ILs_ref_l = ILs_ref_prev - dILs_max;
+}
+if (ILs_ref_l > ILs_mpp) ILs_ref_l = ILs_mpp;
+if (ILs_ref_l < 0.0) ILs_ref_l = 0.0;
+ILs_ref_prev = ILs_ref_l;
+
+Ppv_est = Vpv_m * ILs_m;
+ILbat_ref_l = (Po_ref - Ppv_est) / Vbat_safe;
+if (ILbat_ref_l > ILbat_ref_prev + dILbat_max) {
+    ILbat_ref_l = ILbat_ref_prev + dILbat_max;
+}
+if (ILbat_ref_l < ILbat_ref_prev - dILbat_max) {
+    ILbat_ref_l = ILbat_ref_prev - dILbat_max;
+}
+if (ILbat_ref_l > Ibat_disc_max) ILbat_ref_l = Ibat_disc_max;
+if (ILbat_ref_l < -Ibat_chg_max) ILbat_ref_l = -Ibat_chg_max;
+ILbat_ref_prev = ILbat_ref_l;
+
+if (ILbat_ref_l >= 0.0) {
+    wLbat = 1.0 / Ibat_disc_max;
+} else {
+    wLbat = 1.0 / Ibat_chg_max;
+}
+wLs = 1.0 / ILs_mpp_stc;
+
+m_prev = 1.0 - S1_prev * S2_prev;
+if (S1_prev == 0.0 && S2_prev == 0.0) {
+    gamma_prev = (ILbat_m >= 0.0) ? 1.0 : 0.0;
+} else {
+    gamma_prev = S1_prev * (1.0 - S2_prev);
+}
+ILbat_k1 = ILbat_m + Ts*( Vbat_m/Lbat - gamma_prev/Lbat*Vo_m );
+ILs_k1 = ILs_m + Ts*( Vpv_m/Ls - m_prev/Ls*Vo_m );
+dVo_dt1 = gamma_prev/Co*ILbat_m + m_prev/Co*ILs_m;
+dVo_dt1 = dVo_dt1 - Vo_m/(Ro*Co);
+Vo_k1 = Vo_m + Ts*dVo_dt1;
+
+m_c = 0.0; gamma_c = 0.0;
+ILbat_k2 = ILbat_k1 + Ts*( Vbat_m/Lbat - gamma_c/Lbat*Vo_k1 );
+ILs_k2 = ILs_k1 + Ts*( Vpv_m/Ls - m_c/Ls*Vo_k1 );
+erro_Ls = ILs_ref_l - ILs_k2;
+erro_Lbat = ILbat_ref_l - ILbat_k2;
+cost11 = wLs*erro_Ls*erro_Ls + wLbat*erro_Lbat*erro_Lbat;
+
+m_c = 1.0; gamma_c = 1.0;
+ILbat_k2 = ILbat_k1 + Ts*( Vbat_m/Lbat - gamma_c/Lbat*Vo_k1 );
+ILs_k2 = ILs_k1 + Ts*( Vpv_m/Ls - m_c/Ls*Vo_k1 );
+erro_Ls = ILs_ref_l - ILs_k2;
+erro_Lbat = ILbat_ref_l - ILbat_k2;
+cost10 = wLs*erro_Ls*erro_Ls + wLbat*erro_Lbat*erro_Lbat;
+
+m_c = 1.0; gamma_c = 0.0;
+ILbat_k2 = ILbat_k1 + Ts*( Vbat_m/Lbat - gamma_c/Lbat*Vo_k1 );
+ILs_k2 = ILs_k1 + Ts*( Vpv_m/Ls - m_c/Ls*Vo_k1 );
+erro_Ls = ILs_ref_l - ILs_k2;
+erro_Lbat = ILbat_ref_l - ILbat_k2;
+cost01 = wLs*erro_Ls*erro_Ls + wLbat*erro_Lbat*erro_Lbat;
+
+best_cost = cost11;
+S1_best = 1.0;
+S2_best = 1.0;
+if (cost10 < best_cost) {
+    best_cost = cost10;
+    S1_best = 1.0;
+    S2_best = 0.0;
+}
+if (cost01 < best_cost) {
+    best_cost = cost01;
+    S1_best = 0.0;
+    S2_best = 1.0;
+}
+
+S1_opt = S1_best;
+S2_opt = S2_best;
+S1_prev = S1_best;
+S2_prev = S2_best;
+dbg_ILs_ref = ILs_ref_l;
+dbg_ILbat_ref = ILbat_ref_l;
+dbg_cost11 = cost11;
+dbg_cost10 = cost10;
+dbg_cost01 = cost01;
+dbg_cost00 = 0.0;
+dbg_Vpv_m = Vpv_m;
+dbg_Vbat_m = Vbat_m;
+dbg_Vo_m = Vo_m;
+dbg_ILs_m = ILs_m;
+dbg_ILbat_m = ILbat_m;
+/*End code section*/"
+            output_terminals = "real S1_opt;inherit S2_opt;inherit dbg_ILs_ref;inherit dbg_ILbat_ref;inherit dbg_cost11;inherit dbg_cost10;inherit dbg_cost01;inherit dbg_cost00;inherit dbg_Vpv_m;inherit dbg_Vbat_m;inherit dbg_Vo_m;inherit dbg_ILs_m;inherit dbg_ILbat_m;"
+            output_terminals_dimensions = "inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit"
+            output_terminals_feedthrough = "True;True;True;True;True;True;True;True;True;True;True;True;True"
+            output_terminals_show_labels = "True;True;True;True;True;True;True;True;True;True;True;True;True"
+            update_fnc = "/*Begin code section*/
+
+/*End code section*/"
+        }
+        [
+            position = 7188, 7536
+            size = 152, 704
+        ]
+
+        component "core/Probe" S1_opt {
+            override_signal_name = "True"
+            signal_name = "S1_opt"
+        }
+        [
+            position = 7360, 7188
+        ]
+
+        component "core/Probe" S2_opt {
+            override_signal_name = "True"
+            signal_name = "S2_opt"
+        }
+        [
+            position = 7412, 7340
+        ]
+
+        component "core/Probe" dbg_ILs_ref {
+            override_signal_name = "True"
+            signal_name = "dbg_ILs_ref"
+        }
+        [
+            position = 7312, 7344
+        ]
+
+        component "core/Probe" dbg_ILbat_ref {
+            override_signal_name = "True"
+            signal_name = "dbg_ILbat_ref"
+        }
+        [
+            position = 7312, 7392
+        ]
+
+        component "core/Probe" dbg_cost11 {
+            override_signal_name = "True"
+            signal_name = "dbg_cost11"
+        }
+        [
+            position = 7312, 7440
+        ]
+
+        component "core/Probe" dbg_cost10 {
+            override_signal_name = "True"
+            signal_name = "dbg_cost10"
+        }
+        [
+            position = 7312, 7488
+        ]
+
+        component "core/Probe" dbg_cost01 {
+            override_signal_name = "True"
+            signal_name = "dbg_cost01"
+        }
+        [
+            position = 7312, 7536
+        ]
+
+        component "core/Probe" dbg_cost00 {
+            override_signal_name = "True"
+            signal_name = "dbg_cost00"
+        }
+        [
+            position = 7312, 7584
+        ]
+
+        component "core/Probe" dbg_Vpv_m {
+            override_signal_name = "True"
+            signal_name = "dbg_Vpv_m"
+        }
+        [
+            position = 7312, 7632
+        ]
+
+        component "core/Probe" dbg_Vbat_m {
+            override_signal_name = "True"
+            signal_name = "dbg_Vbat_m"
+        }
+        [
+            position = 7312, 7680
+        ]
+
+        component "core/Probe" dbg_Vo_m {
+            override_signal_name = "True"
+            signal_name = "dbg_Vo_m"
+        }
+        [
+            position = 7312, 7728
+        ]
+
+        component "core/Probe" dbg_ILs_m {
+            override_signal_name = "True"
+            signal_name = "dbg_ILs_m"
+        }
+        [
+            position = 7312, 7776
+        ]
+
+        component "core/Probe" dbg_ILbat_m {
+            override_signal_name = "True"
+            signal_name = "dbg_ILbat_m"
+        }
+        [
+            position = 7312, 7824
+        ]
+
+        component "core/Step" Step1 {
+            execution_rate = "2e-07"
+            final_value = "1000"
+            initial_value = "1"
+            step_time = "0.02"
+        }
+        [
+            position = 6384, 8924
+        ]
+
+        component "core/Sum" Sum1 {
+        }
+        [
+            position = 6520, 8932
+        ]
+
+        component "core/Sum" Sum2 {
+        }
+        [
+            position = 6616, 9040
+        ]
+
+        component "core/Sum" Sum3 {
+        }
+        [
+            position = 6708, 9104
+        ]
+
+        component "core/Step" Step2 {
+            execution_rate = "2e-07"
+            final_value = "-300"
+            step_time = "0.04"
+        }
+        [
+            position = 6384, 8984
+        ]
+
+        component "core/Step" Step3 {
+            execution_rate = "2e-07"
+            final_value = "-300"
+            step_time = "0.06"
+        }
+        [
+            position = 6384, 9048
+        ]
+
+        component "core/Step" Step4 {
+            execution_rate = "2e-07"
+            final_value = "600"
+            step_time = "0.08"
+        }
+        [
+            position = 6384, 9112
+        ]
+
+        component "core/Probe" G_pv {
+            override_signal_name = "True"
+            signal_name = "G_pv"
+        }
+        [
+            position = 6816, 8976
+        ]
+
+        component "core/Step" Step5 {
+            execution_rate = "2e-07"
+            final_value = "0"
+            initial_value = "25"
+            step_time = "0.02"
+        }
+        [
+            position = 6384, 9176
+        ]
+
+        component "core/Sum" Sum4 {
+        }
+        [
+            position = 6520, 9184
+        ]
+
+        component "core/Sum" Sum5 {
+        }
+        [
+            position = 6616, 9292
+        ]
+
+        component "core/Sum" Sum6 {
+        }
+        [
+            position = 6708, 9356
+        ]
+
+        component "core/Step" Step6 {
+            execution_rate = "2e-07"
+            final_value = "45"
+            step_time = "0.04"
+        }
+        [
+            position = 6384, 9236
+        ]
+
+        component "core/Step" Step7 {
+            execution_rate = "2e-07"
+            final_value = "15"
+            step_time = "0.06"
+        }
+        [
+            position = 6384, 9300
+        ]
+
+        component "core/Step" Step8 {
+            execution_rate = "2e-07"
+            final_value = "15"
+            step_time = "0.08"
+        }
+        [
+            position = 6384, 9364
+        ]
+
+        component "core/Probe" Temp_pv {
+            override_signal_name = "True"
+            signal_name = "Temp_pv"
+        }
+        [
+            position = 6816, 9228
         ]
 
         tag From1 {
@@ -571,17 +878,6 @@ const real_t Q_1_real = 2.3;
             size = 132, 20
         ]
 
-        tag Goto3 {
-            value = "G_pv"
-            scope = local
-            kind = sp
-            direction = in
-        }
-        [
-            position = 6832, 8756
-            size = 132, 20
-        ]
-
         tag Goto4 {
             value = "Temp_pv"
             scope = local
@@ -589,7 +885,7 @@ const real_t Q_1_real = 2.3;
             direction = in
         }
         [
-            position = 6832, 8820
+            position = 6836, 9356
             size = 132, 20
         ]
 
@@ -791,6 +1087,171 @@ const real_t Q_1_real = 2.3;
             size = 108, 20
         ]
 
+        tag From16 {
+            value = "I_bat_mes"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 6948, 7728
+            size = 108, 20
+        ]
+
+        tag From17 {
+            value = "V_bat_mes"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 6948, 7344
+            size = 108, 20
+        ]
+
+        tag From18 {
+            value = "V_pv_mes"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 6948, 7216
+            size = 108, 20
+        ]
+
+        tag From19 {
+            value = "I_pv_mes"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 6948, 7600
+            size = 108, 20
+        ]
+
+        tag From20 {
+            value = "V_o_mes"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 6948, 7472
+            size = 108, 20
+        ]
+
+        tag Goto10 {
+            value = "V_o_mes"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 8696, 8220
+            size = 100, 20
+        ]
+
+        tag Goto11 {
+            value = "V_bat_mes"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 8696, 8288
+            size = 100, 20
+        ]
+
+        tag Goto12 {
+            value = "I_pv_mes"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 7372, 8052
+            size = 100, 20
+        ]
+
+        tag Goto13 {
+            value = "V_pv_mes"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 7440, 8460
+            size = 100, 20
+        ]
+
+        tag From21 {
+            value = "S1_opt"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 7452, 8152
+            size = 108, 20
+        ]
+
+        tag From22 {
+            value = "S2_opt"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 7452, 8272
+            size = 108, 20
+        ]
+
+        tag Goto14 {
+            value = "S1_opt"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 7348, 7248
+            size = 100, 20
+        ]
+
+        tag Goto15 {
+            value = "S2_opt"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 7348, 7296
+            size = 100, 20
+        ]
+
+        tag Goto16 {
+            value = "G_pv"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 6828, 9104
+            size = 132, 20
+        ]
+
+        tag From23 {
+            value = "G_pv"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 6944, 7856
+            size = 60, 20
+        ]
+
         junction Junction1 pe
         [
             position = 7552, 8092
@@ -891,16 +1352,6 @@ const real_t Q_1_real = 2.3;
             position = 7980, 8404
         ]
 
-        junction Junction44 sp
-        [
-            position = 7468, 8276
-        ]
-
-        junction Junction45 sp
-        [
-            position = 7460, 8152
-        ]
-
         junction Junction46 pe
         [
             position = 7608, 8216
@@ -914,6 +1365,26 @@ const real_t Q_1_real = 2.3;
         junction Junction48 pe
         [
             position = 7608, 8404
+        ]
+
+        junction Junction49 sp
+        [
+            position = 7280, 7296
+        ]
+
+        junction Junction50 sp
+        [
+            position = 7280, 7248
+        ]
+
+        junction Junction51 sp
+        [
+            position = 6744, 9104
+        ]
+
+        junction Junction52 sp
+        [
+            position = 6748, 9356
         ]
 
         connect Junction1 Ls.n_node as Connection4
@@ -948,8 +1419,6 @@ const real_t Q_1_real = 2.3;
         connect V_out.n_node Junction23 as Connection109
         connect Num_cel_serie_pv.out Goto1 as Connection133
         connect Num_cel_par_pv.out Goto2 as Connection134
-        connect G_pv.out Goto3 as Connection135
-        connect Temp_pv.out Goto4 as Connection136
         connect From1 pv_array1.Ns_mod as Connection137
         connect From2 pv_array1.Np_mod as Connection138
         connect From3 pv_array1.G as Connection141
@@ -1018,12 +1487,6 @@ const real_t Q_1_real = 2.3;
             breakpoints = 7984, 8404
         ]
         connect Cbat.n_node Junction43 as Connection224
-        connect Constant8.out PWM_Mod_S1.en as Connection250
-        connect Constant9.out PWM_Mod_S1.in as Connection251
-        connect Constant8.out PWM_Mod_S2.en as Connection255
-        [
-            breakpoints = 7480, 7896; 7480, 7956
-        ]
         connect From15 SOC_I_to_Ah.in as Connection256
         connect SOC_it0_calc.it0 SOC_it_integrator.init_condition_port as Connection257
         [
@@ -1033,13 +1496,6 @@ const real_t Q_1_real = 2.3;
         [
             breakpoints = 8076, 8788; 8076, 8648; 8160, 8648
         ]
-        connect "Digital Input2.out" Junction44 as Connection259
-        connect Junction44 S2.ctrl_in as Connection260
-        connect PWM_S2.in Junction44 as Connection261
-        connect "Digital Input1.out" Junction45 as Connection262
-        connect Junction45 S1.ctrl_in as Connection263
-        connect PWM_S1.in Junction45 as Connection264
-        connect Constant10.out PWM_Mod_S2.in as Connection265
         connect Junction4 Junction46 as Connection267
         connect Junction46 Va1.n_node as Connection268
         [
@@ -1055,6 +1511,62 @@ const real_t Q_1_real = 2.3;
         ]
         connect Junction48 Junction5 as Connection275
         connect Va2.n_node Junction48 as Connection276
+        connect From18 "C function1.V_pv" as Connection279
+        connect From16 "C function1.I_bat" as Connection281
+        connect From20 "C function1.V_o" as Connection283
+        connect V_out.out Goto10 as Connection285
+        connect V_bat.out Goto11 as Connection286
+        [
+            breakpoints = 8416, 8288; 8500, 8288
+        ]
+        connect V-pv.out Goto13 as Connection288
+        connect I_pv.out Goto12 as Connection289
+        connect From21 S1.ctrl_in as Connection290
+        connect From22 S2.ctrl_in as Connection291
+        connect From17 "C function1.V_bat" as Connection300
+        connect From19 "C function1.I_pv" as Connection301
+        connect "C function1.dbg_ILs_ref" dbg_ILs_ref.in as Connection304
+        connect "C function1.dbg_ILbat_ref" dbg_ILbat_ref.in as Connection305
+        connect "C function1.dbg_cost11" dbg_cost11.in as Connection306
+        connect "C function1.dbg_cost10" dbg_cost10.in as Connection307
+        connect "C function1.dbg_cost01" dbg_cost01.in as Connection308
+        connect "C function1.dbg_cost00" dbg_cost00.in as Connection309
+        connect "C function1.dbg_Vpv_m" dbg_Vpv_m.in as Connection310
+        connect "C function1.dbg_Vbat_m" dbg_Vbat_m.in as Connection311
+        connect "C function1.dbg_Vo_m" dbg_Vo_m.in as Connection312
+        connect "C function1.dbg_ILs_m" dbg_ILs_m.in as Connection313
+        connect "C function1.dbg_ILbat_m" dbg_ILbat_m.in as Connection314
+        connect "C function1.S2_opt" Junction49 as Connection315
+        connect Junction49 Goto15 as Connection316
+        connect S2_opt.in Junction49 as Connection317
+        connect "C function1.S1_opt" Junction50 as Connection318
+        connect Junction50 Goto14 as Connection319
+        connect S1_opt.in Junction50 as Connection320
+        [
+            breakpoints = 7280, 7240
+        ]
+        connect Step1.out Sum1.in as Connection321
+        connect Step2.out Sum1.in1 as Connection322
+        connect Step3.out Sum2.in1 as Connection323
+        connect Step4.out Sum3.in1 as Connection324
+        connect Sum1.out Sum2.in as Connection325
+        connect Sum2.out Sum3.in as Connection326
+        connect From23 "C function1.G_in" as Connection331
+        connect Sum3.out Junction51 as Connection333
+        connect Junction51 Goto16 as Connection334
+        connect G_pv.in Junction51 as Connection335
+        connect Step5.out Sum4.in as Connection336
+        connect Step6.out Sum4.in1 as Connection337
+        connect Step7.out Sum5.in1 as Connection338
+        connect Step8.out Sum6.in1 as Connection339
+        connect Sum4.out Sum5.in as Connection340
+        connect Sum5.out Sum6.in as Connection341
+        connect Temp_pv.in Junction52 as Connection346
+        [
+            breakpoints = 6744, 9356
+        ]
+        connect Junction52 Sum6.out as Connection347
+        connect Goto4 Junction52 as Connection348
     }
 
     default {
@@ -1110,13 +1622,6 @@ const real_t Q_1_real = 2.3;
             _tunable = "False"
         }
 
-        "core/Digital Input" {
-            addr = "1"
-            invert = "false"
-            signal_type = "uint"
-            execution_rate = "100e-6"
-        }
-
         "core/Gain" {
             gain = "1"
             multiplication = "Element-wise(K.*u)"
@@ -1157,25 +1662,6 @@ const real_t Q_1_real = 2.3;
             execution_rate = "inherit"
         }
 
-        "core/PWM Modulator" {
-            signal_access = "inherit"
-            status = "False"
-            carrier = "Triangle"
-            op_mode = "Fixed carrier frequency"
-            carrier_freq = "10000.0"
-            phase_op_mode = "Fixed carrier phase offset"
-            carr_ph_offset = "0.0"
-            num_of_ch = "1"
-            channels = "[]"
-            di_ctrl_addrs = "[]"
-            override_PWM_by_DI = "False"
-            d_time = "5e-6"
-            ref_sig_min_max = "[-1.0, 1.0]"
-            load_mode = "on min"
-            execution_rate = "inherit"
-            _supported_platforms = "[\'hil\', \'vhil\']"
-        }
-
         "core/Probe" {
             signal_access = "inherit"
             addr = "0"
@@ -1196,6 +1682,19 @@ const real_t Q_1_real = 2.3;
             signals_data = "{}"
             selected_signals = "[]"
             user_range_data = "{}"
+        }
+
+        "core/Step" {
+            step_time = "1"
+            initial_value = "0"
+            final_value = "1"
+            signal_type = "real"
+            execution_rate = "100e-6"
+        }
+
+        "core/Sum" {
+            signs = "2"
+            execution_rate = "inherit"
         }
 
         "core/Current Measurement" {

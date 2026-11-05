@@ -71,7 +71,7 @@ model "VR-BESS" {
         abs_tol = 1e-3
         rel_tol = 1e-3
         init_sim_step = 2e-8
-        r_on_sw = 1e-3
+        r_on_sw = 1e-5
         v_on_diode = 0.7
         data_sampling_rate = 1e-8
         feedthrough_validation_error_level = error
@@ -179,7 +179,7 @@ model "VR-BESS" {
 
         component "core/Constant" SOC_inicial_bat {
             execution_rate = "2e-7"
-            value = "100"
+            value = "50"
         }
         [
             position = 7032, 8640
@@ -202,7 +202,6 @@ model "VR-BESS" {
 
         component "core/Constant" modo_teste {
             execution_rate = "2e-7"
-            value = "0"
         }
         [
             position = 7032, 8824
@@ -640,7 +639,7 @@ dbg_cost11 = x_opt;
 dbg_cost10 = ILbk2; 
 dbg_cost00 = ILbk1;
 /*End code section*/"
-            output_terminals = "real S1_opt;inherit S2_opt;inherit dbg_ILs_ref;inherit dbg_ILbat_ref;inherit dbg_cost11;inherit dbg_cost10;inherit dbg_cost01;inherit dbg_cost00;inherit dbg_Vpv_m;inherit dbg_Vbat_m;inherit dbg_Vo_m;inherit dbg_ILs_m;inherit dbg_ILbat_m;"
+            output_terminals = "real S1;inherit S2;inherit dbg_ILs_ref;inherit dbg_ILbat_ref;inherit dbg_cost11;inherit dbg_cost10;inherit dbg_cost01;inherit dbg_cost00;inherit dbg_Vpv_m;inherit dbg_Vbat_m;inherit dbg_Vo_m;inherit dbg_ILs_m;inherit dbg_ILbat_m;"
             output_terminals_dimensions = "inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit"
             output_terminals_feedthrough = "True;True;True;True;True;True;True;True;True;True;True;True;True"
             output_terminals_show_labels = "True;True;True;True;True;True;True;True;True;True;True;True;True"
@@ -822,7 +821,7 @@ dbg_cost00 = ILbk1;
 
         component "core/Step" Step5 {
             execution_rate = "2e-07"
-            final_value = "0"
+            final_value = "25"
             initial_value = "25"
             step_time = "0.02"
         }
@@ -850,7 +849,8 @@ dbg_cost00 = ILbk1;
 
         component "core/Step" Step6 {
             execution_rate = "2e-07"
-            final_value = "45"
+            final_value = "25"
+            initial_value = "25"
             step_time = "0.04"
         }
         [
@@ -859,7 +859,8 @@ dbg_cost00 = ILbk1;
 
         component "core/Step" Step7 {
             execution_rate = "2e-07"
-            final_value = "15"
+            final_value = "25"
+            initial_value = "25"
             step_time = "0.06"
         }
         [
@@ -868,7 +869,8 @@ dbg_cost00 = ILbk1;
 
         component "core/Step" Step8 {
             execution_rate = "2e-07"
-            final_value = "15"
+            final_value = "25"
+            initial_value = "25"
             step_time = "0.08"
         }
         [
@@ -1648,10 +1650,10 @@ dbg_cost00 = ILbk1;
         connect "C function1.dbg_Vo_m" dbg_Vo_m.in as Connection312
         connect "C function1.dbg_ILs_m" dbg_ILs_m.in as Connection313
         connect "C function1.dbg_ILbat_m" dbg_ILbat_m.in as Connection314
-        connect "C function1.S2_opt" Junction49 as Connection315
+        connect "C function1.S2" Junction49 as Connection315
         connect Junction49 Goto15 as Connection316
         connect S2_opt.in Junction49 as Connection317
-        connect "C function1.S1_opt" Junction50 as Connection318
+        connect "C function1.S1" Junction50 as Connection318
         connect Junction50 Goto14 as Connection319
         connect S1_opt.in Junction50 as Connection320
         [

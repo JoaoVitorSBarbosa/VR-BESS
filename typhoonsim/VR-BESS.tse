@@ -65,15 +65,15 @@ model "VR-BESS" {
         export_encrypt_library = True
         export_encrypt_resources = True
         solver_type = "DAE"
-        integration_method = "BDF"
-        max_sim_step = 2e-7
+        integration_method = "BDF - Robust"
+        max_sim_step = 2e-8
         simulation_time = 0.1
         abs_tol = 1e-3
         rel_tol = 1e-3
-        init_sim_step = 2e-7
+        init_sim_step = 2e-8
         r_on_sw = 1e-3
-        v_on_diode = 0.1
-        data_sampling_rate = 0
+        v_on_diode = 0.7
+        data_sampling_rate = 1e-8
         feedthrough_validation_error_level = error
     }
 
@@ -288,7 +288,7 @@ it0 = it0_calc;
         ]
 
         component "core/Gain" SOC_I_to_Ah {
-            gain = "0.000277777778"
+            gain = "-0.000277777778"
         }
         [
             position = 7632, 8636
@@ -386,7 +386,6 @@ const real_t Q_1_real = 2.3;
         }
         [
             position = 8112, 8132
-            rotation = down
             size = 64, 32
         ]
 
@@ -453,154 +452,193 @@ const real_t Q_1_real = 2.3;
 
         component "core/C function" "C function1" {
             arb_defs = "/*Begin code section*/
+/* ---------- Parametros do sistema ---------- */
 
+const double Ts = 1.0e-5;
+const double Ls = 3.89e-3;
+const double Lb = 4.23e-3;
+const double Ro = 160.0;
+const double Co = 400e-6;
+const double Vo_ref = 400.0;
+
+/* ---------- Estados persistentes ---------- */
+
+static int initialized = 0;
+static int x_old = 0;
+
+
+
+/* ---------- Variaveis locais ---------- */
+
+int M[4][2] = {
+    {1, 0},
+    {1, 1},
+    {0, 0},
+    {0, 1}
+};
+
+int i, j, k, p;
+int c, f, x_opt;
+int pivot_row;
+
+double X;
+double ILb_ref, ILs_ref;
+double ILbk, ILsk, Vok, r;
+double Vink, ILsm, ILbm, Vom, Vcbk;
+double Vpv_safe;
+double v, s1, s2;
+
+double ILbk1, ILsk1, Vok1;
+double ILbk2, ILsk2, Vok2;
+
+double g, g_opt=33.0;
+double best_cost;
+double temp;
+double denominator;
+double Mod;
+double aux=67;
 /*End code section*/"
             init_fnc = "/*Begin code section*/
 
 /*End code section*/"
-            input_terminals = "real V_pv;inherit V_bat;inherit V_o;inherit I_pv;inherit I_bat;inherit G_in;"
-            input_terminals_dimensions = "inherit;inherit;inherit;inherit;inherit;inherit"
-            input_terminals_feedthrough = "True;True;True;True;True;True"
-            input_terminals_show_labels = "True;True;True;True;True;False"
+            input_terminals = "real V_pv;inherit V_bat;inherit V_o;inherit I_pv;inherit I_bat;inherit G_in;inherit Op_mode;"
+            input_terminals_dimensions = "inherit;inherit;inherit;inherit;inherit;inherit;inherit"
+            input_terminals_feedthrough = "True;True;True;True;True;True;True"
+            input_terminals_show_labels = "True;True;True;True;True;True;True"
             output_fnc = "/*Begin code section*/
-const real_t Ls = 3.89e-3;
-const real_t Lbat = 4.23e-3;
-const real_t Co = 1.41e-6;
-const real_t Ro = 160.0;
-const real_t Ts = 1e-6;
-const real_t Po_ref = 1000.0;
-const real_t ILs_mpp_stc = 5.92;
-const real_t Ibat_chg_max = 1.15;
-const real_t Ibat_disc_max = 4.6;
-const real_t dILs_max = 0.02;
-const real_t dILbat_max = 0.02;
+/* ============================================================
+   FCS-MPC + Filtro de Kalman
+   Adaptacao para Typhoon HIL - C Function
+   Entradas escalares: Vin, ILs, ILb, Vo, Vcb, Mod
+   Saidas escalares: S1, S2, Ro, Ref_Vo, Ref_ILb, Ref_ILs, Xo
+   ============================================================ */
 
-static real_t S1_prev = 1.0;
-static real_t S2_prev = 1.0;
-static real_t ILs_ref_prev = 3.7;
-static real_t ILbat_ref_prev = -1.0;
 
-real_t Vpv_m, Vbat_m, Vo_m, ILs_m, ILbat_m, G_m;
-real_t Vpv_safe, Vbat_safe, ILs_mpp;
-real_t Pbat_target, ILs_ref_l;
-real_t Ppv_est, ILbat_ref_l;
-real_t wLs, wLbat;
-real_t gamma_prev, m_prev, dVo_dt1;
-real_t ILbat_k1, ILs_k1, Vo_k1;
-real_t m_c, gamma_c, ILbat_k2, ILs_k2;
-real_t erro_Ls, erro_Lbat;
-real_t cost11, cost10, cost01;
-real_t best_cost, S1_best, S2_best;
 
-Vpv_m = V_pv;
-Vbat_m = V_bat;
-Vo_m = V_o;
-ILs_m = I_pv;
-ILbat_m = I_bat;
-G_m = G_in;
+/* ---------- Leitura das entradas escalares ---------- */
 
-ILs_mpp = ILs_mpp_stc * (G_m / 1000.0);
-if (ILs_mpp < 0.0) ILs_mpp = 0.0;
-if (ILs_mpp > ILs_mpp_stc) ILs_mpp = ILs_mpp_stc;
+Vink = V_pv;
+ILsk = I_pv;
+ILbk = I_bat;
+Vok = V_o;
+Vcbk = V_bat;
+Mod = Op_mode;
 
-Vpv_safe = Vpv_m;
-if (Vpv_safe < 1.0) Vpv_safe = 1.0;
-Vbat_safe = Vbat_m;
-if (Vbat_safe < 1.0) Vbat_safe = 1.0;
 
-Pbat_target = Ibat_chg_max * Vbat_safe;
-ILs_ref_l = (Po_ref + Pbat_target) / Vpv_safe;
-if (ILs_ref_l > ILs_ref_prev + dILs_max) {
-    ILs_ref_l = ILs_ref_prev + dILs_max;
-}
-if (ILs_ref_l < ILs_ref_prev - dILs_max) {
-    ILs_ref_l = ILs_ref_prev - dILs_max;
-}
-if (ILs_ref_l > ILs_mpp) ILs_ref_l = ILs_mpp;
-if (ILs_ref_l < 0.0) ILs_ref_l = 0.0;
-ILs_ref_prev = ILs_ref_l;
+/* ---------- Estado de chaveamento anterior ---------- */
 
-Ppv_est = Vpv_m * ILs_m;
-ILbat_ref_l = (Po_ref - Ppv_est) / Vbat_safe;
-if (ILbat_ref_l > ILbat_ref_prev + dILbat_max) {
-    ILbat_ref_l = ILbat_ref_prev + dILbat_max;
-}
-if (ILbat_ref_l < ILbat_ref_prev - dILbat_max) {
-    ILbat_ref_l = ILbat_ref_prev - dILbat_max;
-}
-if (ILbat_ref_l > Ibat_disc_max) ILbat_ref_l = Ibat_disc_max;
-if (ILbat_ref_l < -Ibat_chg_max) ILbat_ref_l = -Ibat_chg_max;
-ILbat_ref_prev = ILbat_ref_l;
 
-if (ILbat_ref_l >= 0.0) {
-    wLbat = 1.0 / Ibat_disc_max;
-} else {
-    wLbat = 1.0 / Ibat_chg_max;
-}
-wLs = 1.0 / ILs_mpp_stc;
+g_opt = 1e100;
+S1 = M[x_old][0];
+S2 = M[x_old][1];
 
-m_prev = 1.0 - S1_prev * S2_prev;
-if (S1_prev == 0.0 && S2_prev == 0.0) {
-    gamma_prev = (ILbat_m >= 0.0) ? 1.0 : 0.0;
-} else {
-    gamma_prev = S1_prev * (1.0 - S2_prev);
-}
-ILbat_k1 = ILbat_m + Ts*( Vbat_m/Lbat - gamma_prev/Lbat*Vo_m );
-ILs_k1 = ILs_m + Ts*( Vpv_m/Ls - m_prev/Ls*Vo_m );
-dVo_dt1 = gamma_prev/Co*ILbat_m + m_prev/Co*ILs_m;
-dVo_dt1 = dVo_dt1 - Vo_m/(Ro*Co);
-Vo_k1 = Vo_m + Ts*dVo_dt1;
 
-m_c = 0.0; gamma_c = 0.0;
-ILbat_k2 = ILbat_k1 + Ts*( Vbat_m/Lbat - gamma_c/Lbat*Vo_k1 );
-ILs_k2 = ILs_k1 + Ts*( Vpv_m/Ls - m_c/Ls*Vo_k1 );
-erro_Ls = ILs_ref_l - ILs_k2;
-erro_Lbat = ILbat_ref_l - ILbat_k2;
-cost11 = wLs*erro_Ls*erro_Ls + wLbat*erro_Lbat*erro_Lbat;
 
-m_c = 1.0; gamma_c = 1.0;
-ILbat_k2 = ILbat_k1 + Ts*( Vbat_m/Lbat - gamma_c/Lbat*Vo_k1 );
-ILs_k2 = ILs_k1 + Ts*( Vpv_m/Ls - m_c/Ls*Vo_k1 );
-erro_Ls = ILs_ref_l - ILs_k2;
-erro_Lbat = ILbat_ref_l - ILbat_k2;
-cost10 = wLs*erro_Ls*erro_Ls + wLbat*erro_Lbat*erro_Lbat;
 
-m_c = 1.0; gamma_c = 0.0;
-ILbat_k2 = ILbat_k1 + Ts*( Vbat_m/Lbat - gamma_c/Lbat*Vo_k1 );
-ILs_k2 = ILs_k1 + Ts*( Vpv_m/Ls - m_c/Ls*Vo_k1 );
-erro_Ls = ILs_ref_l - ILs_k2;
-erro_Lbat = ILbat_ref_l - ILbat_k2;
-cost01 = wLs*erro_Ls*erro_Ls + wLbat*erro_Lbat*erro_Lbat;
+/* ============================================================
+   IDENTIFICACAO DO MODO DE OPERACAO
+   ============================================================ */
 
-best_cost = cost11;
-S1_best = 1.0;
-S2_best = 1.0;
-if (cost10 < best_cost) {
-    best_cost = cost10;
-    S1_best = 1.0;
-    S2_best = 0.0;
-}
-if (cost01 < best_cost) {
-    best_cost = cost01;
-    S1_best = 0.0;
-    S2_best = 1.0;
+c = 0;
+f = 3;
+X = 0.0;
+ILb_ref = 0.0;
+ILs_ref = 0.0;
+
+switch ((int)Mod) {
+    case 1:
+        X = 0;
+        c = 0;
+        f = 2;
+        ILb_ref = 1.08;
+        ILs_ref = (Vcbk * ILb_ref + Vo_ref * Vo_ref / Ro) / Vink;
+        break;
+    case 2:
+        X = 0;
+        c = 1;
+        f = 2;
+        ILb_ref = 0;
+        ILs_ref = Vo_ref*Vo_ref/(Vink*Ro);      
+        break;
+
+    case 3:
+        X = 1;
+        c = 1;
+        f = 3;
+        ILb_ref = -1.08;
+        ILs_ref = (Vcbk*ILb_ref + Vo_ref*Vo_ref/Ro)/Vink;
+        break;
+    case 4:
+        c = 2;
+        f = 3;
+        X = 1;
+        
+        ILb_ref = -Vo_ref*Vo_ref/(Ro*Vcbk);
+        ILs_ref = 0;
+        
+        break;
 }
 
-S1_opt = S1_best;
-S2_opt = S2_best;
-S1_prev = S1_best;
-S2_prev = S2_best;
-dbg_ILs_ref = ILs_ref_l;
-dbg_ILbat_ref = ILbat_ref_l;
-dbg_cost11 = cost11;
-dbg_cost10 = cost10;
-dbg_cost01 = cost01;
-dbg_cost00 = 0.0;
-dbg_Vpv_m = Vpv_m;
-dbg_Vbat_m = Vbat_m;
-dbg_Vo_m = Vo_m;
-dbg_ILs_m = ILs_m;
-dbg_ILbat_m = ILbat_m;
+
+/* ============================================================
+   FCS-MPC: PREDICAO DO PRIMEIRO PASSO
+   ============================================================ */
+
+
+
+ILbk1 = ILbk + Ts*(S1*(1.0 - S2)+ X*(1.0 - S1)*(1.0 - S2))*Vok/Lb - Ts * Vcbk/Lb;
+ILsk1 = ILsk + Ts*(S1 * S2 - 1.0)*Vok/Ls + Ts*Vink/Ls;
+Vok1 = -Ts*(S1*(1.0 - S2) + X*(1.0 - S1) * (1.0 - S2))*ILbk/Co + Ts*(1.0-S1*S2)*ILsk/Co + (1-Ts/(Co*Ro))*Vok;
+
+/* ============================================================
+   FCS-MPC: SELECAO DO ESTADO OTIMO
+   ============================================================ */
+
+
+
+int i = c; 
+
+while (i <= f) {
+    // 2° Passo de Predicão
+    ILbk2 = ILbk1 + Ts * (M[i][0] * (1.0 - M[i][1]) + X * (1.0 - M[i][0]) * (1.0 - M[i][1])) * Vok1 / Lb - Ts * Vcbk / Lb;
+    
+    ILsk2 = ILsk1 + Ts * (M[i][0] * M[i][1] - 1.0) * Vok1 / Ls + Ts * Vink / Ls;
+
+    //Vok2 = -Ts * (M[i][0] * (1 - M[i][1]) + X * (1 - M[i][0]) * (1 - M[i][1])) * ILbk1 / Co + Ts * (1 - (1 - M[i][0]) * M[i][1]) * ILsk1 / Co + (1 - Ts / (Co * Ro)) * Vok1;
+
+
+    // Função Custo Corrente
+    g= (ILsk2 - ILs_ref) * (ILsk2 - ILs_ref) + (ILbk2 - ILb_ref) * (ILbk2 - ILb_ref);            
+    
+    // Seleção dos valores ótimos
+    if (g < g_opt) {
+        g_opt = g;
+        x_opt = i;
+    }
+
+    // Incrementa i
+    i = i + 1;
+    aux = 1;
+}
+
+/* ============================================================
+   ATUALIZACAO DO ESTADO DE CHAVEAMENTO
+   ============================================================ */
+
+/* O estado selecionado sera aplicado na proxima chamada */
+
+x_old = x_opt;
+
+/* As saidas S1 e S2 continuam representando o estado aplicado
+   nesta chamada; o estado selecionado fica armazenado em x_old. */
+
+dbg_ILbat_ref =  ILb_ref ;
+dbg_ILs_ref = ILs_ref ;
+dbg_ILbat_m =  ILbk ;
+dbg_ILs_m = ILsk;
+dbg_cost11 = x_opt; 
+dbg_cost10 = ILbk2; 
+dbg_cost00 = ILbk1;
 /*End code section*/"
             output_terminals = "real S1_opt;inherit S2_opt;inherit dbg_ILs_ref;inherit dbg_ILbat_ref;inherit dbg_cost11;inherit dbg_cost10;inherit dbg_cost01;inherit dbg_cost00;inherit dbg_Vpv_m;inherit dbg_Vbat_m;inherit dbg_Vo_m;inherit dbg_ILs_m;inherit dbg_ILbat_m;"
             output_terminals_dimensions = "inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit"
@@ -620,7 +658,7 @@ dbg_ILbat_m = ILbat_m;
             signal_name = "S1_opt"
         }
         [
-            position = 7360, 7188
+            position = 7412, 7184
         ]
 
         component "core/Probe" S2_opt {
@@ -843,6 +881,70 @@ dbg_ILbat_m = ILbat_m;
         }
         [
             position = 6816, 9228
+        ]
+
+        component "core/Rate Transition" "Rate Transition1" {
+            execution_rate = "1e-05"
+        }
+        [
+            position = 7056, 7224
+            size = 32, 32
+        ]
+
+        component "core/Rate Transition" "Rate Transition2" {
+            execution_rate = "1e-05"
+        }
+        [
+            position = 7056, 7328
+            size = 32, 32
+        ]
+
+        component "core/Rate Transition" "Rate Transition3" {
+            execution_rate = "1e-05"
+        }
+        [
+            position = 7056, 7432
+            size = 32, 32
+        ]
+
+        component "core/Rate Transition" "Rate Transition4" {
+            execution_rate = "1e-05"
+        }
+        [
+            position = 7056, 7536
+            size = 32, 32
+        ]
+
+        component "core/Rate Transition" "Rate Transition5" {
+            execution_rate = "1e-05"
+        }
+        [
+            position = 7056, 7640
+            size = 32, 32
+        ]
+
+        component "core/Rate Transition" "Rate Transition6" {
+            execution_rate = "1e-05"
+        }
+        [
+            position = 7056, 7744
+            size = 32, 32
+        ]
+
+        component "core/Rate Transition" "Rate Transition7" {
+            execution_rate = "1e-05"
+        }
+        [
+            position = 7056, 7848
+            size = 32, 32
+        ]
+
+        component "core/Constant" Num_cel_par_pv1 {
+            execution_rate = "2e-07"
+            value = "4"
+        }
+        [
+            position = 6372, 8636
         ]
 
         tag From1 {
@@ -1072,7 +1174,7 @@ dbg_ILbat_m = ILbat_m;
             direction = in
         }
         [
-            position = 8144, 8060
+            position = 8200, 8060
             size = 100, 20
         ]
 
@@ -1094,7 +1196,7 @@ dbg_ILbat_m = ILbat_m;
             direction = out
         }
         [
-            position = 6948, 7728
+            position = 6948, 7640
             size = 108, 20
         ]
 
@@ -1105,7 +1207,7 @@ dbg_ILbat_m = ILbat_m;
             direction = out
         }
         [
-            position = 6948, 7344
+            position = 6948, 7328
             size = 108, 20
         ]
 
@@ -1116,7 +1218,7 @@ dbg_ILbat_m = ILbat_m;
             direction = out
         }
         [
-            position = 6948, 7216
+            position = 6948, 7224
             size = 108, 20
         ]
 
@@ -1127,7 +1229,7 @@ dbg_ILbat_m = ILbat_m;
             direction = out
         }
         [
-            position = 6948, 7600
+            position = 6948, 7536
             size = 108, 20
         ]
 
@@ -1138,7 +1240,7 @@ dbg_ILbat_m = ILbat_m;
             direction = out
         }
         [
-            position = 6948, 7472
+            position = 6948, 7432
             size = 108, 20
         ]
 
@@ -1215,7 +1317,7 @@ dbg_ILbat_m = ILbat_m;
             direction = in
         }
         [
-            position = 7348, 7248
+            position = 7444, 7248
             size = 100, 20
         ]
 
@@ -1226,7 +1328,7 @@ dbg_ILbat_m = ILbat_m;
             direction = in
         }
         [
-            position = 7348, 7296
+            position = 7444, 7296
             size = 100, 20
         ]
 
@@ -1248,8 +1350,30 @@ dbg_ILbat_m = ILbat_m;
             direction = out
         }
         [
-            position = 6944, 7856
+            position = 6972, 7744
             size = 60, 20
+        ]
+
+        tag From24 {
+            value = "Op_mode"
+            scope = local
+            kind = sp
+            direction = out
+        }
+        [
+            position = 6972, 7848
+            size = 60, 20
+        ]
+
+        tag Goto17 {
+            value = "Op_mode"
+            scope = local
+            kind = sp
+            direction = in
+        }
+        [
+            position = 6520, 8636
+            size = 132, 20
         ]
 
         junction Junction1 pe
@@ -1322,16 +1446,6 @@ dbg_ILbat_m = ILbat_m;
             position = 8244, 8404
         ]
 
-        junction Junction33 pe
-        [
-            position = 7980, 8216
-        ]
-
-        junction Junction34 pe
-        [
-            position = 8244, 8132
-        ]
-
         junction Junction35 pe
         [
             position = 8384, 8404
@@ -1369,12 +1483,12 @@ dbg_ILbat_m = ILbat_m;
 
         junction Junction49 sp
         [
-            position = 7280, 7296
+            position = 7348, 7296
         ]
 
         junction Junction50 sp
         [
-            position = 7280, 7248
+            position = 7348, 7248
         ]
 
         junction Junction51 sp
@@ -1385,6 +1499,16 @@ dbg_ILbat_m = ILbat_m;
         junction Junction52 sp
         [
             position = 6748, 9356
+        ]
+
+        junction Junction53 pe
+        [
+            position = 8244, 8132
+        ]
+
+        junction Junction54 pe
+        [
+            position = 7980, 8216
         ]
 
         connect Junction1 Ls.n_node as Connection4
@@ -1449,12 +1573,6 @@ dbg_ILbat_m = ILbat_m;
         connect From6 Bat_array1.Np_bat as Connection163
         connect From5 Bat_array1.SOC_inicial as Connection164
         connect Bat_array1.- Junction32 as Connection167
-        connect Cbat.p_node Junction33 as Connection170
-        connect Junction33 Lbat.n_node as Connection171
-        connect I_bat.n_node Junction33 as Connection172
-        connect Bat_array1.+ Junction34 as Connection173
-        connect Junction34 I_bat.p_node as Connection174
-        connect V_bat.p_node Junction34 as Connection175
         connect Junction15 Junction35 as Connection176
         connect Junction35 Junction32 as Connection177
         connect V_bat.n_node Junction35 as Connection178
@@ -1473,7 +1591,6 @@ dbg_ILbat_m = ILbat_m;
         connect From12 SOC_it0_calc.modo_teste as Connection186
         connect SOC_calc_top.Np_bat From13 as Connection187
         connect SOC_calc_top.modo_teste From14 as Connection188
-        connect I_bat.out Goto9 as Connection189
         connect SOC_calc_top.SOC SOC_mes.in as Connection191
         connect D3.A Junction41 as Connection210
         connect Junction41 Junction1 as Connection211
@@ -1511,20 +1628,15 @@ dbg_ILbat_m = ILbat_m;
         ]
         connect Junction48 Junction5 as Connection275
         connect Va2.n_node Junction48 as Connection276
-        connect From18 "C function1.V_pv" as Connection279
-        connect From16 "C function1.I_bat" as Connection281
-        connect From20 "C function1.V_o" as Connection283
         connect V_out.out Goto10 as Connection285
         connect V_bat.out Goto11 as Connection286
         [
-            breakpoints = 8416, 8288; 8500, 8288
+            breakpoints = 8428, 8216; 8428, 8288; 8500, 8288
         ]
         connect V-pv.out Goto13 as Connection288
         connect I_pv.out Goto12 as Connection289
         connect From21 S1.ctrl_in as Connection290
         connect From22 S2.ctrl_in as Connection291
-        connect From17 "C function1.V_bat" as Connection300
-        connect From19 "C function1.I_pv" as Connection301
         connect "C function1.dbg_ILs_ref" dbg_ILs_ref.in as Connection304
         connect "C function1.dbg_ILbat_ref" dbg_ILbat_ref.in as Connection305
         connect "C function1.dbg_cost11" dbg_cost11.in as Connection306
@@ -1543,7 +1655,7 @@ dbg_ILbat_m = ILbat_m;
         connect Junction50 Goto14 as Connection319
         connect S1_opt.in Junction50 as Connection320
         [
-            breakpoints = 7280, 7240
+            breakpoints = 7348, 7184; 7348, 7240
         ]
         connect Step1.out Sum1.in as Connection321
         connect Step2.out Sum1.in1 as Connection322
@@ -1551,7 +1663,6 @@ dbg_ILbat_m = ILbat_m;
         connect Step4.out Sum3.in1 as Connection324
         connect Sum1.out Sum2.in as Connection325
         connect Sum2.out Sum3.in as Connection326
-        connect From23 "C function1.G_in" as Connection331
         connect Sum3.out Junction51 as Connection333
         connect Junction51 Goto16 as Connection334
         connect G_pv.in Junction51 as Connection335
@@ -1567,6 +1678,34 @@ dbg_ILbat_m = ILbat_m;
         ]
         connect Junction52 Sum6.out as Connection347
         connect Goto4 Junction52 as Connection348
+        connect From23 "Rate Transition6.in" as Connection349
+        connect "Rate Transition6.out" "C function1.G_in" as Connection350
+        connect "C function1.I_bat" "Rate Transition5.out" as Connection351
+        connect "C function1.I_pv" "Rate Transition4.out" as Connection352
+        connect "Rate Transition3.out" "C function1.V_o" as Connection353
+        connect "C function1.V_bat" "Rate Transition2.out" as Connection354
+        connect "Rate Transition1.out" "C function1.V_pv" as Connection355
+        connect From18 "Rate Transition1.in" as Connection356
+        connect From17 "Rate Transition2.in" as Connection357
+        connect From20 "Rate Transition3.in" as Connection358
+        connect "Rate Transition4.in" From19 as Connection359
+        connect From16 "Rate Transition5.in" as Connection360
+        connect Bat_array1.+ Junction53 as Connection363
+        connect Junction53 V_bat.p_node as Connection364
+        [
+            breakpoints = 8244, 8132
+        ]
+        connect I_bat.n_node Junction53 as Connection365
+        connect Cbat.p_node Junction54 as Connection366
+        connect Junction54 Lbat.n_node as Connection367
+        [
+            breakpoints = 7980, 8216
+        ]
+        connect I_bat.p_node Junction54 as Connection368
+        connect I_bat.out Goto9 as Connection369
+        connect From24 "Rate Transition7.in" as Connection370
+        connect "C function1.Op_mode" "Rate Transition7.out" as Connection371
+        connect Num_cel_par_pv1.out Goto17 as Connection372
     }
 
     default {
@@ -1808,6 +1947,12 @@ dbg_ILbat_m = ILbat_m;
             switch_Tth = "[1.1e-1, 1.56e-2, 1.35e-3, 1.51e-4]"
             switch_Cth = "[0.0029, 0.0097, 0.1068, 0.8500]"
             loss_exec_rate = "100e-6"
+        }
+
+        "core/Rate Transition" {
+            init_value = "0.0"
+            execution_rate = "100e-6"
+            _supported_platforms = "[\'generic\']"
         }
 
         "core/Voltage Measurement" {

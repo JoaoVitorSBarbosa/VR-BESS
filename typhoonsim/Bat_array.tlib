@@ -282,7 +282,7 @@ const real_t Q_1_real = 2.3;
             ]
 
             component "core/Gain" GainKi {
-                gain = "0"
+                gain = "1000"
             }
             [
                 position = 8084, 8704
@@ -349,13 +349,6 @@ const real_t Q_1_real = 2.3;
             }
             [
                 position = 8224, 8588
-            ]
-
-            component "core/Constant" Constant2 {
-                execution_rate = "2e-7"
-            }
-            [
-                position = 8216, 8244
             ]
 
             port - {
@@ -889,7 +882,7 @@ const real_t Q_1_real = 2.3;
             connect IFilt.out Junction3 as Connection72
             connect Iout.n_node MOSFET1.D as Connection79
             connect RL1.p_node MOSFET1.S as Connection80
-            connect Constant2.out MOSFET1.ctrl_in as Connection81
+            connect From10 MOSFET1.ctrl_in as Connection81
         }
         [
             position = 4920, 4780

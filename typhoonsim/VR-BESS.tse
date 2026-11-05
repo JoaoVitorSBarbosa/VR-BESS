@@ -849,8 +849,7 @@ dbg_cost00 = ILbk1;
 
         component "core/Step" Step6 {
             execution_rate = "2e-07"
-            final_value = "25"
-            initial_value = "25"
+            final_value = "0"
             step_time = "0.04"
         }
         [
@@ -859,8 +858,7 @@ dbg_cost00 = ILbk1;
 
         component "core/Step" Step7 {
             execution_rate = "2e-07"
-            final_value = "25"
-            initial_value = "25"
+            final_value = "0"
             step_time = "0.06"
         }
         [
@@ -869,8 +867,7 @@ dbg_cost00 = ILbk1;
 
         component "core/Step" Step8 {
             execution_rate = "2e-07"
-            final_value = "25"
-            initial_value = "25"
+            final_value = "0"
             step_time = "0.08"
         }
         [

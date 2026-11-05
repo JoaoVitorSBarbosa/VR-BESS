@@ -25,6 +25,12 @@ artigos de referência estão em `~/Documentos/Artigos` (ver memória do Claude 
   (gitignored, recriada a cada build).
 - `kicad/` — vazio, reservado para o hardware (placa).
 
+## Convenção: commits sem coautor
+
+**Todo commit (e PR) deste repositório deve ser feito sem coautor** — nunca acrescentar linhas
+`Co-Authored-By:` (de Claude ou de qualquer outra pessoa/ferramenta) nem rodapés de atribuição
+("Generated with ...") na mensagem. Vale para qualquer commit, inclusive os feitos pelo Claude Code.
+
 ## Convenção: documentar dependências instaladas no README
 
 Sempre que uma dependência/pacote for instalada no sistema pra viabilizar alguma parte do projeto

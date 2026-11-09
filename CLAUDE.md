@@ -831,7 +831,12 @@ sistema já está perto do modo 4.
 
 ### Etapas
 
-- [ ] **A** — P&O + PI de `Vpv` geram `ILs_ref`; `ILb_ref` como resíduo; modo 1 fixo
+- [x] **A** — **VALIDADA no Typhoon em 09/11/2026 (v5)**, G=650 fixo, 0,1 s: `V_pv` médio 301,6 V
+  (Vmp 302,2 V), `I_pv` 3,84 A (≈1158 W, ~99,7% do MPP), `V_out` médio 401,5 V (396,6–408,9 V),
+  `I_bat` médio 0,61 A. `dbg_ILbat_ref` médio 0,82 vs `dbg_ILbat_m` 0,68 — o FCS-MPC segue a
+  bateria com ~0,14 A de erro, e o termo `Kv_o` compensa subindo a referência. Esquemático commitado
+  com o cenário de teste (G fixo em 650, modo 1, `Scope2` com os sinais de depuração).
+  Descrição original: P&O + PI de `Vpv` geram `ILs_ref`; `ILb_ref` como resíduo; modo 1 fixo
   (`Op_mode` = 1 na constante `Num_cel_par_pv1`). Código passado no chat em 09/11/2026 (compilado
   com `gcc` e testado com painel + `Cpv` simulados e FCS-MPC idealizado antes de ir pro Typhoon).
   **Teste corrigido:** em STC o MPPT NÃO fica no MPP (ver "limite de demanda" abaixo) — testar em

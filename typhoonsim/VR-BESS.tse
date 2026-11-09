@@ -220,7 +220,7 @@ model "VR-BESS" {
             user_range_data = "{\"1\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-15.0, 38.0]}, \"2\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-12.0, 25.0]}, \"3\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-10.0, 30.0]}, \"4\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Manual\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-10.0, 10.0]}, \"5\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-10.0, 30.0]}, \"6\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.5, 2.0]}}"
         }
         [
-            position = 7856, 7960
+            position = 7832, 7832
         ]
 
         component "pv_array/pv_array" pv_array1 {
@@ -435,7 +435,7 @@ const real_t Q_1_real = 2.3;
             model_load_legacy = "1"
         }
         [
-            position = 7984, 7960
+            position = 7976, 7832
         ]
 
         component "core/Voltage Measurement" Va2 {
@@ -459,6 +459,33 @@ const double Lb = 4.23e-3;
 const double Ro = 160.0;
 const double Co = 400e-6;
 const double Vo_ref = 400.0;
+
+/* ---------- MPPT P&O + PI de Vpv (etapa A) ---------- */
+
+const double N_mppt = 500.0;
+const double dV_po = 5.0;
+const double Vref_min = 200.0;
+const double Vref_max = 380.0;
+const double Kp_v = 0.03;
+const double Kv_o = 0.1;
+const double ILs_max = 6.5;
+const double ILb_chg = 1.15;
+const double ILb_dis = 4.6;
+const double a_f = 0.0591;
+const double lim_frac = 0.98;
+const double a_p = 0.00624;
+
+static double Vpv_ref = 300.0;
+static double P_sum = 0.0;
+static double P_old = 0.0;
+static double dir_po = 1.0;
+static double cnt_po = 0.0;
+static double Vpv_f = -1.0;
+static double Ppv_f = -1.0;
+static double Ipv_f = -1.0;
+
+double Po, e_v, u_raw, u_pi;
+double ILs_dem, ILs_top, P_avg, P_lim;
 
 /* ---------- Estados persistentes ---------- */
 
@@ -497,6 +524,7 @@ double denominator;
 double Mod;
 double aux=67;
 /*End code section*/"
+            execution_rate = "1e-05"
             init_fnc = "/*Begin code section*/
 
 /*End code section*/"
@@ -506,7 +534,7 @@ double aux=67;
             input_terminals_show_labels = "True;True;True;True;True;True;True"
             output_fnc = "/*Begin code section*/
 /* ============================================================
-   FCS-MPC + Filtro de Kalman
+   FCS-MPC (orientadora) + MPPT P&O (etapa A)
    Adaptacao para Typhoon HIL - C Function
    Entradas escalares: Vin, ILs, ILb, Vo, Vcb, Mod
    Saidas escalares: S1, S2, Ro, Ref_Vo, Ref_ILb, Ref_ILs, Xo
@@ -522,6 +550,60 @@ ILbk = I_bat;
 Vok = V_o;
 Vcbk = V_bat;
 Mod = Op_mode;
+
+
+/* ============================================================
+   MPPT (etapa A): P&O na tensao + PI de Vpv -> ILs_ref
+   Roda so no modo 1. ILs_ref e limitado pela demanda
+   maxima (carga + bateria a ILb_chg); quando a potencia
+   media chega nesse limite, o P&O fica congelado.
+   Malha de Vpv: ILs_ref = Ipv_f + Kp_v*(Vpv_f - Vpv_ref)
+   (feedforward da corrente medida do painel + correcao
+   proporcional; sem integrador - o FCS-MPC regula I_pv).
+   Vpv_f, Ipv_f: filtrados (passa-baixa 1 kHz) contra ripple.
+   Ppv_f: potencia medida do painel filtrada (100 Hz), usada
+   no residuo da bateria, somado a Kv_o*(Vo - Vo_ref) para
+   corrigir Vo (bateria carrega mais se Vo esta alto).
+   ============================================================ */
+
+Po = Vo_ref * Vo_ref / Ro;
+Vpv_safe = Vink;
+if (Vpv_safe < 50.0) Vpv_safe = 50.0;
+u_pi = 0.0;
+if (Vpv_f < 0.0) Vpv_f = Vink;
+Vpv_f = Vpv_f + a_f * (Vink - Vpv_f);
+if (Ppv_f < 0.0) Ppv_f = Vink * ILsk;
+if (Ipv_f < 0.0) Ipv_f = ILsk;
+Ipv_f = Ipv_f + a_f * (ILsk - Ipv_f);
+Ppv_f = Ppv_f + a_p * (Vink * ILsk - Ppv_f);
+
+if ((int)Mod == 1) {
+    P_lim = Po + Vcbk * ILb_chg;
+    ILs_dem = P_lim / Vpv_safe;
+    ILs_top = ILs_max;
+    if (ILs_dem < ILs_top) ILs_top = ILs_dem;
+
+    e_v = Vpv_f - Vpv_ref;
+    u_raw = Ipv_f + Kp_v * e_v;
+    u_pi = u_raw;
+    if (u_pi > ILs_top) u_pi = ILs_top;
+    if (u_pi < 0.0) u_pi = 0.0;
+
+    P_sum = P_sum + Vink * ILsk;
+    cnt_po = cnt_po + 1.0;
+    if (cnt_po >= N_mppt) {
+        P_avg = P_sum / N_mppt;
+        if (P_avg < lim_frac * P_lim) {
+            if (P_avg < P_old) dir_po = -dir_po;
+            Vpv_ref = Vpv_ref + dir_po * dV_po;
+        }
+        if (Vpv_ref > Vref_max) Vpv_ref = Vref_max;
+        if (Vpv_ref < Vref_min) Vpv_ref = Vref_min;
+        P_old = P_avg;
+        P_sum = 0.0;
+        cnt_po = 0.0;
+    }
+}
 
 
 /* ---------- Estado de chaveamento anterior ---------- */
@@ -549,8 +631,11 @@ switch ((int)Mod) {
         X = 0;
         c = 0;
         f = 2;
-        ILb_ref = 1.08;
-        ILs_ref = (Vcbk * ILb_ref + Vo_ref * Vo_ref / Ro) / Vink;
+        ILs_ref = u_pi;
+        ILb_ref = (Ppv_f - Po) / Vcbk;
+        ILb_ref = ILb_ref + Kv_o * (Vok - Vo_ref);
+        if (ILb_ref > ILb_chg) ILb_ref = ILb_chg;
+        if (ILb_ref < -ILb_dis) ILb_ref = -ILb_dis;
         break;
     case 2:
         X = 0;
@@ -637,7 +722,8 @@ dbg_ILbat_m =  ILbk ;
 dbg_ILs_m = ILsk;
 dbg_cost11 = x_opt; 
 dbg_cost10 = ILbk2; 
-dbg_cost00 = ILbk1;
+dbg_cost00 = P_old;
+dbg_cost01 = Vpv_ref;
 /*End code section*/"
             output_terminals = "real S1;inherit S2;inherit dbg_ILs_ref;inherit dbg_ILbat_ref;inherit dbg_cost11;inherit dbg_cost10;inherit dbg_cost01;inherit dbg_cost00;inherit dbg_Vpv_m;inherit dbg_Vbat_m;inherit dbg_Vo_m;inherit dbg_ILs_m;inherit dbg_ILbat_m;"
             output_terminals_dimensions = "inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit;inherit"
@@ -758,8 +844,8 @@ dbg_cost00 = ILbk1;
 
         component "core/Step" Step1 {
             execution_rate = "2e-07"
-            final_value = "1000"
-            initial_value = "1"
+            final_value = "650"
+            initial_value = "650"
             step_time = "0.02"
         }
         [
@@ -786,7 +872,7 @@ dbg_cost00 = ILbk1;
 
         component "core/Step" Step2 {
             execution_rate = "2e-07"
-            final_value = "-300"
+            final_value = "0"
             step_time = "0.04"
         }
         [
@@ -795,7 +881,7 @@ dbg_cost00 = ILbk1;
 
         component "core/Step" Step3 {
             execution_rate = "2e-07"
-            final_value = "-300"
+            final_value = "0"
             step_time = "0.06"
         }
         [
@@ -804,7 +890,7 @@ dbg_cost00 = ILbk1;
 
         component "core/Step" Step4 {
             execution_rate = "2e-07"
-            final_value = "600"
+            final_value = "0"
             step_time = "0.08"
         }
         [
@@ -940,10 +1026,18 @@ dbg_cost00 = ILbk1;
 
         component "core/Constant" Num_cel_par_pv1 {
             execution_rate = "2e-07"
-            value = "4"
         }
         [
             position = 6372, 8636
+        ]
+
+        component "core/Scope" Scope2 {
+            selected_signals = "[\'dbg_ILbat_m\', \'dbg_ILbat_ref\', \'dbg_ILs_m\', \'dbg_ILs_ref\']"
+            signals_data = "{\"plot_settings\": {\"layout\": \"Vertical\", \"background_color\": \"white\", \"legend_visible\": true, \"signals_tooltips_enabled\": true}, \"signals\": {\"dbg_ILbat_m\": {\"viewports\": [1], \"type\": \"analog\", \"color\": {\"1\": \"#FFCC00\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"dbg_ILbat_ref\": {\"viewports\": [1], \"type\": \"analog\", \"color\": {\"1\": \"#FF0000\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"dbg_ILs_m\": {\"viewports\": [1], \"type\": \"analog\", \"color\": {\"1\": \"#00CC00\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}, \"dbg_ILs_ref\": {\"viewports\": [1], \"type\": \"analog\", \"color\": {\"1\": \"#0099FF\"}, \"display\": {\"1\": \"solid\"}, \"is_manual\": {\"1\": false}}}, \"viewports\": {\"1\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"2\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"3\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"4\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"5\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}, \"6\": {\"log_scale_x\": false, \"log_scale_y\": false, \"y_axis_db\": false}}}"
+            user_range_data = "{\"1\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Manual\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-5.0, 5.0]}, \"2\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-12.0, 25.0]}, \"3\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-10.0, 30.0]}, \"4\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Manual\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-10.0, 10.0]}, \"5\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [-10.0, 30.0]}, \"6\": {\"user_x_range_mode\": \"Zoom to fit\", \"user_y_range_mode\": \"Zoom to fit\", \"user_x_range\": [0.0, 1.0], \"user_y_range\": [0.5, 2.0]}}"
+        }
+        [
+            position = 7832, 7948
         ]
 
         tag From1 {

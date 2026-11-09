@@ -829,8 +829,31 @@ sistema já está perto do modo 4.
 
 ### Etapas
 
-- [ ] **A** — P&O + PI de `Vpv` geram `ILs_ref`; `ILb_ref` como resíduo; modo 1 fixo. Teste:
-  `Vpv ≈ 310 V` em STC, `P_pv/P_mpp > 98%`, `Vo ≈ 400 V`.
+- [ ] **A** — P&O + PI de `Vpv` geram `ILs_ref`; `ILb_ref` como resíduo; modo 1 fixo
+  (`Op_mode` = 1 na constante `Num_cel_par_pv1`). Código passado no chat em 09/11/2026 (compilado
+  com `gcc` e testado com painel + `Cpv` simulados e FCS-MPC idealizado antes de ir pro Typhoon).
+  **Teste corrigido:** em STC o MPPT NÃO fica no MPP (ver "limite de demanda" abaixo) — testar em
+  **G = 650 W/m²** (MPP 302,2 V / 3,84 A / 1161 W, esperado `ILb_ref ≈ +0,7 A`) e em **G = 1000**
+  (limitado: `Vpv ≈ 347,3 V`, `P_pv ≈ 1272 W`, `ILb_ref = 1,08`). `Vo ≈ 400 V` nos dois.
+  Debug: `dbg_cost01 = Vpv_ref`, `dbg_cost00 = P_old` (potência média do último período do P&O);
+  `dbg_cost00`/`dbg_cost01` deixaram de mostrar `ILbk1`/custo da versão da orientadora.
+
+**Limite de demanda (achado 09/11/2026, ao escrever o código da etapa A):** a bateria só aceita
+até `ILb_chg = 1,08 A` de carga, então o sistema só absorve `Po + Vbat·1,08 ≈ 1272 W`. Acima de
+**G ≈ 708 W/m²** (25 °C) o MPP passa disso, e operar no MPP faria `Vo` subir (mesmo problema do
+modo 2). Solução: `ILs_ref = min(PI, ILs_dem)`, com `ILs_dem = (Vbat·ILb_chg + Po)/Vpv` — que é
+**exatamente a fórmula original do modo 1 da orientadora**, agora como teto. Quando o teto atua,
+o painel vai pra direita do MPP (curtailment) e o P&O fica congelado (`lim_any`); o PI usa
+anti-windup por rastreamento (`int_v = ILs_top − Kp·e`) pra sair do limite sem salto. Consequência:
+**o MPPT só fica ativo de fato entre ~570 W/m² (abaixo disso precisa do modo 3) e ~708 W/m²** no
+modo 1; com o modo 3 (etapa B), a faixa inferior se estende até `P_pv ≈ 0`.
+
+**Achado: `I_pv` mede a corrente do PAINEL, não a do indutor `Ls`** (`I_pv` fica entre
+`pv_array1.+` e o nó do `Cpv`, `VR-BESS.tse` Connections 143/150/151). O FCS-MPC da orientadora usa
+`I_pv` como `ILsk` (corrente do indutor) na predição — diferem pela corrente do `Cpv`. Em regime as
+médias batem; no transitório a predição fica imprecisa. Pré-existente, não corrigido; se der
+problema de dinâmica, considerar um sensor de corrente em série com `Ls`. Para o P&O, `Vpv·I_pv` é
+exatamente a potência do painel, então está certo.
 - [ ] **B** — Supervisor troca modo 1 ↔ 3 pelo sinal de `ILb_ref`, com histerese. Teste: degrau de
   G cruzando ~570 W/m².
 - [ ] **C** — Modo 2 (SOC alto, MPPT congelado) e modo 4 (`P_pv ≈ 0`). Teste: perfil de "dia"

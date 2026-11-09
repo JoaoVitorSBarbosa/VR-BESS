@@ -200,7 +200,7 @@ do `CLAUDE.md`.
 
 | Etapa | O que | Teste |
 |---|---|---|
-| [ ] A | P&O + PI geram `ILs_ref`; `ILb_ref` como resíduo; modo 1 fixo | `Vpv ≈ 310 V`, `P_pv/P_mpp > 98%`, `Vo ≈ 400 V` |
+| [ ] A | P&O + PI geram `ILs_ref`; `ILb_ref` como resíduo; modo 1 fixo; limite de demanda acima de ~708 W/m² | G=650: `P_pv ≈ 1161 W` (>98% do MPP); G=1000: limitado em `Vpv ≈ 347 V`/`1272 W`; `Vo ≈ 400 V` |
 | [ ] B | Supervisor troca modo 1 ↔ 3 pelo sinal de `ILb_ref`, com histerese | degrau de G cruzando ~570 W/m² |
 | [ ] C | Modo 2 (SOC alto, MPPT congelado) e modo 4 (sem sol) | perfil de "dia" comprimido (`modo_teste`) |
 | [ ] depois | Degrau de carga: medir `I_o` em vez de `Po` fixo | pendência já listada acima |

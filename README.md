@@ -179,3 +179,27 @@ na seção "Roteiro: controlador FCS-MPC" do `CLAUDE.md`:
   resultado equivalente).
 - Proteção/limitador antigos da bateria permanecem desligados — o FCS-MPC assume os limites de
   corrente via saturação da referência.
+
+## Roteiro: MPPT + seleção automática de modo (planejado em 09/11/2026)
+
+MPPT (*Maximum Power Point Tracking*, rastreamento do ponto de máxima potência do painel) por
+**P&O** (Perturba e Observa) **na tensão do painel**, alimentando o FCS-MPC (controle preditivo com
+conjunto finito de estados) da orientadora. Detalhes, fórmulas e porquês na seção "Roteiro: MPPT"
+do `CLAUDE.md`.
+
+- **Cascata:** `P&O (Ta = 5 ms) → Vpv_ref → PI de tensão do PV → ILs_ref → FCS-MPC → S1, S2`. O
+  FCS-MPC continua perseguindo só correntes (controle indireto, por causa da fase não mínima de
+  `Vo`).
+- **Mudança mínima no controlador da Silvia, só nos modos 1 e 3:** `ILs_ref` passa a vir do MPPT e
+  `ILb_ref` vira o resíduo da **mesma** equação de balanço dela,
+  `ILb_ref = (Vpv·Ipv − Po)/Vbat`, saturado nos limites da bateria. Modos 2 e 4 sem mudança.
+- **Parâmetros:** passo `ΔV = 5 V`, período `Ta = 5 ms`, PI `Kp = 0,28 A/V`, `Ki = 24 A/(V·s)`,
+  `Vpv_ref` partindo de 300 V e limitado a `[200; 380] V`, `ILs_ref ∈ [0; 6,5] A` com anti-windup.
+- **Gabarito (STC, 1000 W/m², 25 °C):** `Vmp = 309,9 V`, `Imp = 5,92 A`, `Pmp = 1834 W`.
+
+| Etapa | O que | Teste |
+|---|---|---|
+| [ ] A | P&O + PI geram `ILs_ref`; `ILb_ref` como resíduo; modo 1 fixo | `Vpv ≈ 310 V`, `P_pv/P_mpp > 98%`, `Vo ≈ 400 V` |
+| [ ] B | Supervisor troca modo 1 ↔ 3 pelo sinal de `ILb_ref`, com histerese | degrau de G cruzando ~570 W/m² |
+| [ ] C | Modo 2 (SOC alto, MPPT congelado) e modo 4 (sem sol) | perfil de "dia" comprimido (`modo_teste`) |
+| [ ] depois | Degrau de carga: medir `I_o` em vez de `Po` fixo | pendência já listada acima |

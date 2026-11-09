@@ -724,3 +724,116 @@ recalculados com os parâmetros reais deste projeto (ver "Valores de projeto" ac
   - Adicionar ao `Latex/ifacconf.bib` as entradas que faltam e já são referenciadas em `old.tex`:
     `braga2022controle` (Isadora Della-Sávia Braga, dissertação UFLA 2022 — ver acima),
     `marcello22019modelagem`, `delay`.
+
+## Roteiro: MPPT + seleção automática de modo (planejado em 09/11/2026)
+
+Discutido em duas sessões (06/11 e 09/11/2026). Siglas: **MPP** = ponto de máxima potência do
+painel; **MPPT** = algoritmo que rastreia o MPP; **P&O** = Perturba e Observa; **PI** = controlador
+proporcional-integral; **STC** = condição padrão de teste (1000 W/m², 25 °C).
+
+### Ponto de partida: controlador da orientadora (commits `4800723`/`2515d7b`, 05/11/2026)
+
+Substituiu a versão de 12/10 descrita na seção "Roteiro: controlador FCS-MPC" acima — várias
+afirmações daquela seção (convenção de `I_bat`, `Ts=1µs`, proteção desligada, teto de MPP por `G`,
+normalização da função custo) **não valem mais** para o código atual. Estado atual do `C function1`:
+
+- Modo de operação por entrada `Op_mode` (1–4), hoje fixo em **4** pela constante
+  `Num_cel_par_pv1` (nome herdado de cópia, não renomeada). Cada modo define os estados candidatos
+  (`c`, `f`, `X`) e referências **fixas**: modo 1 `ILb_ref=+1,08`, modo 2 `0`, modo 3 `−1,08`, modo 4
+  `−Po/Vbat`; `ILs_ref = (Vbat·ILb_ref + Po)/Vpv` nos modos 1–3, `0` no modo 4.
+- `I_bat` positivo = **carregando** (sensor invertido, convenção do `old.tex`); ganho
+  `SOC_I_to_Ah` negativo pra manter o SOC coerente.
+- `Ts=10µs` (Rate Transitions de `1e-5` entre sensores e o bloco; o bloco não tem `execution_rate`
+  explícito, herda `1e-5` delas), predição em 2 passos com memória `x_old`, função custo sem
+  normalização.
+- Proteção `S` e limitador `GainKi=1000` religados em `Bat_array.tlib`.
+- Entrada `G_in` ligada mas **não usada** no código. Comentário de cabeçalho cita "Filtro de Kalman"
+  e saídas (`Ro`, `Ref_Vo`...) que não existem — resto de versão anterior.
+
+**Constantes do código conferidas contra o circuito (09/11/2026):** `Ls=3,89mH`, `Lb=4,23mH`,
+`Ro=160Ω`, `Co=400µF`, `Vo_ref=400V` batem com `VR-BESS.tse` (a versão original da orientadora usava
+`Ls=3,5mH`/`Lb=3,0mH`, já alinhados no merge). Fixos e diferentes do projeto:
+- `ILb_ref = 1,08 A` em vez de `0,5C = 1,15 A`. Provável margem (~94%) abaixo do limitador de
+  `Bat_array.tlib` (que atua em 1,15 A), para o FCS-MPC não brigar com ele — **não confirmado com a
+  orientadora**. Ao saturar o resíduo, manter a mesma margem nos dois sentidos.
+- `Po = Vo_ref²/Ro` com `Ro=160` fixo — mesma limitação já listada para o degrau de carga.
+
+### Decisões
+
+- **O MPPT não escolhe o modo diretamente:** ele opera o painel no MPP e o supervisor decide o modo
+  pelo balanço de potência (sinal do resíduo da bateria) e pelo SOC. Dispensa sensor de irradiância
+  (piranômetro), que não existe no hardware real.
+- **Controle indireto pela corrente mantido.** A fase não mínima é de `Vo` (lado elevador;
+  `paper_4440` e `braga2022controle`, seção 2.3). `Vpv` está na entrada, com planta
+  `Cpv·dVpv/dt = I_painel − iLs`, de fase mínima — por isso dá para regular `Vpv` com um PI que gera
+  `ILs_ref`, sem custo de tensão no FCS-MPC.
+- **P&O na tensão, não na corrente nem na razão cíclica:** (1) FCS-MPC não tem razão cíclica, então
+  a perturbação direta de duty (alternativa do Elgendy 2012) não se aplica; (2) `Imp ≈ 94% Isc` —
+  P&O por corrente tem só 6% de margem até o colapso de `Vpv`; (3) com PI de tensão a dinâmica é
+  projetada, não ditada por `τ = Rd·Cpv` (11 ms em STC, 193 ms em 50 W/m²). **Atenção ao citar
+  Elgendy:** ele NÃO conclui que perturbar a tensão é mais eficiente — conclui que responde mais
+  rápido a transitórios, mas perde estabilidade com perturbação rápida e é mais sensível a ruído
+  (97,2% de eficiência medida com ruído). Usá-lo para justificar o `Ta` folgado.
+- **Mudança mínima no código da orientadora (aceita pelo usuário):** só nos modos 1 e 3, inverter
+  qual corrente é imposta — `ILs_ref` vem do MPPT e `ILb_ref = (Vpv·Ipv − Po)/Vbat` (a mesma equação
+  de balanço dela, isolando a outra variável). Mudar só `ILs_ref` e manter `ILb_ref` fixo quebra o
+  balanço e `Vo` sai de 400 V. O sinal do resíduo decide modo 1 (carga) × 3 (descarga). Modos 2 e 4,
+  função custo, predição e estados candidatos ficam como estão. PI de `Vo` pela bateria e entrada
+  `I_o` ficaram **fora** por enquanto (seguem `Po` fixo como no código dela).
+- **Modo 2 (bateria cheia): MPPT congelado**, não "ativo e ignorado" — sem bateria nem carga de
+  despejo, a sobra do MPP só iria para `Co` e `Vo` subiria. Ao entrar no modo 2, guardar
+  `Vpv_ref`/`P_mpp` e parar o P&O; retomar dali ao sair. Saída do modo 2 pela demanda (`Vpv`/`Vo`
+  caindo).
+- **Histerese em todas as transições** (P&O oscila em volta do pico). Crítica em 1↔2 e 3↔4; em 1↔3
+  o resíduo já se ajusta pelo sinal. SOC: ex. entra no modo 2 com 95%, volta com 90%.
+
+### Parâmetros (Femia 2005, Elgendy 2012, Ryu 2018)
+
+- **PI de `Vpv`:** planta linearizada no MPP `Vpv/ILs = −Rd/(1 + s·Rd·Cpv)` (sinal negativo: mais
+  corrente derruba a tensão → erro invertido, `e = Vpv − Vpv_ref`). Zero do PI cancelando o polo
+  (`Ki/Kp = 1/(Rd·Cpv)`), banda `ωc = 2π·200 Hz`: `Kp = ωc·Cpv = 0,28 A/V`, `Ki = 24 A/(V·s)` (`Rd`
+  de STC = 52 Ω, `Cpv = 220µF`). Acomodação a 10%: `Tε = ln(10)/ωc ≈ 1,8 ms`.
+- **Período `Ta = 5 ms`** (≈ 2,7·Tε; Femia Eq. 14 exige `Ta > Tε`). Ryu acha ~4 s ótimo em clima
+  real — vale para hardware, não para a simulação de tempo comprimido.
+- **Passo `ΔV = 5 V`** (Femia Eq. 15, não confundir perturbação com variação de irradiância:
+  `½·|P''|·ΔV² > (Pmp/G)·(dG/dt)·Ta`, com `dG/dt = 100 W/m²/s`; pior caso G=200, `|P''|=0,071 W/V²`
+  → `ΔV ≥ 4,8 V`). Perda em regime `≈ ¼·|P''|·ΔV²` ≈ 0,13%.
+- **Limites:** `Vpv_ref` inicial 300 V, em `[200; 380] V`; `ILs_ref ∈ [0; 6,5] A` com anti-windup.
+  Convergência a partir de 300 V: ~10 ms (STC), ~45 ms (65 °C).
+- **Rodar o P&O a cada N chamadas** do `C function1` (contador `static`), não em bloco de taxa
+  diferente — evita a armadilha de `execution_rate` no laço.
+
+### Gabarito do MPP (modelo de diodo do `pv_array.tlib`, arranjo 17s×2p)
+
+Calculado por varredura de tensão (e conferido por Lambert W:
+`Vmp = Vt·[W(e·(Iph+I0)/I0) − 1]`). Em STC equivale ao catálogo `17×18,228 V`, `2×2,96 A`.
+
+| G (W/m²) | T (°C) | Vmp (V) | Imp (A) | Pmp (W) | Voc (V) | Rd (Ω) |
+|---|---|---|---|---|---|---|
+| 1000 | 25 | 309,9 | 5,92 | 1834 | 363,8 | 52 |
+| 800 | 25 | 305,9 | 4,73 | 1448 | 359,6 | 65 |
+| 600 | 25 | 300,8 | 3,55 | 1066 | 354,2 | 85 |
+| 400 | 25 | 293,6 | 2,36 | 693 | 346,5 | 124 |
+| 200 | 25 | 281,2 | 1,18 | 331 | 333,4 | 239 |
+| 50 | 25 | 256,7 | 0,29 | 75 | 307,3 | 878 |
+| 1000 | 0 | 342,5 | 5,86 | 2008 | 395,0 | 58 |
+| 1000 | 45 | 283,9 | 5,95 | 1691 | 338,6 | 48 |
+| 1000 | 65 | 258,2 | 5,98 | 1543 | 313,2 | 43 |
+
+Fronteira modo 1 ↔ 3 com `P_carga = 1000 W`: G ≈ 570 W/m² (25 °C), ≈ 660 W/m² (65 °C) — bons
+pontos para os degraus do teste. O script que gerou a tabela ficou numa pasta temporária e se
+perdeu; refazer em `Latex/scripts/curvas_pv.py` se for usar no TCC (pendente, usuário não decidiu).
+
+### Etapas
+
+- [ ] **A** — P&O + PI de `Vpv` geram `ILs_ref`; `ILb_ref` como resíduo; modo 1 fixo. Teste:
+  `Vpv ≈ 310 V` em STC, `P_pv/P_mpp > 98%`, `Vo ≈ 400 V`.
+- [ ] **B** — Supervisor troca modo 1 ↔ 3 pelo sinal de `ILb_ref`, com histerese. Teste: degrau de
+  G cruzando ~570 W/m².
+- [ ] **C** — Modo 2 (SOC alto, MPPT congelado) e modo 4 (`P_pv ≈ 0`). Teste: perfil de "dia"
+  comprimido com `modo_teste`.
+- [ ] **Depois** — degrau de carga (medir `I_o`, PI de `Vo`); revisar com a orientadora.
+
+Referências em `~/Documents/Artigos`: Esram & Chapman 2007 (panorama), Femia et al. 2005 (`ΔV`,
+`Ta`), Elgendy et al. 2012 (tensão × duty), Ryu et al. 2018 (período), Brito et al. 2013 (métricas
+de eficiência de rastreamento), Shadmand et al. 2015 (MPPT com MPC). Faltam no `Latex/ifacconf.bib`.

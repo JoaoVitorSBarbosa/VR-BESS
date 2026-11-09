@@ -821,8 +821,11 @@ Calculado por varredura de tensão (e conferido por Lambert W:
 | 1000 | 65 | 258,2 | 5,98 | 1543 | 313,2 | 43 |
 
 Fronteira modo 1 ↔ 3 com `P_carga = 1000 W`: G ≈ 570 W/m² (25 °C), ≈ 660 W/m² (65 °C) — bons
-pontos para os degraus do teste. O script que gerou a tabela ficou numa pasta temporária e se
-perdeu; refazer em `Latex/scripts/curvas_pv.py` se for usar no TCC (pendente, usuário não decidiu).
+pontos para os degraus do teste. Tabela gerada por `Latex/scripts/curvas_pv.py` (só biblioteca
+padrão do Python, sem dependência nova; `python3 Latex/scripts/curvas_pv.py`), que também imprime
+`τ`, `|P''|` e o `ΔV` mínimo do Femia por condição. **Abaixo de ~150 W/m² o `ΔV` mínimo passa de
+5 V** (9,2 V em 50 W/m²) — o P&O pode se confundir com nuvens nessa faixa; aceito porque ali o
+sistema já está perto do modo 4.
 
 ### Etapas
 

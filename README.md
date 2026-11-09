@@ -196,6 +196,7 @@ do `CLAUDE.md`.
 - **Parâmetros:** passo `ΔV = 5 V`, período `Ta = 5 ms`, PI `Kp = 0,28 A/V`, `Ki = 24 A/(V·s)`,
   `Vpv_ref` partindo de 300 V e limitado a `[200; 380] V`, `ILs_ref ∈ [0; 6,5] A` com anti-windup.
 - **Gabarito (STC, 1000 W/m², 25 °C):** `Vmp = 309,9 V`, `Imp = 5,92 A`, `Pmp = 1834 W`.
+  Tabela completa (várias G e T) gerada por `python3 Latex/scripts/curvas_pv.py`.
 
 | Etapa | O que | Teste |
 |---|---|---|

@@ -840,6 +840,21 @@ sistema já está perto do modo 4.
   Debug: `dbg_cost01 = Vpv_ref`, `dbg_cost00 = P_old` (potência média do último período do P&O);
   `dbg_cost00`/`dbg_cost01` deixaram de mostrar `ILbk1`/custo da versão da orientadora.
 
+**Primeiro teste no Typhoon (09/11/2026, v1 do código, G=650 fixo, 0,1 s):** `V_pv` ficou parado
+em ~314 V / 3,63 A (≈1141 W, 98,2% do MPP) em vez de oscilar em volta de 302 V; `V_out` médio
+405,5 V; `I_bat` médio +0,47 A. O ponto medido cai **exatamente** na curva do gabarito (o modelo
+Python e o `pv_array.tlib` batem). Causa (reproduzida no teste em C com ripple de 2 V em `V_pv`):
+(1) o detector de limite era instantâneo (`u_raw >= ILs_dem`) e o ripple de `V_pv` (`Kp·2 V ≈
+0,56 A`) disparava ele em todo período → P&O congelado; (2) o anti-windup por rastreamento
+resetava o integrador a cada pico de ripple → PI não levava `V_pv` até a referência.
+**Correção (v2):** `V_pv` filtrado por passa-baixa de 1 kHz (`a_f = Ts/(Ts+1/(2π·1000)) = 0,0591`,
+5× acima da banda do PI) só para o PI; P&O congelado só quando a **potência média** do período
+passa de `0,98·P_lim`; anti-windup por integração condicional. Testado em C com ripple de 0/2/4 V em
+2,5/3 kHz: G=650 → 1156 W (99,6%), G=1000 → limitado em 1290 W. Código v2 em
+`~/Desktop/fcsmpc_mppt_etapaA.c` (fora do repo; só vai pro `.tse` quando colado no editor).
+Lição: **toda decisão do MPPT tomada sobre sinal instantâneo precisa considerar o ripple de
+chaveamento do FCS-MPC** — usar média do período ou sinal filtrado.
+
 **Limite de demanda (achado 09/11/2026, ao escrever o código da etapa A):** a bateria só aceita
 até `ILb_chg = 1,15 A` de carga, então o sistema só absorve `Po + Vbat·1,15 ≈ 1290 W`. Acima de
 **G ≈ 718 W/m²** (25 °C) o MPP passa disso, e operar no MPP faria `Vo` subir (mesmo problema do
@@ -860,6 +875,18 @@ exatamente a potência do painel, então está certo.
   G cruzando ~570 W/m².
 - [ ] **C** — Modo 2 (SOC alto, MPPT congelado) e modo 4 (`P_pv ≈ 0`). Teste: perfil de "dia"
   comprimido com `modo_teste`.
+- [ ] **D — Perfil de dia realista (pedido do usuário, 09/11/2026; deixar para o fim).** Trocar os
+  degraus de G/T por um bloco (`core/C function` com contador de tempo, ~25 linhas) que gera:
+  - `G(t) = G_max·sin(π·t/T_dia)` (zero fora do dia), opcionalmente com "nuvens" (quedas curtas de
+    30–60%); alternativa mais forte para o TCC: tabela com perfil medido de uma estação do INMET
+    (ex.: Lavras), interpolada.
+  - Temperatura de célula pelo modelo NOCT: `T_cel = T_amb(t) + G·(NOCT − 20)/800`, `NOCT ≈ 45 °C`,
+    com `T_amb` senoidal (ex.: 18–30 °C, pico ~2–3 h depois do meio-dia).
+  - **Cuidado com a compressão do tempo:** um dia em ~1 s simulado dá `dG/dt` de milhares de
+    W/m²/s, muito acima dos 100 W/m²/s usados no projeto do `ΔV` (Femia) — o P&O vai se confundir
+    nas rampas. Escolher a compressão pelo tempo de simulação aceitável e reavaliar `ΔV`/`Ta`.
+    Medir antes quanto tempo real leva 0,1 s simulado (passo de 20 ns).
+  - Usar junto com `modo_teste` (SOC acelerado) para passar por todos os modos num "dia".
 - [ ] **Depois** — degrau de carga (medir `I_o`, PI de `Vo`); revisar com a orientadora.
 
 Referências em `~/Documents/Artigos`: Esram & Chapman 2007 (panorama), Femia et al. 2005 (`ΔV`,

@@ -753,9 +753,11 @@ normalização da função custo) **não valem mais** para o código atual. Esta
 **Constantes do código conferidas contra o circuito (09/11/2026):** `Ls=3,89mH`, `Lb=4,23mH`,
 `Ro=160Ω`, `Co=400µF`, `Vo_ref=400V` batem com `VR-BESS.tse` (a versão original da orientadora usava
 `Ls=3,5mH`/`Lb=3,0mH`, já alinhados no merge). Fixos e diferentes do projeto:
-- `ILb_ref = 1,08 A` em vez de `0,5C = 1,15 A`. Provável margem (~94%) abaixo do limitador de
-  `Bat_array.tlib` (que atua em 1,15 A), para o FCS-MPC não brigar com ele — **não confirmado com a
-  orientadora**. Ao saturar o resíduo, manter a mesma margem nos dois sentidos.
+- `ILb_ref = 1,08 A` em vez de `0,5C = 1,15 A`. Segundo o usuário (09/11/2026), provavelmente
+  herdado de um modelo de bateria antigo do grupo. **Decisão: usar os limites do projeto** no MPPT
+  (`ILb_chg = 1,15 A`, `ILb_dis = 4,6 A`). Ficar de olho se o limitador `GainKi` de `Bat_array.tlib`
+  (que atua no mesmo 1,15 A) brigar com a referência; se brigar, baixar um pouco o `ILb_chg`. O
+  `−1,08` fixo do modo 3 continua no código até a etapa B, que o substitui pelo resíduo.
 - `Po = Vo_ref²/Ro` com `Ro=160` fixo — mesma limitação já listada para o degrau de carga.
 
 ### Decisões
@@ -834,18 +836,18 @@ sistema já está perto do modo 4.
   com `gcc` e testado com painel + `Cpv` simulados e FCS-MPC idealizado antes de ir pro Typhoon).
   **Teste corrigido:** em STC o MPPT NÃO fica no MPP (ver "limite de demanda" abaixo) — testar em
   **G = 650 W/m²** (MPP 302,2 V / 3,84 A / 1161 W, esperado `ILb_ref ≈ +0,7 A`) e em **G = 1000**
-  (limitado: `Vpv ≈ 347,3 V`, `P_pv ≈ 1272 W`, `ILb_ref = 1,08`). `Vo ≈ 400 V` nos dois.
+  (limitado: `Vpv ≈ 346,9 V`, `P_pv ≈ 1290 W`, `ILb_ref = 1,15`). `Vo ≈ 400 V` nos dois.
   Debug: `dbg_cost01 = Vpv_ref`, `dbg_cost00 = P_old` (potência média do último período do P&O);
   `dbg_cost00`/`dbg_cost01` deixaram de mostrar `ILbk1`/custo da versão da orientadora.
 
 **Limite de demanda (achado 09/11/2026, ao escrever o código da etapa A):** a bateria só aceita
-até `ILb_chg = 1,08 A` de carga, então o sistema só absorve `Po + Vbat·1,08 ≈ 1272 W`. Acima de
-**G ≈ 708 W/m²** (25 °C) o MPP passa disso, e operar no MPP faria `Vo` subir (mesmo problema do
+até `ILb_chg = 1,15 A` de carga, então o sistema só absorve `Po + Vbat·1,15 ≈ 1290 W`. Acima de
+**G ≈ 718 W/m²** (25 °C) o MPP passa disso, e operar no MPP faria `Vo` subir (mesmo problema do
 modo 2). Solução: `ILs_ref = min(PI, ILs_dem)`, com `ILs_dem = (Vbat·ILb_chg + Po)/Vpv` — que é
 **exatamente a fórmula original do modo 1 da orientadora**, agora como teto. Quando o teto atua,
 o painel vai pra direita do MPP (curtailment) e o P&O fica congelado (`lim_any`); o PI usa
 anti-windup por rastreamento (`int_v = ILs_top − Kp·e`) pra sair do limite sem salto. Consequência:
-**o MPPT só fica ativo de fato entre ~570 W/m² (abaixo disso precisa do modo 3) e ~708 W/m²** no
+**o MPPT só fica ativo de fato entre ~570 W/m² (abaixo disso precisa do modo 3) e ~718 W/m²** no
 modo 1; com o modo 3 (etapa B), a faixa inferior se estende até `P_pv ≈ 0`.
 
 **Achado: `I_pv` mede a corrente do PAINEL, não a do indutor `Ls`** (`I_pv` fica entre

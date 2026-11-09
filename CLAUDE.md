@@ -850,7 +850,7 @@ resetava o integrador a cada pico de ripple → PI não levava `V_pv` até a ref
 **Correção (v2):** `V_pv` filtrado por passa-baixa de 1 kHz (`a_f = Ts/(Ts+1/(2π·1000)) = 0,0591`,
 5× acima da banda do PI) só para o PI; P&O congelado só quando a **potência média** do período
 passa de `0,98·P_lim`; anti-windup por integração condicional. Testado em C com ripple de 0/2/4 V em
-2,5/3 kHz: G=650 → 1156 W (99,6%), G=1000 → limitado em 1290 W. Código atual (v3) em
+2,5/3 kHz: G=650 → 1156 W (99,6%), G=1000 → limitado em 1290 W. Código atual em
 `sim_offline/controlador_etapaA.c` (cópia de trabalho também em `~/Desktop/fcsmpc_mppt_etapaA.c`).
 Lição: **toda decisão do MPPT tomada sobre sinal instantâneo precisa considerar o ripple de
 chaveamento do FCS-MPC** — usar média do período ou sinal filtrado.
@@ -873,12 +873,26 @@ offline: G=650 → `P_pv` 1156 W (99,6%), `V_out` 402,9 V, `I_bat` 0,59 A (ref 0
 3,62 e 3,94 A; G=1000 → limitado, `V_out` 399,7 V. Se no futuro medir a corrente do indutor `Ls`, o
 projeto analítico original do PI volta a valer (e precisa retunar de novo).
 
+**Terceiro teste no Typhoon (v3, G=650, 09/11/2026):** regime OK no fim da simulação (t≈0,07 s:
+`V_pv·I_pv ≈ 304,4·3,81 ≈ 1160 W`, `dbg_ILbat_ref` 0,615 A, `V_out` ~403–406 V, `dbg_ILs_ref` suave),
+mas **partida lenta**: `ILs_ref` subindo devagar até ~0,07 s, `ILb_ref` começando em −4 A. Causa:
+integrador com `Ki=5` partindo de zero. Reproduzido offline depois de corrigir a planta para partir
+com `iLs=0` (antes partia com 3,5 A e escondia o problema).
+**Correção (v4): sem integrador** — `ILs_ref = Ipv_f + Kp·(Vpv_f − Vpv_ref)`, `Kp = 0,03`, com
+`Ipv_f` = `I_pv` filtrado a 1 kHz. Como o FCS-MPC regula a própria `I_pv`, a corrente medida do
+painel serve de feedforward e o erro de regime vai a zero sem integrador (no equilíbrio
+`I_painel = Ipv_f`, então `e = 0`); some também o anti-windup. Offline: MPP em ~10 ms (v3: ~60 ms),
+G=650 → 1157 W (99,7%), `V_out` 403,8 V, `I_bat` 0,59 A (ref 0,62). Testados e descartados: `Ki`
+maior (20/50 volta a oscilar, `ILs_ref` de 0 a 4,2 A), `Kp=0,1` (oscila mais), iniciar `Vpv_ref` na
+tensão medida (partida mais lenta).
+
 **Simulação offline (`sim_offline/`):** `planta.c` (painel + `Cpv` + `Ls` + `Lb` + `Co` + bateria
 ideal, chaves pelo modelo γ/m, passo 0,2 µs) + `rodar.sh controlador.c` (o arquivo do controlador
 no mesmo formato de 2 partes do que é colado no Typhoon). Roda em segundos e reproduziu o Typhoon
 com boa fidelidade — **usar para testar mudanças no controlador antes de ir pro Typhoon.** Limites:
 bateria como fonte ideal (sem SOC/proteção), T fixo em 25 °C, sem perdas de diodo/chave.
-`sim_offline/controlador_etapaA.c` é a cópia versionada do código (v3) que vai pro `C function1`.
+`sim_offline/controlador_etapaA.c` é a cópia versionada do código que vai pro `C function1`
+(hoje v4). A planta parte com `iLs = 0`, como o Typhoon.
 
 **Limite de demanda (achado 09/11/2026, ao escrever o código da etapa A):** a bateria só aceita
 até `ILb_chg = 1,15 A` de carga, então o sistema só absorve `Po + Vbat·1,15 ≈ 1290 W`. Acima de

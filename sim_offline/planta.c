@@ -15,7 +15,7 @@ static double ipanel(double V,double G){double k=1.3806e-23,q=1.6022e-19,a=1.2,T
 int main(int argc,char**argv){
  double Gs[3]={650,1000,650}; double G=Gs[0]; int meas_iL=0; double tseg=0.1, tend=0.3;
  double Ls=3.89e-3,Lb=4.23e-3,Co=400e-6,Cpv=220e-6,Ro=160,Vb=252,dt=2e-7;
- double iLs=3.5,iLb=0,Vpv=346,Vo=400; double s1=0,s2=0;
+ double iLs=0.0,iLb=0,Vpv=346,Vo=400; double s1=0,s2=0;
  long N=(long)(tend/dt), Nc=50; double sVpv=0,sIpv=0,sVo=0,sIb=0,sIbr=0,sIsr=0,n=0,vmin=1e9,vmax=0,rmin=1e9,rmax=-1e9,omin=1e9,omax=0; int seg=0;
  Op_mode=1;
  for(long k=0;k<N;k++){

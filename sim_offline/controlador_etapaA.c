@@ -1,11 +1,13 @@
 /* ====================================================================
-   VR-BESS - FCS-MPC (orientadora) + MPPT P&O na tensao - ETAPA A v3
+   VR-BESS - FCS-MPC (orientadora) + MPPT P&O na tensao - ETAPA A v4
    C function1 do typhoonsim/VR-BESS.tse
    v2 (09/11/2026): Vpv filtrado (1 kHz) no PI e P&O congelado so
    quando a potencia media chega no limite (ripple congelava na v1).
    v3 (09/11/2026): residuo da bateria pela potencia MEDIDA do painel
    (filtrada) e PI mais lento (Kp=0,01, Ki=5) - o FCS-MPC regula a
    corrente do painel (I_pv), nao a do indutor, e o PI original oscilava.
+   v4 (09/11/2026): sem integrador - ILs_ref = Ipv_f + Kp*(Vpv_f - Vref),
+   Kp=0,03. Partida ~6x mais rapida (MPP em ~10 ms em vez de ~60 ms).
 
    Este arquivo tem DUAS partes, uma para cada aba do editor do bloco:
      PARTE 1 -> aba arb_defs   (definicoes, constantes, variaveis static)
@@ -45,8 +47,7 @@ const double N_mppt = 500.0;
 const double dV_po = 5.0;
 const double Vref_min = 200.0;
 const double Vref_max = 380.0;
-const double Kp_v = 0.01;
-const double Ki_v = 5.0;
+const double Kp_v = 0.03;
 const double ILs_max = 6.5;
 const double ILb_chg = 1.15;
 const double ILb_dis = 4.6;
@@ -55,15 +56,15 @@ const double lim_frac = 0.98;
 const double a_p = 0.00624;
 
 static double Vpv_ref = 300.0;
-static double int_v = 0.0;
 static double P_sum = 0.0;
 static double P_old = 0.0;
 static double dir_po = 1.0;
 static double cnt_po = 0.0;
 static double Vpv_f = -1.0;
 static double Ppv_f = -1.0;
+static double Ipv_f = -1.0;
 
-double Po, e_v, int_new, u_raw, u_pi;
+double Po, e_v, u_raw, u_pi;
 double ILs_dem, ILs_top, P_avg, P_lim;
 
 /* ---------- Estados persistentes ---------- */
@@ -134,9 +135,12 @@ Mod = Op_mode;
    Roda so no modo 1. ILs_ref e limitado pela demanda
    maxima (carga + bateria a ILb_chg); quando a potencia
    media chega nesse limite, o P&O fica congelado.
-   Vpv_f: Vpv filtrado (passa-baixa 1 kHz) contra o ripple.
+   Malha de Vpv: ILs_ref = Ipv_f + Kp_v*(Vpv_f - Vpv_ref)
+   (feedforward da corrente medida do painel + correcao
+   proporcional; sem integrador - o FCS-MPC regula I_pv).
+   Vpv_f, Ipv_f: filtrados (passa-baixa 1 kHz) contra ripple.
    Ppv_f: potencia medida do painel filtrada (100 Hz), usada
-   no residuo da bateria (nao ILs_ref, que tem ripple do PI).
+   no residuo da bateria.
    ============================================================ */
 
 Po = Vo_ref * Vo_ref / Ro;
@@ -146,6 +150,8 @@ u_pi = 0.0;
 if (Vpv_f < 0.0) Vpv_f = Vink;
 Vpv_f = Vpv_f + a_f * (Vink - Vpv_f);
 if (Ppv_f < 0.0) Ppv_f = Vink * ILsk;
+if (Ipv_f < 0.0) Ipv_f = ILsk;
+Ipv_f = Ipv_f + a_f * (ILsk - Ipv_f);
 Ppv_f = Ppv_f + a_p * (Vink * ILsk - Ppv_f);
 
 if ((int)Mod == 1) {
@@ -155,19 +161,10 @@ if ((int)Mod == 1) {
     if (ILs_dem < ILs_top) ILs_top = ILs_dem;
 
     e_v = Vpv_f - Vpv_ref;
-    int_new = int_v + Ki_v * Ts * e_v;
-    u_raw = Kp_v * e_v + int_new;
-
-    if (u_raw > ILs_top) {
-        u_pi = ILs_top;
-        if (e_v < 0.0) int_v = int_new;
-    } else if (u_raw < 0.0) {
-        u_pi = 0.0;
-        if (e_v > 0.0) int_v = int_new;
-    } else {
-        u_pi = u_raw;
-        int_v = int_new;
-    }
+    u_raw = Ipv_f + Kp_v * e_v;
+    u_pi = u_raw;
+    if (u_pi > ILs_top) u_pi = ILs_top;
+    if (u_pi < 0.0) u_pi = 0.0;
 
     P_sum = P_sum + Vink * ILsk;
     cnt_po = cnt_po + 1.0;

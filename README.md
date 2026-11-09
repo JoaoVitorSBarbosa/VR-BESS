@@ -198,8 +198,10 @@ do `CLAUDE.md`.
 - **Simulação offline:** `sim_offline/rodar.sh` roda o controlador (`sim_offline/controlador_etapaA.c`,
   mesmo código que vai pro `C function1`) numa planta em C puro em segundos — usar antes do Typhoon.
   Só precisa de `gcc` e `python3` (já presentes no sistema).
-- **PI retunado (v3):** `Kp = 0,01`, `Ki = 5` (empírico, simulação offline) — o FCS-MPC regula a
-  corrente do painel, não a do indutor, e os ganhos analíticos oscilavam.
+- **Malha de `Vpv` (v4):** `ILs_ref = I_pv_filtrada + 0,03·(V_pv_filtrada − Vpv_ref)` — feedforward
+  da corrente medida do painel + correção proporcional, sem integrador (o FCS-MPC regula a corrente
+  do painel, não a do indutor; o PI analítico oscilava e o PI lento da v3 demorava ~60 ms pra
+  partir). Ajustado na simulação offline.
 - **Gabarito (STC, 1000 W/m², 25 °C):** `Vmp = 309,9 V`, `Imp = 5,92 A`, `Pmp = 1834 W`.
   Tabela completa (várias G e T) gerada por `python3 Latex/scripts/curvas_pv.py`.
 

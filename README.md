@@ -202,6 +202,8 @@ do `CLAUDE.md`.
   da corrente medida do painel + correção proporcional, sem integrador (o FCS-MPC regula a corrente
   do painel, não a do indutor; o PI analítico oscilava e o PI lento da v3 demorava ~60 ms pra
   partir). Ajustado na simulação offline.
+- **Correção de `V_out` (v5):** `ILb_ref = (P_pv − Po)/Vbat + 0,1·(V_out − 400)` — a bateria carrega
+  mais quando `V_out` sobe; centra `V_out` em 400 V (antes ~404–411 V).
 - **Gabarito (STC, 1000 W/m², 25 °C):** `Vmp = 309,9 V`, `Imp = 5,92 A`, `Pmp = 1834 W`.
   Tabela completa (várias G e T) gerada por `python3 Latex/scripts/curvas_pv.py`.
 

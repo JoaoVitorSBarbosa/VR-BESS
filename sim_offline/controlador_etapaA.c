@@ -1,5 +1,5 @@
 /* ====================================================================
-   VR-BESS - FCS-MPC (orientadora) + MPPT P&O na tensao - ETAPA A v4
+   VR-BESS - FCS-MPC (orientadora) + MPPT P&O na tensao - ETAPA A v5
    C function1 do typhoonsim/VR-BESS.tse
    v2 (09/11/2026): Vpv filtrado (1 kHz) no PI e P&O congelado so
    quando a potencia media chega no limite (ripple congelava na v1).
@@ -8,6 +8,8 @@
    corrente do painel (I_pv), nao a do indutor, e o PI original oscilava.
    v4 (09/11/2026): sem integrador - ILs_ref = Ipv_f + Kp*(Vpv_f - Vref),
    Kp=0,03. Partida ~6x mais rapida (MPP em ~10 ms em vez de ~60 ms).
+   v5 (09/11/2026): ILb_ref += 0,1*(Vo - 400) - centra Vo em 400 V e
+   acelera a acomodacao (antes so pela constante Ro*Co = 64 ms).
 
    Este arquivo tem DUAS partes, uma para cada aba do editor do bloco:
      PARTE 1 -> aba arb_defs   (definicoes, constantes, variaveis static)
@@ -48,6 +50,7 @@ const double dV_po = 5.0;
 const double Vref_min = 200.0;
 const double Vref_max = 380.0;
 const double Kp_v = 0.03;
+const double Kv_o = 0.1;
 const double ILs_max = 6.5;
 const double ILb_chg = 1.15;
 const double ILb_dis = 4.6;
@@ -140,7 +143,8 @@ Mod = Op_mode;
    proporcional; sem integrador - o FCS-MPC regula I_pv).
    Vpv_f, Ipv_f: filtrados (passa-baixa 1 kHz) contra ripple.
    Ppv_f: potencia medida do painel filtrada (100 Hz), usada
-   no residuo da bateria.
+   no residuo da bateria, somado a Kv_o*(Vo - Vo_ref) para
+   corrigir Vo (bateria carrega mais se Vo esta alto).
    ============================================================ */
 
 Po = Vo_ref * Vo_ref / Ro;
@@ -210,6 +214,7 @@ switch ((int)Mod) {
         f = 2;
         ILs_ref = u_pi;
         ILb_ref = (Ppv_f - Po) / Vcbk;
+        ILb_ref = ILb_ref + Kv_o * (Vok - Vo_ref);
         if (ILb_ref > ILb_chg) ILb_ref = ILb_chg;
         if (ILb_ref < -ILb_dis) ILb_ref = -ILb_dis;
         break;

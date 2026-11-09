@@ -886,13 +886,24 @@ G=650 → 1157 W (99,7%), `V_out` 403,8 V, `I_bat` 0,59 A (ref 0,62). Testados e
 maior (20/50 volta a oscilar, `ILs_ref` de 0 a 4,2 A), `Kp=0,1` (oscila mais), iniciar `Vpv_ref` na
 tensão medida (partida mais lenta).
 
+**Quarto teste no Typhoon (v4, G=650, 09/11/2026):** partida rápida confirmada (`ILs_ref` em ~3,8 A
+em poucos ms), mas `V_out` caindo devagar de ~418 V (10 ms) para ~409 V (90 ms), média 411 V. Duas
+causas: (1) ninguém regula `V_out` — o excesso da partida (bateria sem carregar nos primeiros ms)
+só se dissipa pela constante `Ro·Co = 64 ms`; (2) erro de regime de ~1%: `I_bat` médio 0,48 A vs
+ref 0,62 A, a diferença vai pra carga. **Correção (v5):** `ILb_ref += Kv_o·(Vo − Vo_ref)`,
+`Kv_o = 0,1 A/V` — só proporcional, sem sensor novo (`V_out` já é entrada). Varredura offline:
+Kv=0 → `V_out` 403,8 V; 0,05 → 400,2; **0,1 → 399,9 V (G=650) / 400,2 V (G=1000), ~400 V já em
+~30 ms**; 0,2 → 400,4. Sobra oscilação de ~±5 V (396–407 V) causada pelos passos do P&O; reduzir
+`ΔV` diminui, ao custo de rastreamento mais lento. Isso cobre parte da antiga pendência "PI de Vo
+pela bateria" (falta o degrau de carga, que ainda depende de `Po` fixo).
+
 **Simulação offline (`sim_offline/`):** `planta.c` (painel + `Cpv` + `Ls` + `Lb` + `Co` + bateria
 ideal, chaves pelo modelo γ/m, passo 0,2 µs) + `rodar.sh controlador.c` (o arquivo do controlador
 no mesmo formato de 2 partes do que é colado no Typhoon). Roda em segundos e reproduziu o Typhoon
 com boa fidelidade — **usar para testar mudanças no controlador antes de ir pro Typhoon.** Limites:
 bateria como fonte ideal (sem SOC/proteção), T fixo em 25 °C, sem perdas de diodo/chave.
 `sim_offline/controlador_etapaA.c` é a cópia versionada do código que vai pro `C function1`
-(hoje v4). A planta parte com `iLs = 0`, como o Typhoon.
+(hoje v5). A planta parte com `iLs = 0`, como o Typhoon.
 
 **Limite de demanda (achado 09/11/2026, ao escrever o código da etapa A):** a bateria só aceita
 até `ILb_chg = 1,15 A` de carga, então o sistema só absorve `Po + Vbat·1,15 ≈ 1290 W`. Acima de

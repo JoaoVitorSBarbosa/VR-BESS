@@ -195,6 +195,11 @@ do `CLAUDE.md`.
   `ILb_ref = (Vpv·Ipv − Po)/Vbat`, saturado nos limites da bateria. Modos 2 e 4 sem mudança.
 - **Parâmetros:** passo `ΔV = 5 V`, período `Ta = 5 ms`, PI `Kp = 0,28 A/V`, `Ki = 24 A/(V·s)`,
   `Vpv_ref` partindo de 300 V e limitado a `[200; 380] V`, `ILs_ref ∈ [0; 6,5] A` com anti-windup.
+- **Simulação offline:** `sim_offline/rodar.sh` roda o controlador (`sim_offline/controlador_etapaA.c`,
+  mesmo código que vai pro `C function1`) numa planta em C puro em segundos — usar antes do Typhoon.
+  Só precisa de `gcc` e `python3` (já presentes no sistema).
+- **PI retunado (v3):** `Kp = 0,01`, `Ki = 5` (empírico, simulação offline) — o FCS-MPC regula a
+  corrente do painel, não a do indutor, e os ganhos analíticos oscilavam.
 - **Gabarito (STC, 1000 W/m², 25 °C):** `Vmp = 309,9 V`, `Imp = 5,92 A`, `Pmp = 1834 W`.
   Tabela completa (várias G e T) gerada por `python3 Latex/scripts/curvas_pv.py`.
 

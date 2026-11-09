@@ -850,10 +850,35 @@ resetava o integrador a cada pico de ripple → PI não levava `V_pv` até a ref
 **Correção (v2):** `V_pv` filtrado por passa-baixa de 1 kHz (`a_f = Ts/(Ts+1/(2π·1000)) = 0,0591`,
 5× acima da banda do PI) só para o PI; P&O congelado só quando a **potência média** do período
 passa de `0,98·P_lim`; anti-windup por integração condicional. Testado em C com ripple de 0/2/4 V em
-2,5/3 kHz: G=650 → 1156 W (99,6%), G=1000 → limitado em 1290 W. Código v2 em
-`~/Desktop/fcsmpc_mppt_etapaA.c` (fora do repo; só vai pro `.tse` quando colado no editor).
+2,5/3 kHz: G=650 → 1156 W (99,6%), G=1000 → limitado em 1290 W. Código atual (v3) em
+`sim_offline/controlador_etapaA.c` (cópia de trabalho também em `~/Desktop/fcsmpc_mppt_etapaA.c`).
 Lição: **toda decisão do MPPT tomada sobre sinal instantâneo precisa considerar o ripple de
 chaveamento do FCS-MPC** — usar média do período ou sinal filtrado.
+
+**Segundo teste no Typhoon (v2, G=650):** MPPT OK (`V_pv` médio 302,8 V, 99,5% do MPP), mas
+`V_out` médio 415,6 V e `I_bat` só 0,31 A (esperado ~0,62). `GainKi=0` não mudou nada (limitador
+descartado); `S` também descartado (`V_bat` variou só 0,2 V, ou seja, bateria sempre conectada).
+Scope de depuração mostrou a causa: `dbg_ILs_ref` (saída do PI) oscilando de **0 a 4,2 A** a
+~700 Hz, e como `ILb_ref` era calculado de `ILs_ref`, oscilava de −4 a +1,15 A (média −1,22 A);
+nos trechos negativos o modo 1 não descarrega e `I_bat` ia a zero. Reproduzido na simulação offline
+(`sim_offline/`, bate com o Typhoon: 303 V / 414 V / 0,34 A).
+**Causa raiz da oscilação do PI:** o FCS-MPC regula `I_pv` (corrente do **painel**, ver achado do
+sensor acima), não a do indutor. Então a planta que o PI enxerga não é `−Rd/(1+s·Rd·Cpv)` (que
+supunha corrente de indutor imposta), e sim a própria curva do painel, cujo ganho `|dV/dI|` é enorme
+à esquerda do MPP — os ganhos projetados (`Kp=0,28`, `Ki=24`) ficam altos demais.
+**Correção (v3):** (1) resíduo da bateria pela **potência medida** do painel filtrada a 100 Hz
+(`Ppv_f`, `a_p=0,00624`), não por `Vpv·ILs_ref`; (2) PI retunado **empiricamente na simulação
+offline**: `Kp=0,01`, `Ki=5` (`0,005/3` fica lento demais — não converge em 0,1 s). Resultado
+offline: G=650 → `P_pv` 1156 W (99,6%), `V_out` 402,9 V, `I_bat` 0,59 A (ref 0,61), `ILs_ref` entre
+3,62 e 3,94 A; G=1000 → limitado, `V_out` 399,7 V. Se no futuro medir a corrente do indutor `Ls`, o
+projeto analítico original do PI volta a valer (e precisa retunar de novo).
+
+**Simulação offline (`sim_offline/`):** `planta.c` (painel + `Cpv` + `Ls` + `Lb` + `Co` + bateria
+ideal, chaves pelo modelo γ/m, passo 0,2 µs) + `rodar.sh controlador.c` (o arquivo do controlador
+no mesmo formato de 2 partes do que é colado no Typhoon). Roda em segundos e reproduziu o Typhoon
+com boa fidelidade — **usar para testar mudanças no controlador antes de ir pro Typhoon.** Limites:
+bateria como fonte ideal (sem SOC/proteção), T fixo em 25 °C, sem perdas de diodo/chave.
+`sim_offline/controlador_etapaA.c` é a cópia versionada do código (v3) que vai pro `C function1`.
 
 **Limite de demanda (achado 09/11/2026, ao escrever o código da etapa A):** a bateria só aceita
 até `ILb_chg = 1,15 A` de carga, então o sistema só absorve `Po + Vbat·1,15 ≈ 1290 W`. Acima de

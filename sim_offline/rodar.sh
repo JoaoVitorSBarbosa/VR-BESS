@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # Simulação offline (C puro) do VR-BESS com o controlador do C function1, para testar
 # mudanças em segundos antes de ir pro Typhoon. Uso:
-#   sim_offline/rodar.sh [controlador.c]     (padrão: sim_offline/controlador_etapaA.c)
+#   sim_offline/rodar.sh [controlador.c] [G1,G2,...] [t_trecho_s] [Op_mode]
+#   (padrão: sim_offline/controlador_mppt.c  650,1000,650  0.1  1)
 # O arquivo do controlador tem as duas partes do bloco (PARTE 1 = arb_defs, PARTE 2 = output_fnc),
 # no mesmo formato do que é colado no editor do Typhoon.
 set -euo pipefail
 DIR="$(cd "$(dirname "$0")" && pwd)"
-CTRL="${1:-$DIR/controlador_etapaA.c}"
+CTRL="${1:-$DIR/controlador_mppt.c}"
+shift || true
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 python3 -I - "$CTRL" "$TMP/ctrl.c" <<'PY'
 import sys, re
@@ -23,4 +25,4 @@ hdr = ("#include <math.h>\n"
 open(sys.argv[2], "w").write(hdr + arb + "\nvoid step(void){\n" + out + "\n}\n")
 PY
 gcc -O2 -w "$TMP/ctrl.c" "$DIR/planta.c" -lm -o "$TMP/sim"
-"$TMP/sim"
+"$TMP/sim" "$@"

@@ -856,7 +856,7 @@ resetava o integrador a cada pico de ripple → PI não levava `V_pv` até a ref
 5× acima da banda do PI) só para o PI; P&O congelado só quando a **potência média** do período
 passa de `0,98·P_lim`; anti-windup por integração condicional. Testado em C com ripple de 0/2/4 V em
 2,5/3 kHz: G=650 → 1156 W (99,6%), G=1000 → limitado em 1290 W. Código atual em
-`sim_offline/controlador_etapaA.c` (cópia de trabalho também em `~/Desktop/fcsmpc_mppt_etapaA.c`).
+`sim_offline/controlador_mppt.c` (cópia de trabalho também em `~/Desktop/fcsmpc_mppt_etapaA.c`).
 Lição: **toda decisão do MPPT tomada sobre sinal instantâneo precisa considerar o ripple de
 chaveamento do FCS-MPC** — usar média do período ou sinal filtrado.
 
@@ -907,8 +907,8 @@ ideal, chaves pelo modelo γ/m, passo 0,2 µs) + `rodar.sh controlador.c` (o arq
 no mesmo formato de 2 partes do que é colado no Typhoon). Roda em segundos e reproduziu o Typhoon
 com boa fidelidade — **usar para testar mudanças no controlador antes de ir pro Typhoon.** Limites:
 bateria como fonte ideal (sem SOC/proteção), T fixo em 25 °C, sem perdas de diodo/chave.
-`sim_offline/controlador_etapaA.c` é a cópia versionada do código que vai pro `C function1`
-(hoje v5). A planta parte com `iLs = 0`, como o Typhoon.
+`sim_offline/controlador_mppt.c` é a cópia versionada do código que vai pro `C function1`
+(hoje v6). A planta parte com `iLs = 0`, como o Typhoon.
 
 **Limite de demanda (achado 09/11/2026, ao escrever o código da etapa A):** a bateria só aceita
 até `ILb_chg = 1,15 A` de carga, então o sistema só absorve `Po + Vbat·1,15 ≈ 1290 W`. Acima de
@@ -927,7 +927,27 @@ médias batem; no transitório a predição fica imprecisa. Pré-existente, não
 problema de dinâmica, considerar um sensor de corrente em série com `Ls`. Para o P&O, `Vpv·I_pv` é
 exatamente a potência do painel, então está certo.
 - [ ] **B** — Supervisor troca modo 1 ↔ 3 pelo sinal de `ILb_ref`, com histerese. Teste: degrau de
-  G cruzando ~570 W/m².
+  G cruzando ~570 W/m². **Implementado e validado OFFLINE em 09/11/2026 (v6), falta o Typhoon.**
+  - `Op_mode = 0` → automático; `1..4` continua forçando o modo (compatível com o código antigo).
+    Modo efetivo em `dbg_cost10`. MPPT roda nos modos 1 e 3; no modo 3 o `−1,08` fixo da
+    orientadora foi trocado pelo mesmo resíduo do modo 1 (`ILb_res`, saturado em −4,6/+1,15 A).
+  - **Primeira tentativa (decidir pelo balanço de potência `d_bal = (Ppv_f − Po)/Vbat`, sem o termo
+    de `Vo`) travava no modo 3:** no modo 3 a bateria não carrega, então o painel só entrega o que
+    a carga consome e `d_bal ≈ 0` nunca passa da histerese — impasse, com `V_out` subindo para
+    ~410–413 V. Mesmo problema simétrico no modo 1 perto da fronteira. **Correção:** decidir por
+    `res_f` = `ILb_res` (balanço **+ termo `Kv_o·(Vo − 400)`**) filtrado a 10 Hz (`a_s = 0,000628`),
+    histerese `d_hist = 0,2 A`. No impasse `V_out` sai de 400 V e o termo de `Vo` empurra a decisão.
+  - Planta offline corrigida antes (o estado (0,0) só com diodos leva `iLb` a zero pelos dois lados;
+    os outros estados não têm mais o "clamp" que impedia descarga). Etapa A continua idêntica.
+  - Resultado offline (perfil 650/400/200/650/1000/500/600/562, 0,1 s cada): `V_out` 399–400 V em
+    todos os trechos; MPPT bate com o gabarito (G=400 → 691 W, MPP 693; G=200 → 330 W, MPP 331);
+    no máximo 1 troca de modo por degrau. **Limitação:** com G bem na fronteira (~555–568 W/m²,
+    `P_mpp ≈ Po`) ainda pode trocar de modo algumas vezes por 0,1 s (`V_out` ~392–416 V), porque ali
+    a bateria precisaria de ~0 A e o modo 1 só carrega / o modo 3 só descarrega — o caso natural é
+    o modo 2 (bateria parada, etapa C). Testados: histerese 0,05/0,1/0,2 A, filtro 10/20 Hz.
+  - Código: `sim_offline/controlador_mppt.c` (cabeçalho com histórico v1–v6; cópia em
+    `~/Desktop/fcsmpc_mppt.c`). `sim_offline/controlador_mppt_v5_etapaA.c` = versão validada da
+    etapa A. `rodar.sh` agora aceita perfil de G, duração do trecho e `Op_mode`.
 - [ ] **C** — Modo 2 (SOC alto, MPPT congelado) e modo 4 (`P_pv ≈ 0`). Teste: perfil de "dia"
   comprimido com `modo_teste`.
 - [ ] **D — Perfil de dia realista (pedido do usuário, 09/11/2026; deixar para o fim).** Trocar os

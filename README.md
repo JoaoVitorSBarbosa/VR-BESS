@@ -195,7 +195,7 @@ do `CLAUDE.md`.
   `ILb_ref = (Vpv·Ipv − Po)/Vbat`, saturado nos limites da bateria. Modos 2 e 4 sem mudança.
 - **Parâmetros:** passo `ΔV = 5 V`, período `Ta = 5 ms`, PI `Kp = 0,28 A/V`, `Ki = 24 A/(V·s)`,
   `Vpv_ref` partindo de 300 V e limitado a `[200; 380] V`, `ILs_ref ∈ [0; 6,5] A` com anti-windup.
-- **Simulação offline:** `sim_offline/rodar.sh` roda o controlador (`sim_offline/controlador_etapaA.c`,
+- **Simulação offline:** `sim_offline/rodar.sh` roda o controlador (`sim_offline/controlador_mppt.c`,
   mesmo código que vai pro `C function1`) numa planta em C puro em segundos — usar antes do Typhoon.
   Só precisa de `gcc` e `python3` (já presentes no sistema).
 - **Malha de `Vpv` (v4):** `ILs_ref = I_pv_filtrada + 0,03·(V_pv_filtrada − Vpv_ref)` — feedforward
@@ -210,7 +210,7 @@ do `CLAUDE.md`.
 | Etapa | O que | Teste |
 |---|---|---|
 | [x] A (validada 09/11) | P&O + PI geram `ILs_ref`; `ILb_ref` como resíduo; modo 1 fixo; limite de demanda acima de ~718 W/m² | G=650: `P_pv ≈ 1161 W` (>98% do MPP); G=1000: limitado em `Vpv ≈ 347 V`/`1290 W`; `Vo ≈ 400 V` |
-| [ ] B | Supervisor troca modo 1 ↔ 3 pelo sinal de `ILb_ref`, com histerese | degrau de G cruzando ~570 W/m² |
+| [ ] B (ok offline 09/11) | Supervisor (`Op_mode = 0`) troca modo 1 ↔ 3 pela referência da bateria filtrada, histerese 0,2 A | degrau de G cruzando ~570 W/m² |
 | [ ] C | Modo 2 (SOC alto, MPPT congelado) e modo 4 (sem sol) | perfil de "dia" comprimido (`modo_teste`) |
 | [ ] D | Perfil de "dia" realista: G senoidal (ou tabela INMET) + temperatura de célula pelo modelo NOCT | dia comprimido passando por todos os modos |
 | [ ] depois | Degrau de carga: medir `I_o` em vez de `Po` fixo | pendência já listada acima |

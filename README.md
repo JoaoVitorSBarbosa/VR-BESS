@@ -182,6 +182,10 @@ na seção "Roteiro: controlador FCS-MPC" do `CLAUDE.md`:
 
 ## Roteiro: MPPT + seleção automática de modo (planejado em 09/11/2026)
 
+> **Onde paramos (10/11/2026):** etapa A validada no Typhoon; etapa B validada offline e já
+> aplicada no `VR-BESS.tse` (v6, `Op_mode = 0`, perfil de G 650→400→200→650 em 0,4 s) — falta
+> rodar no Typhoon. Detalhes e valores esperados no `CLAUDE.md` ("ONDE PARAMOS").
+
 MPPT (*Maximum Power Point Tracking*, rastreamento do ponto de máxima potência do painel) por
 **P&O** (Perturba e Observa) **na tensão do painel**, alimentando o FCS-MPC (controle preditivo com
 conjunto finito de estados) da orientadora. Detalhes, fórmulas e porquês na seção "Roteiro: MPPT"

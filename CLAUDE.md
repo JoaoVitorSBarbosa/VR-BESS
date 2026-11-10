@@ -731,6 +731,28 @@ Discutido em duas sessões (06/11 e 09/11/2026). Siglas: **MPP** = ponto de máx
 painel; **MPPT** = algoritmo que rastreia o MPP; **P&O** = Perturba e Observa; **PI** = controlador
 proporcional-integral; **STC** = condição padrão de teste (1000 W/m², 25 °C).
 
+### >>> ONDE PARAMOS (fim da sessão de 09–10/11/2026) <<<
+
+- **Etapa A: validada no Typhoon (v5).** **Etapa B (v6): validada só offline**; o `VR-BESS.tse`
+  já está com a v6 e o cenário de teste, **falta rodar no Typhoon e conferir**:
+  - `C function1` = v6 (idêntico a `sim_offline/controlador_mppt.c`); `Op_mode` = **0**
+    (automático, constante `Num_cel_par_pv1`); G = 650 → 400 (0,1 s) → 200 (0,2 s) → 650 (0,3 s)
+    pelos `Step1..4`; `simulation_time = 0,4 s` (4× o de antes — se demorar demais, usar trechos de
+    0,05 s).
+  - **Esperado (da simulação offline):** `dbg_cost10` (modo) = 1 em 650, **3** em 400 e 200, volta
+    a 1 em 650; `V_out` ≈ 400 V em todos os trechos; P_pv ≈ 1157 / 691 / 330 / 1157 W;
+    `I_bat` ≈ +0,58 / −1,24 / −2,68 / +0,5 A (negativo = descarregando).
+  - Lembrar que o FCS-MPC no Typhoon segue a bateria com ~0,14 A de erro (visto na etapa A), então
+    `I_bat` pode sair um pouco diferente do offline; o termo `Kv_o` compensa via `V_out`.
+- **Próximos passos:** (1) rodar e validar a etapa B no Typhoon; se passar, marcar `[x]` e
+  commitar; (2) etapa C: modo 2 (SOC alto, MPPT congelado, bateria parada — também resolve a
+  troca de modo repetida na fronteira ~555–568 W/m²) e modo 4 (sem sol); (3) etapa D: perfil de dia
+  realista (G senoidal/INMET + temperatura NOCT); (4) degrau de carga (medir `I_o`).
+- **Fluxo combinado com o usuário:** testar toda mudança primeiro em `sim_offline/` (segundos),
+  só depois no Typhoon; **antes de editar `.tse`/`.tlib`, pedir para fechar o TyphoonSim e esperar
+  a confirmação**; backups da sessão ficaram no scratchpad (temporário, não contar com eles).
+- Arquivo de trabalho para colar na mão, se preferir: `~/Desktop/fcsmpc_mppt.c` (= v6).
+
 ### Ponto de partida: controlador da orientadora (commits `4800723`/`2515d7b`, 05/11/2026)
 
 Substituiu a versão de 12/10 descrita na seção "Roteiro: controlador FCS-MPC" acima — várias

@@ -67,7 +67,7 @@ model "VR-BESS" {
         solver_type = "DAE"
         integration_method = "BDF - Robust"
         max_sim_step = 2e-8
-        simulation_time = 0.1
+        simulation_time = 0.4
         abs_tol = 1e-3
         rel_tol = 1e-3
         init_sim_step = 2e-8
@@ -468,6 +468,8 @@ const double Vref_min = 200.0;
 const double Vref_max = 380.0;
 const double Kp_v = 0.03;
 const double Kv_o = 0.1;
+const double d_hist = 0.2;
+const double a_s = 0.000628;
 const double ILs_max = 6.5;
 const double ILb_chg = 1.15;
 const double ILb_dis = 4.6;
@@ -483,9 +485,12 @@ static double cnt_po = 0.0;
 static double Vpv_f = -1.0;
 static double Ppv_f = -1.0;
 static double Ipv_f = -1.0;
+static double modo_ef = 1.0;
+static double res_f = 0.0;
 
 double Po, e_v, u_raw, u_pi;
 double ILs_dem, ILs_top, P_avg, P_lim;
+double ILb_res, d_bal;
 
 /* ---------- Estados persistentes ---------- */
 
@@ -550,11 +555,12 @@ ILbk = I_bat;
 Vok = V_o;
 Vcbk = V_bat;
 Mod = Op_mode;
+if ((int)Op_mode == 0) Mod = modo_ef;
 
 
 /* ============================================================
-   MPPT (etapa A): P&O na tensao + PI de Vpv -> ILs_ref
-   Roda so no modo 1. ILs_ref e limitado pela demanda
+   MPPT (etapas A e B): P&O na tensao -> ILs_ref
+   Roda nos modos 1 e 3. ILs_ref e limitado pela demanda
    maxima (carga + bateria a ILb_chg); quando a potencia
    media chega nesse limite, o P&O fica congelado.
    Malha de Vpv: ILs_ref = Ipv_f + Kp_v*(Vpv_f - Vpv_ref)
@@ -577,7 +583,7 @@ if (Ipv_f < 0.0) Ipv_f = ILsk;
 Ipv_f = Ipv_f + a_f * (ILsk - Ipv_f);
 Ppv_f = Ppv_f + a_p * (Vink * ILsk - Ppv_f);
 
-if ((int)Mod == 1) {
+if ((int)Mod == 1 || (int)Mod == 3) {
     P_lim = Po + Vcbk * ILb_chg;
     ILs_dem = P_lim / Vpv_safe;
     ILs_top = ILs_max;
@@ -603,6 +609,27 @@ if ((int)Mod == 1) {
         P_sum = 0.0;
         cnt_po = 0.0;
     }
+
+    d_bal = (Ppv_f - Po) / Vcbk;
+    ILb_res = d_bal + Kv_o * (Vok - Vo_ref);
+    if (ILb_res > ILb_chg) ILb_res = ILb_chg;
+    if (ILb_res < -ILb_dis) ILb_res = -ILb_dis;
+    res_f = res_f + a_s * (ILb_res - res_f);
+}
+
+
+/* ============================================================
+   SUPERVISOR (etapa B): Op_mode = 0 -> automatico.
+   Modo 1 (bateria carrega) se sobra potencia do painel,
+   modo 3 (bateria descarrega) se falta. Decide por res_f:
+   ILb_res (balanco + termo de Vo) filtrado, com histerese
+   d_hist em A. O termo de Vo evita travar num modo que nao
+   consegue fechar o balanco. Op_mode = 1..4 forca o modo.
+   ============================================================ */
+
+if ((int)Op_mode == 0) {
+    if (modo_ef == 1.0 && res_f < -d_hist) modo_ef = 3.0;
+    if (modo_ef == 3.0 && res_f > d_hist) modo_ef = 1.0;
 }
 
 
@@ -632,10 +659,7 @@ switch ((int)Mod) {
         c = 0;
         f = 2;
         ILs_ref = u_pi;
-        ILb_ref = (Ppv_f - Po) / Vcbk;
-        ILb_ref = ILb_ref + Kv_o * (Vok - Vo_ref);
-        if (ILb_ref > ILb_chg) ILb_ref = ILb_chg;
-        if (ILb_ref < -ILb_dis) ILb_ref = -ILb_dis;
+        ILb_ref = ILb_res;
         break;
     case 2:
         X = 0;
@@ -649,8 +673,8 @@ switch ((int)Mod) {
         X = 1;
         c = 1;
         f = 3;
-        ILb_ref = -1.08;
-        ILs_ref = (Vcbk*ILb_ref + Vo_ref*Vo_ref/Ro)/Vink;
+        ILs_ref = u_pi;
+        ILb_ref = ILb_res;
         break;
     case 4:
         c = 2;
@@ -721,7 +745,7 @@ dbg_ILs_ref = ILs_ref ;
 dbg_ILbat_m =  ILbk ;
 dbg_ILs_m = ILsk;
 dbg_cost11 = x_opt; 
-dbg_cost10 = ILbk2; 
+dbg_cost10 = Mod;
 dbg_cost00 = P_old;
 dbg_cost01 = Vpv_ref;
 /*End code section*/"
@@ -872,8 +896,8 @@ dbg_cost01 = Vpv_ref;
 
         component "core/Step" Step2 {
             execution_rate = "2e-07"
-            final_value = "0"
-            step_time = "0.04"
+            final_value = "-250"
+            step_time = "0.1"
         }
         [
             position = 6384, 8984
@@ -881,8 +905,8 @@ dbg_cost01 = Vpv_ref;
 
         component "core/Step" Step3 {
             execution_rate = "2e-07"
-            final_value = "0"
-            step_time = "0.06"
+            final_value = "-200"
+            step_time = "0.2"
         }
         [
             position = 6384, 9048
@@ -890,8 +914,8 @@ dbg_cost01 = Vpv_ref;
 
         component "core/Step" Step4 {
             execution_rate = "2e-07"
-            final_value = "0"
-            step_time = "0.08"
+            final_value = "450"
+            step_time = "0.3"
         }
         [
             position = 6384, 9112
@@ -1026,6 +1050,7 @@ dbg_cost01 = Vpv_ref;
 
         component "core/Constant" Num_cel_par_pv1 {
             execution_rate = "2e-07"
+            value = "0"
         }
         [
             position = 6372, 8636

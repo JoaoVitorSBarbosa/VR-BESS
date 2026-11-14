@@ -869,8 +869,8 @@ dbg_cost01 = Vpv_ref;
         component "core/Step" Step1 {
             execution_rate = "2e-07"
             final_value = "650"
-            initial_value = "650"
-            step_time = "0.02"
+            initial_value = "1000"
+            step_time = "0.1"
         }
         [
             position = 6384, 8924
@@ -896,8 +896,8 @@ dbg_cost01 = Vpv_ref;
 
         component "core/Step" Step2 {
             execution_rate = "2e-07"
-            final_value = "-250"
-            step_time = "0.1"
+            final_value = "-450"
+            step_time = "0.2"
         }
         [
             position = 6384, 8984
@@ -906,7 +906,7 @@ dbg_cost01 = Vpv_ref;
         component "core/Step" Step3 {
             execution_rate = "2e-07"
             final_value = "-200"
-            step_time = "0.2"
+            step_time = "0.3"
         }
         [
             position = 6384, 9048
@@ -914,8 +914,8 @@ dbg_cost01 = Vpv_ref;
 
         component "core/Step" Step4 {
             execution_rate = "2e-07"
-            final_value = "450"
-            step_time = "0.3"
+            final_value = "1000"
+            step_time = "0.35"
         }
         [
             position = 6384, 9112
